@@ -1,0 +1,3 @@
+[submodule "rsem"]
+	path = rsem
+	url = https://github.com/bli25wisc/RSEM.git
