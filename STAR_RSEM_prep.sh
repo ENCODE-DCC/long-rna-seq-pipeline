@@ -1,19 +1,31 @@
 # prepare genomes for STAR and RSEM
-input parameters:
-# $1=fasta file(s),  e.g. "male.hg19.fa"
-# $2=fasta file with spike-ins, e.g. "spikes.fixed.fasta"
-# $3=gtf file, e.g. "gencode.v19.annotation.gtf"
-# $4=STAR genome directory
-# $5=RSEM genome director
+# input parameters:
+STARgenomeDir=$1 #STAR genome directory
+RSEMgenomeDir=$2 #RSEM genome directory
+fastaGenome=$3   #fasta file(s),  e.g. "male.hg19.fa"
+fastaSpikeins=$4 #fasta file with spike-ins, e.g. "spikes.fixed.fasta"
+gtf=$5           #all-inclusive gtf file "gencode.v19.annotation.gtf"
 
 # example
-./STAR_RSEM_prep.sh male.hg19.fa  spikes.fixed.fasta gencode.v19.annotation.gtf /path/to/STARgenome /path/to/RSEMgenome
+# ./STAR_RSEM_prep.sh  /path/to/STARgenome  /path/to/RSEMgenome  male.hg19.fa  spikes.fixed.fasta gencode.v19.annotation_tRNA_spikeins.gtf
 
 
-mkdir $4
-cd $4
-STAR --runMode genomeGenerate --runThreadN 12 --genomeDir ./ --genomeFastaFiles  $1 $2 --sjdbGTFfile $3 --sjdbOverhang 100
+## PATHS:
+export LD_LIBRARY_PATH=/sonas-hs/gingeras/nlsas_norepl/user/dobin/Software/ZLIB/zlib-1.2.8_installed/lib/
+export PATH=$PATH:/sonas-hs/gingeras/nlsas_norepl/user/dobin/Software/RSEM/RSEM-1.2.15/:/sonas-hs/gingeras/nlsas_norepl/user/dobin/STAR/SandBox/STAR/STAR_2.3.1z9/
 
-mkdir $5
-cd $5
-rsem-prepare-reference --no-polyA --no-bowtie --no-ntog --gtf $3 $1 RSEMref
+
+# RSEM genome
+mkdir $RSEMgenomeDir 
+RSEMcommand="rsem-prepare-reference --no-polyA --gtf $gtf $fastaGenome","$fastaSpikeins $RSEMgenomeDir/RSEMref"
+echo $RSEMcommand
+$RSEMcommand
+
+
+# STAR genome
+mkdir $STARgenomeDir
+STARcommand="STAR --runThreadN 12 --runMode genomeGenerate --genomeDir $STARgenomeDir --genomeFastaFiles $fastaGenome $fastaSpikeins --sjdbGTFfile $gtf --sjdbOverhang 100 --outFileNamePrefix $STARgenomeDir"
+echo $STARcommand
+$STARcommand
+
+

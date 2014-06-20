@@ -1,6 +1,6 @@
 # STAR mapping / RSEM quantification pipeline
 # usage: from an empty working directory, run
-# ./STAR_RSEM.sh <read1> <read2 or ""> <STARgenomeDir> <RSEMrefDir>
+# ./STAR_RSEM.sh (read1) (read2 or "") (STARgenomeDir) (RSEMrefDir) (dataType) 
 
 # input: gzipped fastq file read1 [read2 for paired-end] 
 #        STAR genome directory, RSEM reference directory - prepared with STAR_RSEM_prep.sh script
@@ -8,6 +8,7 @@ read1=$1 #gzipped fastq file for read1
 read2=$2 #gzipped fastq file for read1, use "" if single-end
 STARgenomeDir=$3 
 RSEMrefDir=$4
+dataType=$5 # RNA-seq type, possible values: str_SE str_PE unstr_SE unstr_PE
 
 # output: all in the working directory, fixed names
 # Aligned.sortedByCoord.out.bam                 # alignments, standard sorted BAM, agreed upon formatting
@@ -40,11 +41,19 @@ STARparRun="--runThreadN 12 --genomeLoad LoadAndKeep"
 #     OPTION: both
 STARparBAM="--outSAMtype BAM SortedByCoordinate --quantMode TranscriptomeSAM"
 
+
 # STAR parameters: strandedness, affects bedGraph (wiggle) files and XS tag in BAM 
-#     OPTION: stranded data
-STARparStrand="--outWigStrand Stranded"
-#     OPTION: unstranded data
-# STARparStrand="--outWigStrand Unstranded --outSAMstrandField intronMotif"
+
+case "$dataType" in
+str_SE|str_PE)
+      #OPTION: stranded data
+      STARparStrand="--outWigStrand Stranded"
+      ;;
+      #OPTION: unstranded data
+unstr_SE|unstr_PE)
+      STARparStrand="--outWigStrand Unstranded --outSAMstrandField intronMotif"
+      ;;
+esac
 
 # STAR parameters: metadata
 STARparsMeta="--outSAMheaderCommentFile commentsENCODElong.txt --outSAMheaderHD @HD VN:1.4 SO:coordinate"
@@ -64,21 +73,31 @@ $STAR $STARparCommon $STARparRun $STARparBAM $STARparStrand $STARparsMeta
 
 
 # RSEM parameters: common
-RSEMparCommon="--bam --estimate-rspd  --calc-ci --no-bam-output"
+RSEMparCommon="--bam --estimate-rspd  --calc-ci --no-bam-output --seed 12345"
 
 # RSEM parameters: run-time, number of threads and RAM in MB
 RSEMparRun="-p 12 --ci-memory 30000"
 
 # RSEM parameters: data type dependent
-#    OPTION: stranded paired end
-RSEMparType="--paired-end --forward-prob 0"
-#    OPTION: unstranded single end
-# RSEMparType=""
-#    OPTION: unstranded paired end
-# RSEMparType="--paired-end"
-#    OPTION: stranded single end
-# RSEMparType="--forward-prob 0"
 
+case "$dataType" in
+str_SE)
+      #OPTION: stranded single end
+      RSEMparType="--forward-prob 0"
+      ;;
+str_PE)
+      #OPTION: stranded paired end
+      RSEMparType="--paired-end --forward-prob 0"
+      ;;
+unstr_SE)
+      #OPTION: unstranded single end
+      RSEMparType=""
+      ;;
+unstr_PE)
+      #OPTION: unstranded paired end
+      RSEMparType="--paired-end"
+      ;;
+esac
 
 
 ###### RSEM command
@@ -86,20 +105,25 @@ echo $RSEM $RSEMparCommon $RSEMparRun $RSEMparType Aligned.toTranscriptome.out.b
 $RSEM $RSEMparCommon $RSEMparRun $RSEMparType Aligned.toTranscriptome.out.bam $RSEMrefDir Quant >& Log.rsem
 
 
+###### bigWig conversion commands
 
-# ??? we may need a simple script here to filter RSEM results for unwanted genes
-
-###### bigWig conversion commands: stranded data
-str[1]=-; str[2]=+;
-for istr in 1 2
-do
-for imult in Unique UniqueMultiple
-do
-    $wigToBigWig <(grep ^chr Signal.$imult.str$istr.out.bg) $STARgenomeDir/chrNameLength.txt Signal.$imult.strand${str[istr]}.bw
-done
-done
-###### bigWig conversion commands: unstranded data
-#for imult in Unique UniqueMultiple
-#do
-#    $wigToBigWig Signal.$imult.str1.out.bg $STARgenomeDir/chrNameLength.txt Signal.$imult.unstranded.bw
-#done
+case "$dataType" in
+str_SE|str_PE)
+      # stranded data
+      str[1]=-; str[2]=+;
+      for istr in 1 2
+      do
+      for imult in Unique UniqueMultiple
+      do
+          $wigToBigWig Signal.$imult.str$istr.out.bg $STARgenomeDir/chrNameLength.txt Signal.$imult.strand${str[istr]}.bw
+      done
+      done
+      ;;
+unstr_SE|unstr_PE)
+      # unstranded data
+      for imult in Unique UniqueMultiple
+      do
+          $wigToBigWig Signal.$imult.str1.out.bg $STARgenomeDir/chrNameLength.txt Signal.$imult.unstranded.bw
+      done
+      ;;
+esac
