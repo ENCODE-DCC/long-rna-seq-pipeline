@@ -1,3 +1,6 @@
 [submodule "rsem"]
 	path = rsem
 	url = https://github.com/bli25wisc/RSEM.git
+[submodule "star"]
+	path = star
+	url = https://github.com/alexdobin/STAR.git
