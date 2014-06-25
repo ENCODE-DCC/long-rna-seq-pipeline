@@ -19,9 +19,9 @@ dataType=$5 # RNA-seq type, possible values: str_SE str_PE unstr_SE unstr_PE
 # Signal.{Unique,UniqueMultiple}.unstranded.bw  # 4 bigWig files for stranded data
 
 # executables
-STAR=STAR                             # version: 2.4.0,   GitHub link:
-RSEM=rsem-calculate-expression        # version: x.x.x,   GitHub link:
-wigToBigWig=wigToBigWig               # version: v4,      GitHub link:
+STAR=STAR                             
+RSEM=rsem-calculate-expression        
+wigToBigWig=bedGraphToBigWig              
 
 
 # STAR parameters: common
@@ -115,7 +115,7 @@ str_SE|str_PE)
       do
       for imult in Unique UniqueMultiple
       do
-          $wigToBigWig Signal.$imult.str$istr.out.bg $STARgenomeDir/chrNameLength.txt Signal.$imult.strand${str[istr]}.bw
+          $wigToBigWig  <(grep ^chr Signal.$imult.str$istr.out.bg)  <(grep ^chr $STARgenomeDir/chrNameLength.txt) Signal.$imult.strand${str[istr]}.bw
       done
       done
       ;;
@@ -123,7 +123,7 @@ unstr_SE|unstr_PE)
       # unstranded data
       for imult in Unique UniqueMultiple
       do
-          $wigToBigWig Signal.$imult.str1.out.bg $STARgenomeDir/chrNameLength.txt Signal.$imult.unstranded.bw
+          $wigToBigWig <(grep ^chr Signal.$imult.str1.out.bg) <(grep ^chr $STARgenomeDir/chrNameLength.txt)  Signal.$imult.unstranded.bw
       done
       ;;
 esac

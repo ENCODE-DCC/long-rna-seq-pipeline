@@ -1,5 +1,5 @@
 #! /bin/awk -f 
-# create GTF file from Gencode annotations, Gencode tRNAs, spike-ins fasta
+# GTF.awk v1.0 creates GTF file from Gencode annotations, Gencode tRNAs, spike-ins fasta
 # usage: GTF.awk main.gtf tRNA.gtf spikein.fasta > combined.gtf
 ## input files:
 # main.gtf:      main gtf file, e.g. "gencode.v19.annotation.gtf"
