@@ -1,0 +1,48 @@
+{
+  "name": "prep-rsem",
+  "title": "Long-RNA-Seq-prep-rsem-genome",
+  "summary": "Prepare reference genome and transcriptome indexes for RSEM used in the ENCODE long-rna-seq pipeline",
+  "dxapi": "1.0.0",
+  "version": "0.0.1",
+  "categories": [
+    "ENCODE"
+  ],
+  "inputSpec": [
+    {
+      "name": "annotations",
+      "label": "transcript and other annotations (GTF)",
+      "class": "file",
+      "optional": false
+    },
+    {
+      "name": "genome",
+      "label": "Reference genome (.fa.gz)",
+      "class": "file",
+      "optional": false
+    },
+    {
+      "name": "spike_in",
+      "label": "Spike-in RNA sequences (fasta)",
+      "class": "file",
+      "optional": true
+    },
+    {
+      "name": "index_prefix",
+      "label": "Prefix for Index files",
+      "class": "string",
+      "optional": false
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "rsem_index",
+      "label": "Reference files indexed for RSEM",
+      "class": "file"
+    }
+  ],
+  "runSpec": {
+    "interpreter": "bash",
+    "file": "src/prep-rsem.sh"
+  },
+  "authorizedUsers": []
+}
