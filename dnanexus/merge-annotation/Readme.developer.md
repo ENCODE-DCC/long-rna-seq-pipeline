@@ -13,18 +13,14 @@ for developers or advanced users, for example:
 This app has the following entry points:
 
 * main
-* process
-* postprocess
 
-When running this app, you can override the instance type to be used for each
-entry point by providing the ``systemRequirements`` field to
-```/applet-XXXX/run``` or ```/app-XXXX/run```, as follows:
+When running this app, you can override the instance type to be used by
+providing the ``systemRequirements`` field to ```/applet-XXXX/run``` or
+```/app-XXXX/run```, as follows:
 
     {
       systemRequirements: {
-        "main": {"instanceType": "mem2_hdd2_x2"},
-        "process": {"instanceType": "mem2_hdd2_x2"},
-        "postprocess": {"instanceType": "mem2_hdd2_x2"}
+        "main": {"instanceType": "mem2_hdd2_x2"}
       },
       [...]
     }
