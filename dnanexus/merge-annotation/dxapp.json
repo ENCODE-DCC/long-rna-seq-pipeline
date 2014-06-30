@@ -1,0 +1,40 @@
+{
+  "name": "merge-annotation",
+  "authorizedUsers": [],
+  "title": "Long-RNA-seq-merge-gtf-annotation",
+  "outputSpec": [
+    {
+      "label": "Combined annotation reference file",
+      "class": "file",
+      "name": "combined_gtf"
+    }
+  ],
+  "runSpec": {
+    "interpreter": "python2.7",
+    "file": "src/merge-annotation.py"
+  },
+  "summary": "Takes GENCODE and spike-ins and creates a single GTF file for quantitation",
+  "version": "0.0.1",
+  "inputSpec": [
+    {
+      "label": "Gene/Transcript annotation file (GTF)",
+      "optional": false,
+      "class": "file",
+      "name": "gene_annotation"
+    },
+    {
+      "label": "tRNA annotation file (GTF)",
+      "optional": false,
+      "class": "file",
+      "name": "trna_annoation"
+    },
+    {
+      "label": "RNA Seq Spike-in file (fasta or GTF)",
+      "optional": false,
+      "class": "file",
+      "name": "spike_in"
+    }
+  ],
+  "dxapi": "1.0.0",
+  "categories": []
+}

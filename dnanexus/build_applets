@@ -1,0 +1,15 @@
+#!/bin/bash
+
+applet_dest='long-rna-seq-pipeline'
+applets='merge-annotation prep-star prep-rsem prep-tophat align-star align-tophat quant-rsem filter bam2wiggle wig2bigwig'
+
+project=$(dx find projects --name "$applet_dest")
+if [ -z "$project" ]
+  then
+    dx new project "$applet_dest" --brief
+fi
+
+for applet in $applets; do
+    echo "Building $applet at $applet_dest..."
+    dx build "${applet}" --archive --destination "${applet_dest}:/"
+done
