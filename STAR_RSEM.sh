@@ -73,7 +73,7 @@ $STAR $STARparCommon $STARparRun $STARparBAM $STARparStrand $STARparsMeta
 
 
 # RSEM parameters: common
-RSEMparCommon="--bam --estimate-rspd  --calc-ci --no-bam-output --seed 12345"
+RSEMparCommon="--bam --estimate-rspd  --calc-ci --no-bam-output --seed 12345 --gibbs-number-of-samples 10000"
 
 # RSEM parameters: run-time, number of threads and RAM in MB
 RSEMparRun="-p 12 --ci-memory 30000"
