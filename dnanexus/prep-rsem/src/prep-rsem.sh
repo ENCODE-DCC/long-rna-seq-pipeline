@@ -27,22 +27,22 @@ main() {
     # recover the original filenames, you can use the output of "dx describe
     # "$variable" --name".
 
-    annotation_fn = `dx describe "$annotations" --name | cut -d'.' -f1`
+    annotation_fn=`dx describe "$annotations" --name | cut -d'.' -f1`
     dx download "$annotations" -o "$annotation_fn".gtf.gz
     gunzip "$annotation_fn".gtf.gz
 
-    genome_fn = `dx describe "$genome" --name | cut -d'.' -f1`
+    genome_fn=`dx describe "$genome" --name | cut -d'.' -f1`
     dx download "$genome" -o "$genome_fn".fa.gz
     gunzip "$genome_fn".fa.gz
-    ref = "$genome_fn".fa
+    ref="$genome_fn".fa
 
 
     if [ -n "$spike_in" ]
     then
-        spike_in_fn = `dx describe "$genome" --name | cut -d'.' -f1`
-        dx download "$spike_in" -o "$spike_in_fn".fa.gz
-        gunzip "$spike_in_fn".fa.gz
-        $ref = {$ref},{$spike_in_fn}.fa
+        spike_in_fn=`dx describe "$genome" --name | cut -d'.' -f1`
+        dx download "$spike_in" -o "$spike_in_fn".fa
+        #gunzip "$spike_in_fn".fa.gz
+        $ref={$ref},{$spike_in_fn}.fa
 
     fi
 
@@ -66,9 +66,10 @@ main() {
     # that you have used the output field name for the filename for each output,
     # but you can change that behavior to suit your needs.  Run "dx upload -h"
     # to see more options to set metadata.
-
-    (cd /usr/local/rsem; make)
-    /usr/local/rsem/rsem-prepare-reference --no-polyA --gtf ${$annotation_fn}.gtf \
+    git clone https://github.com/bli25wisc/RSEM.git
+    (cd RSEM; make)
+    `ls`
+    /usr/local/RSEM/rsem-prepare-reference --no-polyA --gtf ${$annotation_fn}.gtf \
                     ${ref} ${index_prefix}
 
     # Attempt to make bamCommentLines.txt, which should be reviewed. NOTE tabs handled by assignment.

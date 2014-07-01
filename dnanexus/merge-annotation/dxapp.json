@@ -28,7 +28,7 @@
     {
       "optional": false,
       "class": "file",
-      "name": "trna_annoation",
+      "name": "trna_annotation",
       "label": "tRNA annotation file (GTF)"
     },
     {

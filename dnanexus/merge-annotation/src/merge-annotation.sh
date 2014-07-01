@@ -18,7 +18,7 @@
 main() {
 
     echo "Value of gene_annotation: '$gene_annotation'"
-    echo "Value of trna_annoation: '$trna_annoation'"
+    echo "Value of trna_annoation: '$trna_annotation'"
     echo "Value of spike_in: '$spike_in'"
 
     # The following line(s) use the dx command-line tool to download your file
@@ -26,17 +26,18 @@ main() {
     # recover the original filenames, you can use the output of "dx describe
     # "$variable" --name".
 
-    gene_fn = `dx describe "$gene_annotation" --name | cut -d'.' -f1`
+    gene_fn=`dx describe "$gene_annotation" --name | cut -d'.' -f1,2,3`
     dx download "$gene_annotation" -o "$gene_fn".gtf.gz
     gunzip "$gene_fn".gtf.gz
 
-    trna_fn = `dx describe "$trna_annotation" --name | cut -d'.' -f1`
+    trna_fn=`dx describe "$trna_annotation" --name | cut -d'.' -f1,2,3`
     dx download "$trna_annotation" -o "$trna_fn".gtf.gz
     gunzip "$trna_fn".gtf.gz
 
-    spike_in_fn = `dx describe "$spike_in" --name | cut -d'.' -f1`
-    dx download "$spike_in" -o "$spike_in_fn".fa.gz
-    gunzip "$spike_in_fn".fa.gz
+    spike_in_fn=`dx describe "$spike_in" --name | cut -d'.' -f1`
+    dx download "$spike_in" -o "$spike_in_fn".fa
+    # not gzipped
+    #gunzip "$spike_in_fn".fa.gz
 
     # Fill in your application code here.
     #
@@ -57,9 +58,10 @@ main() {
     # that you have used the output field name for the filename for each output,
     # but you can change that behavior to suit your needs.  Run "dx upload -h"
     # to see more options to set metadata.
-    out_fn = "$gene_fn"-"trna_fn"-"$spike_in_fn".gtf
-    GTF.awk ${gene_fn}.gtf ${trna_fn}.gtf ${spike_in_fn}.fa > ${out_fn}
-    combined_gtf=$(dx upload $out_fn --brief)
+    out_fn="$gene_fn"-"trna_fn"-"$spike_in_fn".gtf
+    awk -f /usr/bin/GTF.awk ${gene_fn}.gtf ${trna_fn}.gtf ${spike_in_fn}.fa > ${out_fn}
+    gzip ${out_fn}
+    combined_gtf=$(dx upload $out_fn.gz --brief)
 
     # The following line(s) use the utility dx-jobutil-add-output to format and
     # add output variables to your job's output as appropriate for the output

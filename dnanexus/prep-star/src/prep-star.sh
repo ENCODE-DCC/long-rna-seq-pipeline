@@ -27,22 +27,22 @@ main() {
     # recover the original filenames, you can use the output of "dx describe
     # "$variable" --name".
 
-    annotation_fn = `dx describe "$annotations" --name | cut -d'.' -f1`
+    annotation_fn=`dx describe "$annotations" --name | cut -d'.' -f1`
     dx download "$annotations" -o "$annotation_fn".gtf.gz
     gunzip "$annotation_fn".gtf.gz
 
-    genome_fn = `dx describe "$genome" --name | cut -d'.' -f1`
+    genome_fn=`dx describe "$genome" --name | cut -d'.' -f1`
     dx download "$genome" -o "$genome_fn".fa.gz
     gunzip "$genome_fn".fa.gz
-    ref = "$genome_fn".fa
+    ref="$genome_fn".fa
 
 
     if [ -n "$spike_in" ]
     then
-        spike_in_fn = `dx describe "$genome" --name | cut -d'.' -f1`
-        dx download "$spike_in" -o "$spike_in_fn".fa.gz
-        gunzip "$spike_in_fn".fa.gz
-        $ref = {$ref},{$spike_in_fn}.fa
+        spike_in_fn=`dx describe "$genome" --name | cut -d'.' -f1`
+        dx download "$spike_in" -o "$spike_in_fn".fa
+        #gunzip "$spike_in_fn".fagz
+        $ref={$ref},{$spike_in_fn}.fa
 
     fi
 
