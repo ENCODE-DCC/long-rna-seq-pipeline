@@ -27,12 +27,23 @@ main() {
     # recover the original filenames, you can use the output of "dx describe
     # "$variable" --name".
 
-    dx download "$annotations" -o annotations
+    annotation_fn = `dx describe "$annotations" --name | cut -d'.' -f1`
+    dx download "$annotations" -o "$annotation_fn".gtf.gz
+    gunzip "$annotation_fn".gtf.gz
 
-    dx download "$genome" -o genome
+    genome_fn = `dx describe "$genome" --name | cut -d'.' -f1`
+    dx download "$genome" -o "$genome_fn".fa.gz
+    gunzip "$genome_fn".fa.gz
+    ref = "$genome_fn".fa
+
+
     if [ -n "$spike_in" ]
     then
-        dx download "$spike_in" -o spike_in
+        spike_in_fn = `dx describe "$genome" --name | cut -d'.' -f1`
+        dx download "$spike_in" -o "$spike_in_fn".fa.gz
+        gunzip "$spike_in_fn".fa.gz
+        $ref = {$ref},{$spike_in_fn}.fa
+
     fi
 
     # Fill in your application code here.
@@ -49,18 +60,35 @@ main() {
     # reported in the job_error.json file, then the failure reason
     # will be AppInternalError with a generic error message.
 
+
     # The following line(s) use the dx command-line tool to upload your file
     # outputs after you have created them on the local file system.  It assumes
     # that you have used the output field name for the filename for each output,
     # but you can change that behavior to suit your needs.  Run "dx upload -h"
     # to see more options to set metadata.
 
-    rsem_index=$(dx upload rsem_index --brief)
+    (cd /usr/local/STAR; make)
+    /usr/local/STAR --runMode genomeGenerate --genomeFastaFiles ${genome_fn}.fa ${spike_in_fn}.fa --sjdbOverhang 100 \
+     --sjdbGTFfile ${$annotation_fn}.gtf --runThreadN 6 --genomeDir ./  \
+                                         --outFileNamePrefix ${index_prefix}
+
+    # Attempt to make bamCommentLines.txt, which should be reviewed. NOTE tabs handled by assignment.
+    refComment="@CO\tREFID:$(basename ${genome_fn})"
+    annotationComment="@CO\tANNID:$(basename ${annotation_fn})"
+    spikeInComment="@CO\tSPIKEID:${spike_in_fn}"
+    echo -e ${refComment} > ${index_prefix}_bamCommentLines.txt
+    echo -e ${annotationComment} >> ${index_prefix}_bamCommentLines.txt
+    echo -e ${spikeInComment} >> ${index_prefix}_bamCommentLines.txt
+
+    `ls ${index_prefix}*`
+    tar -czf {$index_prefix}_starIndex.tgz ${index_prefix}*
+
+    star_index=$(dx upload {$index_prefix}_starIndex.tgz --brief)
 
     # The following line(s) use the utility dx-jobutil-add-output to format and
     # add output variables to your job's output as appropriate for the output
     # class.  Run "dx-jobutil-add-output -h" for more information on what it
     # does.
 
-    dx-jobutil-add-output rsem_index "$rsem_index" --class=file
+    dx-jobutil-add-output star_index $star_index --class=file
 }

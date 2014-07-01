@@ -1,19 +1,19 @@
 {
   "name": "prep-star",
   "authorizedUsers": [],
-  "title": "Long-RNA-Seq-prep-rsem-genome",
+  "title": "Long-RNA-Seq-prep-star-genome",
   "outputSpec": [
     {
       "class": "file",
-      "name": "rsem_index",
-      "label": "Reference files indexed for RSEM"
+      "name": "star_index",
+      "label": "Reference files indexed for STAR"
     }
   ],
   "runSpec": {
     "interpreter": "bash",
     "file": "src/prep-star.sh"
   },
-  "summary": "Prepare reference genome and transcriptome indexes for RSEM used in the ENCODE long-rna-seq pipeline",
+  "summary": "Prepare reference genome and transcriptome indexes for STAR used in the ENCODE long-rna-seq pipeline",
   "version": "0.0.1",
   "inputSpec": [
     {
