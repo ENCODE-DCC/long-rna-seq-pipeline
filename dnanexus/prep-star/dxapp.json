@@ -13,6 +13,11 @@
     "interpreter": "bash",
     "file": "src/prep-star.sh"
   },
+  "access": {
+    "network": [
+      "*"
+    ]
+  },
   "summary": "Prepare reference genome and transcriptome indexes for STAR used in the ENCODE long-rna-seq pipeline",
   "version": "0.0.1",
   "inputSpec": [

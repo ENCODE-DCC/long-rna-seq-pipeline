@@ -1,0 +1,15 @@
+{
+    "trna_annotation": {
+        "$dnanexus_link": "file-BKkVg180X8yzQ81fQ8JV719q"
+    }, 
+    "gene_annotation": {
+        "$dnanexus_link": "file-BKkVg3008yB2fGJgk1p5VpQJ"
+    }, 
+    "spike_in": {
+        "$dnanexus_link": {
+            "project": "project-BKjyBz00ZZ0PZF5V7Gv00zqG", 
+            "id": "file-BJjZPF004b2XZ0K0y4gZ6JQG"
+        }
+    }
+}
+

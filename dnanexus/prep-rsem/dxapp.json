@@ -44,5 +44,10 @@
     "interpreter": "bash",
     "file": "src/prep-rsem.sh"
   },
+  "access": {
+    "network": [
+      "*"
+    ]
+  },
   "authorizedUsers": []
 }
