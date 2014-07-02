@@ -72,22 +72,25 @@ main() {
     (cd RSEM; make)
     echo `ls RSEM`
     echo "prepare reference"
-    /usr/local/RSEM/rsem-prepare-reference --no-polyA --gtf ${annotation_fn}.gtf ${ref} ${index_prefix}
+    mkdir out
+    RSEM/rsem-prepare-reference --no-polyA --gtf ${annotation_fn}.gtf ${ref} out/${index_prefix}
 
     # Attempt to make bamCommentLines.txt, which should be reviewed. NOTE tabs handled by assignment.
-    echo "creature bam header"
+    echo "create bam header"
     refComment="@CO\tREFID:$(basename ${genome_fn})"
     annotationComment="@CO\tANNID:$(basename ${annotation_fn})"
     spikeInComment="@CO\tSPIKEID:${spike_in_fn}"
-    echo -e ${refComment} > ${index_prefix}_bamCommentLines.txt
-    echo -e ${annotationComment} >> ${index_prefix}_bamCommentLines.txt
-    echo -e ${spikeInComment} >> ${index_prefix}_bamCommentLines.txt
+    echo -e ${refComment} > out/${index_prefix}_bamCommentLines.txt
+    echo -e ${annotationComment} >> out/${index_prefix}_bamCommentLines.txt
+    echo -e ${spikeInComment} >> out/${index_prefix}_bamCommentLines.txt
+
+    echo `cat "out/${index_prefix}_bamCommentLines.txt"`
 
     echo "tar and upload"
-    `ls ${index_prefix}*`
-    tar -czf {$index_prefix}_rsemIndex.tgz ${index_prefix}*
+    echo `ls out/${index_prefix}*`
+    tar -czf ${index_prefix}_rsemIndex.tgz out/$index_prefix*
 
-    rsem_index=$(dx upload {$index_prefix}_rsemIndex.tgz --brief)
+    rsem_index=$(dx upload ${index_prefix}_rsemIndex.tgz --brief)
 
     # The following line(s) use the utility dx-jobutil-add-output to format and
     # add output variables to your job's output as appropriate for the output
