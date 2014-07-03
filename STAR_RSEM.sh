@@ -31,7 +31,7 @@ STARparCommon="--genomeDir $STARgenomeDir  --readFilesIn $read1 $read2   --outSA
  --alignSJoverhangMin 8   --alignSJDBoverhangMin 1 --readFilesCommand zcat --outWigType bedGraph"
 
 # STAR parameters: run-time, controlled by DCC
-STARparRun="--runThreadN 12 --genomeLoad LoadAndKeep"
+STARparRun="--runThreadN 12"
 
 # STAR parameters: type of BAM output: quantification or sorted BAM or both
 #     OPTION: sorted BAM output
@@ -72,8 +72,41 @@ $STAR $STARparCommon $STARparRun $STARparBAM $STARparStrand $STARparsMeta
 
 
 
+
+###### bigWig conversion commands
+# exclude spikeins
+grep ^chr $STARgenomeDir/chrNameLength.txt > chrNL.txt
+
+case "$dataType" in
+str_SE|str_PE)
+      # stranded data
+      str[1]=-; str[2]=+;
+      for istr in 1 2
+      do
+      for imult in Unique UniqueMultiple
+      do
+          grep ^chr Signal.$imult.str$istr.out.bg > sig.tmp
+          $wigToBigWig sig.tmp  chrNL.txt Signal.$imult.strand${str[istr]}.bw
+      done
+      done
+      ;;
+unstr_SE|unstr_PE)
+      # unstranded data
+      for imult in Unique UniqueMultiple
+      do
+          grep ^chr Signal.$imult.str1.out.bg > sig.tmp
+          $wigToBigWig sig.tmp chrNL.txt  Signal.$imult.unstranded.bw
+      done
+      ;;
+esac
+
+
+
+
+######### RSEM
+
 # RSEM parameters: common
-RSEMparCommon="--bam --estimate-rspd  --calc-ci --no-bam-output --seed 12345 --gibbs-number-of-samples 10000"
+RSEMparCommon="--bam --estimate-rspd  --calc-ci --no-bam-output --seed 12345"
 
 # RSEM parameters: run-time, number of threads and RAM in MB
 RSEMparRun="-p 12 --ci-memory 30000"
@@ -105,25 +138,3 @@ echo $RSEM $RSEMparCommon $RSEMparRun $RSEMparType Aligned.toTranscriptome.out.b
 $RSEM $RSEMparCommon $RSEMparRun $RSEMparType Aligned.toTranscriptome.out.bam $RSEMrefDir Quant >& Log.rsem
 
 
-###### bigWig conversion commands
-
-case "$dataType" in
-str_SE|str_PE)
-      # stranded data
-      str[1]=-; str[2]=+;
-      for istr in 1 2
-      do
-      for imult in Unique UniqueMultiple
-      do
-          $wigToBigWig  <(grep ^chr Signal.$imult.str$istr.out.bg)  <(grep ^chr $STARgenomeDir/chrNameLength.txt) Signal.$imult.strand${str[istr]}.bw
-      done
-      done
-      ;;
-unstr_SE|unstr_PE)
-      # unstranded data
-      for imult in Unique UniqueMultiple
-      do
-          $wigToBigWig <(grep ^chr Signal.$imult.str1.out.bg) <(grep ^chr $STARgenomeDir/chrNameLength.txt)  Signal.$imult.unstranded.bw
-      done
-      ;;
-esac
