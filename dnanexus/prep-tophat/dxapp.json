@@ -11,7 +11,11 @@
   ],
   "runSpec": {
     "interpreter": "bash",
-    "file": "src/prep-tophat.sh"
+    "file": "src/prep-tophat.sh",
+    "execDepends": {
+      "name": "bowtie",
+      "version": "2.1.0-2"
+    }
   },
   "access": {
     "network": [

@@ -42,7 +42,15 @@
   ],
   "runSpec": {
     "interpreter": "bash",
-    "file": "src/prep-rsem.sh"
+    "file": "src/prep-rsem.sh",
+    "systemRequirements": {
+      "main": {
+        "instanceType": "mem3_hdd2_x4"
+      },
+      "myEntryPoint": {
+        "instanceType": "mem3_hdd2_x4"
+      }
+    }
   },
   "access": {
     "network": [

@@ -63,7 +63,12 @@
         "id": {
             "$dnanexus_link": "file-BKfxJ5801BJZBZ4yQZb00F4z"
         }
-      }]
+      }
+    ],
+    "execDepends": {
+      "name": "samtools",
+      "version": "0.1.19-1"
+    }
   },
   "access": {
     "network": [
