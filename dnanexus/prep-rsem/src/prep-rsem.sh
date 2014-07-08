@@ -28,7 +28,7 @@ main() {
     # "$variable" --name".
 
     echo "Download files"
-    annotation_fn=`dx describe "$annotations" --name | cut -d'.' -f1`
+    annotation_fn=`dx describe "$annotations" --name | cut -d'.' -f1,2,3`
     dx download "$annotations" -o "$annotation_fn".gtf.gz
     gunzip "$annotation_fn".gtf.gz
 

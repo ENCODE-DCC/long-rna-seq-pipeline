@@ -27,7 +27,8 @@ main() {
     # recover the original filenames, you can use the output of "dx describe
     # "$variable" --name".
 
-    annotation_fn=`dx describe "$annotations" --name | cut -d'.' -f1`
+    echo "Download files"
+    annotation_fn=`dx describe "$annotations" --name | cut -d'.' -f1,2,3`
     dx download "$annotations" -o "$annotation_fn".gtf.gz
     gunzip "$annotation_fn".gtf.gz
 
@@ -39,10 +40,10 @@ main() {
 
     if [ -n "$spike_in" ]
     then
-        spike_in_fn=`dx describe "$genome" --name | cut -d'.' -f1`
+        spike_in_fn=`dx describe "$spike_in" --name | cut -d'.' -f1`
         dx download "$spike_in" -o "$spike_in_fn".fa
-        #gunzip "$spike_in_fn".fagz
-        $ref={$ref},{$spike_in_fn}.fa
+        #gunzip "$spike_in_fn".fa.gz
+        ref="${ref},${spike_in_fn}.fa"
 
     fi
 
@@ -66,19 +67,28 @@ main() {
     # that you have used the output field name for the filename for each output,
     # but you can change that behavior to suit your needs.  Run "dx upload -h"
     # to see more options to set metadata.
+    echo "dowload and install RSEM"
+    git clone https://github.com/alexdobin/STAR.git
+    git checkout tags/STAR_2.3.1z12
+    (cd STAR; make)
+    echo `ls STAR`
+    echo "prepare reference"
+    mkdir out
 
-    (cd /usr/local/STAR; make)
-    /usr/local/STAR --runMode genomeGenerate --genomeFastaFiles ${genome_fn}.fa ${spike_in_fn}.fa --sjdbOverhang 100 \
+    STAR/STAR --runMode genomeGenerate --genomeFastaFiles ${genome_fn}.fa ${spike_in_fn}.fa --sjdbOverhang 100 \
      --sjdbGTFfile ${$annotation_fn}.gtf --runThreadN 6 --genomeDir ./  \
                                          --outFileNamePrefix ${index_prefix}
 
     # Attempt to make bamCommentLines.txt, which should be reviewed. NOTE tabs handled by assignment.
+    echo "create bam header"
     refComment="@CO\tREFID:$(basename ${genome_fn})"
     annotationComment="@CO\tANNID:$(basename ${annotation_fn})"
     spikeInComment="@CO\tSPIKEID:${spike_in_fn}"
-    echo -e ${refComment} > ${index_prefix}_bamCommentLines.txt
-    echo -e ${annotationComment} >> ${index_prefix}_bamCommentLines.txt
-    echo -e ${spikeInComment} >> ${index_prefix}_bamCommentLines.txt
+    echo -e ${refComment} > out/${index_prefix}_bamCommentLines.txt
+    echo -e ${annotationComment} >> out/${index_prefix}_bamCommentLines.txt
+    echo -e ${spikeInComment} >> out/${index_prefix}_bamCommentLines.txt
+
+    echo `cat "out/${index_prefix}_bamCommentLines.txt"`
 
     `ls ${index_prefix}*`
     tar -czf {$index_prefix}_starIndex.tgz ${index_prefix}*
