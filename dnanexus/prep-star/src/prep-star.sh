@@ -67,16 +67,16 @@ main() {
     # that you have used the output field name for the filename for each output,
     # but you can change that behavior to suit your needs.  Run "dx upload -h"
     # to see more options to set metadata.
-    echo "dowload and install RSEM"
-    git clone https://github.com/alexdobin/STAR.git
-    git checkout tags/STAR_2.3.1z12
+    echo "dowload and install STAR"
+    git clone https://github.com/alexdobin/STAR
+    (cd STAR; git checkout tags/STAR_2.3.1z12)
     (cd STAR; make)
     echo `ls STAR`
     echo "prepare reference"
     mkdir out
 
     STAR/STAR --runMode genomeGenerate --genomeFastaFiles ${genome_fn}.fa ${spike_in_fn}.fa --sjdbOverhang 100 \
-     --sjdbGTFfile ${$annotation_fn}.gtf --runThreadN 6 --genomeDir ./  \
+     --sjdbGTFfile ${annotation_fn}.gtf --runThreadN 6 --genomeDir ./  \
                                          --outFileNamePrefix ${index_prefix}
 
     # Attempt to make bamCommentLines.txt, which should be reviewed. NOTE tabs handled by assignment.
@@ -90,10 +90,11 @@ main() {
 
     echo `cat "out/${index_prefix}_bamCommentLines.txt"`
 
-    `ls ${index_prefix}*`
-    tar -czf {$index_prefix}_starIndex.tgz ${index_prefix}*
+    echo "tar and upload"
+    echo `ls out/${index_prefix}*`
+    tar -czf ${index_prefix}_starIndex.tgz out/${index_prefix}*
 
-    star_index=$(dx upload {$index_prefix}_starIndex.tgz --brief)
+    star_index=$(dx upload ${index_prefix}_starIndex.tgz --brief)
 
     # The following line(s) use the utility dx-jobutil-add-output to format and
     # add output variables to your job's output as appropriate for the output
