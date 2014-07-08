@@ -1,0 +1,53 @@
+{
+  "name": "prep-tophat",
+  "authorizedUsers": [],
+  "title": "Long-RNA-Seq-prep-tophat-genome",
+  "outputSpec": [
+    {
+      "class": "file",
+      "name": "tophat_index",
+      "label": "Reference files indexed for tophat"
+    }
+  ],
+  "runSpec": {
+    "interpreter": "bash",
+    "file": "src/prep-tophat.sh"
+  },
+  "access": {
+    "network": [
+      "*"
+    ]
+  },
+  "summary": "Prepare reference genome and transcriptome indexes for tophat used in the ENCODE long-rna-seq pipeline",
+  "version": "0.0.1",
+  "inputSpec": [
+    {
+      "class": "file",
+      "optional": false,
+      "name": "annotations",
+      "label": "transcript and other annotations (GTF)"
+    },
+    {
+      "class": "file",
+      "optional": false,
+      "name": "genome",
+      "label": "Reference genome (.fa.gz)"
+    },
+    {
+      "class": "file",
+      "optional": true,
+      "name": "spike_in",
+      "label": "Spike-in RNA sequences (fasta)"
+    },
+    {
+      "class": "string",
+      "optional": false,
+      "name": "index_prefix",
+      "label": "Prefix for Index files"
+    }
+  ],
+  "dxapi": "1.0.0",
+  "categories": [
+    "ENCODE"
+  ]
+}

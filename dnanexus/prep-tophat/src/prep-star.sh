@@ -71,12 +71,13 @@ main() {
     git clone https://github.com/alexdobin/STAR
     (cd STAR; git checkout tags/STAR_2.3.1z12)
     (cd STAR; make)
+    echo `ls STAR`
     echo "prepare reference"
     mkdir out
 
     STAR/STAR --runMode genomeGenerate --genomeFastaFiles ${genome_fn}.fa ${spike_in_fn}.fa --sjdbOverhang 100 \
-     --sjdbGTFfile ${annotation_fn}.gtf --runThreadN 6 --genomeDir out/ \
-                                         --outFileNamePrefix out/${index_prefix}
+     --sjdbGTFfile ${annotation_fn}.gtf --runThreadN 6 --genomeDir ./  \
+                                         --outFileNamePrefix ${index_prefix}
 
     # Attempt to make bamCommentLines.txt, which should be reviewed. NOTE tabs handled by assignment.
     echo "create bam header"
@@ -90,11 +91,8 @@ main() {
     echo `cat "out/${index_prefix}_bamCommentLines.txt"`
 
     echo "tar and upload"
-    echo "/"
-    echo `ls`
-    echo "out"
-    echo `ls out/`
-    tar -czf ${index_prefix}_starIndex.tgz out/
+    echo `ls out/${index_prefix}*`
+    tar -czf ${index_prefix}_starIndex.tgz out/${index_prefix}*
 
     star_index=$(dx upload ${index_prefix}_starIndex.tgz --brief)
 
