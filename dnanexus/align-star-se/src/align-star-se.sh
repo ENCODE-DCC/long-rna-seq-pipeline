@@ -29,10 +29,11 @@ main() {
     echo "Download files"
     reads_fn=`dx describe "$reads" --name | cut -d'.' -f1`
     dx download "$reads" -o "$reads_fn".fastq.gz
-    gunzip "$reads_fn".fastq.gz
+    #gunzip "$reads_fn".fastq.gz
 
     dx download "$star_index" -o star_index.tgz
-    gunzip star_index.tgz
+    tar zxvf star_index.tgz
+
     # unzips into "out/"
 
     # Fill in your application code here.
@@ -59,7 +60,7 @@ main() {
     cat out/*_bamCommentLines.txt >> COfile.txt
 
     echo "map reads"
-    STAR/STAR --genomeDir out --readFilesIn ${reads_fn}.fastq                    \
+    STAR/STAR --genomeDir out --readFilesIn ${reads_fn}.fastq.gz                    \
          --readFilesCommand zcat --runThreadN 12 --genomeLoad NoSharedMemory          \
          --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1    \
          --outFilterMismatchNmax 999 --outFilterMismatchNoverLmax 0.04                  \

@@ -57,6 +57,14 @@
   "runSpec": {
     "interpreter": "bash",
     "file": "src/align-star-se.sh",
+    "systemRequirements": {
+      "main": {
+        "instanceType": "mem3_hdd2_x8"
+      },
+      "myEntryPoint": {
+        "instanceType": "mem3_hdd2_x8"
+      }
+    },
     "bundledDepends": [
       {
         "name": "resources.tar.gz",

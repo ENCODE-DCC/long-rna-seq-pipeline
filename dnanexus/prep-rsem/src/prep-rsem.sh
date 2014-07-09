@@ -69,6 +69,7 @@ main() {
     # to see more options to set metadata.
     echo "dowload and install RSEM"
     git clone https://github.com/bli25wisc/RSEM.git
+    ## get correct commit bit from submodule
     (cd RSEM; make)
     echo `ls RSEM`
     echo "prepare reference"
