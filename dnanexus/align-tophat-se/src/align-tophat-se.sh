@@ -28,6 +28,9 @@ main() {
     # recover the original filenames, you can use the output of "dx describe
     # "$variable" --name".
 
+    git clone https://github.com/xweigit/xweiEncodeScripts/
+    # warining no version lock!
+
     echo "Download files"
     reads_fn=`dx describe "$reads" --name | cut -d'.' -f1`
     dx download "$reads" -o "$reads_fn".fastq.gz
@@ -81,7 +84,7 @@ main() {
     # sort before merge
 
     # fix unmapped bam and sort before merge
-    perl /usr/bin/tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | \
+    perl xweiEncodeScripts/tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | \
                           samtools view -bS - | samtools sort -m10G - sortedFixedMapped
 
     # merge aligned and unaligned into single bam, using the patched up header
@@ -100,4 +103,4 @@ main() {
 
     dx-jobutil-add-output genome_bam "$genome_bam" --class=file
     dx-jobutil-add-output genome_bai "$genome_bai" --class=file
-
+}
