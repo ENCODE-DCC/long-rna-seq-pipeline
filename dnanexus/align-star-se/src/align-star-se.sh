@@ -56,7 +56,7 @@ main() {
     echo "set up headers"
     libraryComment="@CO\tLIBID:${library_id}"
     echo -e ${libraryComment} > COfile.txt
-    cat out/COfile.txt >> COfile.txt
+    cat out/*_bamCommentLines.txt >> COfile.txt
 
     echo "map reads"
     STAR/STAR --genomeDir out --readFilesIn ${reads_fn}.fastq                    \
