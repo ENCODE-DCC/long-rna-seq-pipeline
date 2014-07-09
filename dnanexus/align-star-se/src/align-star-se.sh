@@ -61,11 +61,6 @@ main() {
     (cd STAR; git checkout tags/STAR_2.3.1z12)
     (cd STAR; make)
 
-    echo "set up headers"
-    libraryComment="@CO\tLIBID:${library_id}"
-    echo -e ${libraryComment} > COfile.txt
-    cat out/*_bamCommentLines.txt >> COfile.txt
-
     echo "map reads"
     STAR/STAR --genomeDir out --readFilesIn ${reads_fn}.fastq.gz                    \
          --readFilesCommand zcat --runThreadN 12 --genomeLoad NoSharedMemory          \
@@ -79,27 +74,29 @@ main() {
 
     echo "index bam"
     samtools index Aligned.sortedByCoord.out.bam
+    echo `ls`
 
     echo "Convert bedGraph to bigWigs.  Spike-ins must be excluded and piping doesn't work"
     grep ^chr Signal.UniqueMultiple.str1.out.bg > signalAll.bg
-    /usr/bin/bedGraphToBigWig signalAll.bg out/chrNameLength.txt    ${reads_fn}_signalAll.bw
+    /usr/bin/bedGraphToBigWig signalAll.bg out/chrNameLength.txt    ${reads_fn}_STAR_signalAll.bw
     grep ^chr Signal.Unique.str1.out.bg         > signalUniq.bg
-    /usr/bin/bedGraphToBigWig signalUniq.bg chrNameLength.txt   ${reads_fn}_signalUniq.bw
+    /usr/bin/bedGraphToBigWig signalUniq.bg out/chrNameLength.txt   ${reads_fn}_STAR_signalUniq.bw
     # The following line(s) use the dx command-line tool to upload your file
     # outputs after you have created them on the local file system.  It assumes
     # that you have used the output field name for the filename for each output,
     # but you can change that behavior to suit your needs.  Run "dx upload -h"
     # to see more options to set metadata.
+    echo `ls`
 
-    mv Aligned.sortedByCoord.out.bam ${reads_fn}_genome.bam
-    mv Aligned.sortedByCoord.out.bai ${reads_fn}_genome.bai
-    mv Aligned.toTranscriptome.out.bam ${reads_fn}_annotation.bam
+    mv Aligned.sortedByCoord.out.bam ${reads_fn}__STAR_genome.bam
+    mv Aligned.sortedByCoord.out.bam.bai ${reads_fn}_STAR_genome.bai
+    mv Aligned.toTranscriptome.out.bam ${reads_fn}_STAR_annotation.bam
 
-    genome_bam=$(dx upload ${reads_fn}_genome.bam --brief)
-    genome_bai=$(dx upload ${reads_fn}_genome.bai --brief)
-    annotation_bam=$(dx upload ${reads_fn}_annotation.bam --brief)
-    all_bw=$(dx upload ${reads_fn}_signalAll.bw --brief)
-    unique_bw=$(dx upload ${reads_fn}_signalUniq.bw --brief)
+    genome_bam=$(dx upload ${reads_fn}_STAR_genome.bam --brief)
+    genome_bai=$(dx upload ${reads_fn}_STAR_genome.bai --brief)
+    annotation_bam=$(dx upload ${reads_fn}_STAR_annotation.bam --brief)
+    all_bw=$(dx upload ${reads_fn}_STAR_signalAll.bw --brief)
+    unique_bw=$(dx upload ${reads_fn}_STAR_signalUniq.bw --brief)
 
     # The following line(s) use the utility dx-jobutil-add-output to format and
     # add output variables to your job's output as appropriate for the output

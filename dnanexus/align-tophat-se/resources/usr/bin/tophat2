@@ -1,0 +1,15 @@
+#!/bin/bash
+prefix=""
+pbin=""
+if [[ -z $prefix ]]; then
+   fl=$(readlink $0)
+   if [[ -z $fl ]]; then
+     pbin=$(dirname $0)
+   else
+     pbin=$(dirname $fl)
+   fi
+else
+ pbin=$prefix/bin
+fi
+export PATH=$pbin:$PATH
+$pbin/tophat "$@"
