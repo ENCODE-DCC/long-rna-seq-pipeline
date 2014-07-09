@@ -49,6 +49,13 @@ main() {
     # exit code will prematurely exit the script; if no error was
     # reported in the job_error.json file, then the failure reason
     # will be AppInternalError with a generic error message.
+    echo "set up headers"
+    libraryComment="@CO\tLIBID:${library_id}"
+    echo -e ${libraryComment} > COfile.txt
+    cat out/*_bamCommentLines.txt >> COfile.txt
+
+    echo `cat COfile.txt`
+
     echo "dowload and install STAR"
     git clone https://github.com/alexdobin/STAR
     (cd STAR; git checkout tags/STAR_2.3.1z12)
