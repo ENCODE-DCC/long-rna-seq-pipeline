@@ -27,12 +27,12 @@ main() {
     # "$variable" --name".
 
     echo "Download files"
-    reads_fn = `dx describe "$reads" --name | cut -d'.' -f1`
+    reads_fn=`dx describe "$reads" --name | cut -d'.' -f1`
     dx download "$reads" -o "$reads_fn".fastq.gz
     gunzip "$reads_fn".fastq.gz
 
-    dx download "$star_index" -o star_index
-    gunzip star_index
+    dx download "$star_index" -o star_index.tgz
+    gunzip star_index.tgz
     # unzips into "out/"
 
     # Fill in your application code here.
