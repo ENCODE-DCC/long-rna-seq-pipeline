@@ -21,9 +21,6 @@ main() {
     echo "Value of star_index: '$star_index'"
     echo "Value of library_id: '$library_id'"
 
-    echo "install samtools"
-    apt-get install samtools=0.1.19-1
-
     # The following line(s) use the dx command-line tool to download your file
     # inputs to the local file system using variable names for the filenames. To
     # recover the original filenames, you can use the output of "dx describe
