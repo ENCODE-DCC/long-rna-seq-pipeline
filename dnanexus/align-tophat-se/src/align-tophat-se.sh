@@ -59,13 +59,14 @@ main() {
     echo "map reads"
     /usr/bin/tophat --no-discordant --no-mixed -p 8 -z0 --min-intron-length 20 --max-intron-length 1000000 \
        --read-mismatches 4 --read-edit-dist 4 --max-multihits 20 \
-       --transcriptome-index ${index_prefix} \
+       --transcriptome-index out/${index_prefix} \
        --min-anchor-length 8 --splice-mismatches 0 --read-gap-length 2 \
        --mate-inner-dist 50 --mate-std-dev 20 --segment-length 25 \
        --b2-L 20 --b2-N 0 --b2-D 15 --b2-R 2 \
-       ${index_prefix} reads.fastq.gz
+       out/${index_prefix} ${reads_fn}.fastq.gz
 
     # Building a new header
+    echo "make new header"
     HD="@HD\tVN:1.4\tSO:coordinate"
     stCommand="perl tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | samtools view -bS - -o - | samtools sort -m10G - sortedFixedMapped; samtools merge -h newHeader.sam out_tophat.bam sortedFixedMapped.bam tophat_out/unmapped.bam"
     newPG="@PG\tID:Samtools\tPN:Samtools\tCL:"$stCommand"\tPP:Tophat\tVN:VN:0.1.19-96b5f2294a"
@@ -83,11 +84,11 @@ main() {
 
     # sort before merge
 
-    # fix unmapped bam and sort before merge
+    echo "fix unmapped bam and sort before merge"
     perl xweiEncodeScripts/tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | \
                           samtools view -bS - | samtools sort -m10G - sortedFixedMapped
 
-    # merge aligned and unaligned into single bam, using the patched up header
+    echo "merge aligned and unaligned into single bam, using the patched up header"
     samtools merge -h newHeader.sam out_tophat.bam sortedFixedMapped.bam tophat_out/unmapped.bam
     samtools index out_tophat.bam
 

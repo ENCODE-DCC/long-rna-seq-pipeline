@@ -22,6 +22,7 @@ main() {
     echo "Value of paired_end: '$paired_end'"
     echo "Value of stranded: '$stranded'"
     echo "Value of rsem_index: '$rsem_index'"
+    echo "Random number seed": '$rnd_seed'""
 
     # The following line(s) use the dx command-line tool to download your file
     # inputs to the local file system using variable names for the filenames. To
@@ -40,10 +41,14 @@ main() {
 
     extraFlags=""
     if [ -n "$paired" ]
+    then
         extraFlags="--paired-end "
+    fi
 
     if [ -n "stranded"]
+    then
         extraFlags=${extraFlags}"--forward-prob 0"
+    fi
 
     # Fill in your application code here.
     #
@@ -58,28 +63,29 @@ main() {
     # exit code will prematurely exit the script; if no error was
     # reported in the job_error.json file, then the failure reason
     # will be AppInternalError with a generic error message.
-    RSEM/rsem-calculate-expression --bam --estimate-rspd --calc-ci --seed 12345 \
-                                 -p 8 --ci-memory 30000 ${extraFlags}\
-                                 inAnnotation.bam out rsemOut
+    RSEM/rsem-calculate-expression --bam --estimate-rspd --calc-ci --seed ${rnd_seed} \
+                                 -p 8 --ci-memory 60000 ${extraFlags} \
+                                 inAnnotation.bam out ${read_prefix}
 
 
     # deliver results:
-    mv rsemOut.genes.results ${outGeneResults}
-    mv rsemOut.isoforms.results ${outIsoformResults}
+    mv rsemOut.genes.results ${read_prefix}.genes.rsem.results
+    mv rsemOut.isoforms.results ${read_prefix}.isoforms.rsem.results
     # The following line(s) use the dx command-line tool to upload your file
     # outputs after you have created them on the local file system.  It assumes
     # that you have used the output field name for the filename for each output,
     # but you can change that behavior to suit your needs.  Run "dx upload -h"
     # to see more options to set metadata.
 
-    genomic_quant_bam=$(dx upload genomic_quant_bam --brief)
-    transcript_quant_bam=$(dx upload transcript_quant_bam --brief)
+    genomic_quant=$(dx upload genomic_quant --brief)
+    transcript_quant=$(dx upload transcript_quant--brief)
 
     # The following line(s) use the utility dx-jobutil-add-output to format and
     # add output variables to your job's output as appropriate for the output
     # class.  Run "dx-jobutil-add-output -h" for more information on what it
     # does.
 
-    dx-jobutil-add-output genomic_quant_bam "$genomic_quant_bam" --class=file
-    dx-jobutil-add-output transcript_quant_bam "$transcript_quant_bam" --class=file
+    dx-jobutil-add-output genomic_quant "$genomic_quant" --class=file
+    dx-jobutil-add-output transcript_quant "$transcript_quant" --class=file
+
 }

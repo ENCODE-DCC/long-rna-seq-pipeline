@@ -27,6 +27,13 @@
       "optional": false
     },
     {
+      "name": "rnd_seed",
+      "label": "Random Seed",
+      "class": "int",
+      "default": 12345,
+      "optional": true
+    },
+    {
       "name": "paired_end",
       "label": "Library was paired_end",
       "class": "boolean",
@@ -41,13 +48,13 @@
   ],
   "outputSpec": [
     {
-      "name": "genomic_quant_bam",
-      "label": "BAM file for genomic quantification",
+      "name": "genomic_quant",
+      "label": "Genomic quantification",
       "class": "file"
     },
     {
-      "name": "transcript_quant_bam",
-      "label": "BAM file for transcript quantification",
+      "name": "transcript_quant",
+      "label": "Transcript quantification",
       "class": "file"
     }
   ],
@@ -61,7 +68,7 @@
       "myEntryPoint": {
         "instanceType": "mem3_hdd2_x8"
       }
-    },
+    }
   },
   "access": {
     "network": [
