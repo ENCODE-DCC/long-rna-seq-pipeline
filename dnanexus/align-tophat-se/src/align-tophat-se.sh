@@ -20,8 +20,6 @@ main() {
     echo "Value of reads: '$reads'"
     echo "Value of tophat_index: '$tophat_index'"
     echo "Value of library_id: '$library_id'"
-    echo "Value of index_prefix: '$index_prefix'"
-    # must be the same as index_prefix used in prep-tophat
 
     # The following line(s) use the dx command-line tool to download your file
     # inputs to the local file system using variable names for the filenames. To
@@ -40,6 +38,8 @@ main() {
     tar zxvf tophat_index.tgz
 
     # unzips into "out/"
+    index_prefix=`ls out/*.ver | cut -d'.' -f1`
+    echo "found $index_prefix ver file"
 
     # Fill in your application code here.
     #
@@ -59,11 +59,11 @@ main() {
     echo "map reads"
     /usr/bin/tophat --no-discordant --no-mixed -p 8 -z0 --min-intron-length 20 --max-intron-length 1000000 \
        --read-mismatches 4 --read-edit-dist 4 --max-multihits 20 \
-       --transcriptome-index out/${index_prefix} \
+       --transcriptome-index ${index_prefix} \
        --min-anchor-length 8 --splice-mismatches 0 --read-gap-length 2 \
        --mate-inner-dist 50 --mate-std-dev 20 --segment-length 25 \
        --b2-L 20 --b2-N 0 --b2-D 15 --b2-R 2 \
-       out/${index_prefix} ${reads_fn}.fastq.gz
+       ${index_prefix} ${reads_fn}.fastq.gz
 
     # Building a new header
     echo "make new header"
@@ -80,7 +80,7 @@ main() {
         }; END{print newPG"\n"PG"\n"library;}' > newHeader.sam
 
     # Add reference genome specific accessions to header
-    cat ${index_prefix}_COfile.txt >> newHeader.sam
+    cat ${index_prefix}_bamCommentLines.txt >> newHeader.sam
 
     # sort before merge
 

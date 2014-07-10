@@ -68,20 +68,20 @@ main() {
     # will be AppInternalError with a generic error message.
     RSEM/rsem-calculate-expression --bam --estimate-rspd --calc-ci --seed ${rnd_seed} \
                                  -p 8 --ci-memory 60000 ${extraFlags} \
-                                 annotation.bam out/${index_prefix} ${read_prefix}
+                                 annotation.bam ${index_prefix} ${read_prefix}_rsem_quant
 
-
+    echo `ls ${read_prefix}*`
     # deliver results:
-    mv rsemOut.genes.results ${read_prefix}.genes.rsem.results
-    mv rsemOut.isoforms.results ${read_prefix}.isoforms.rsem.results
+    #mv rsemOut.genes.results ${read_prefix}.genes.rsem.results
+    #mv rsemOut.isoforms.results ${read_prefix}.isoforms.rsem.results
     # The following line(s) use the dx command-line tool to upload your file
     # outputs after you have created them on the local file system.  It assumes
     # that you have used the output field name for the filename for each output,
     # but you can change that behavior to suit your needs.  Run "dx upload -h"
     # to see more options to set metadata.
 
-    genomic_quant=$(dx upload genomic_quant --brief)
-    transcript_quant=$(dx upload transcript_quant--brief)
+    genomic_quant=$(dx upload ${read_prefix}_rsem_quant.genes.results --brief)
+    transcript_quant=$(dx upload ${read_prefix}_rsem_quant.isoforms.results --brief)
 
     # The following line(s) use the utility dx-jobutil-add-output to format and
     # add output variables to your job's output as appropriate for the output

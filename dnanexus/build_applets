@@ -1,7 +1,7 @@
 #!/bin/bash
 
 applet_dest='long-rna-seq-pipeline'
-applets='merge-annotation prep-star prep-rsem prep-tophat align-star-se align-star-pe align-tophat-pe align-tophat-se quant-rsem filter bam2wiggle wig2bigwig'
+applets='merge-annotation prep-star prep-rsem prep-tophat align-star-se align-star-pe align-tophat-pe align-tophat-se quant-rsem  bam2wiggle wig2bigwig'
 
 project=$(dx find projects --name "$applet_dest")
 if [ -z "$project" ]
