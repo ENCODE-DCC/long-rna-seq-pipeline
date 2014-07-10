@@ -29,10 +29,13 @@ main() {
     # recover the original filenames, you can use the output of "dx describe
     # "$variable" --name".
 
-    dx download "$annotation_bam" -o annotation_bam.bam
+    dx download "$annotation_bam" -o annotation.bam
 
     dx download "$rsem_index" -o rsem_index.tgz
     tar zxvf rsem_index.tgz
+
+    index_prefix=`ls out/*.grp | cut -d'.' -f1`
+    echo "found $index_prefix grp file"
 
     echo "dowload and install RSEM"
     git clone https://github.com/bli25wisc/RSEM.git
@@ -45,7 +48,7 @@ main() {
         extraFlags="--paired-end "
     fi
 
-    if [ -n "stranded"]
+    if [ -n "stranded" ]
     then
         extraFlags=${extraFlags}"--forward-prob 0"
     fi
@@ -65,7 +68,7 @@ main() {
     # will be AppInternalError with a generic error message.
     RSEM/rsem-calculate-expression --bam --estimate-rspd --calc-ci --seed ${rnd_seed} \
                                  -p 8 --ci-memory 60000 ${extraFlags} \
-                                 inAnnotation.bam out ${read_prefix}
+                                 annotation.bam out/${index_prefix} ${read_prefix}
 
 
     # deliver results:
