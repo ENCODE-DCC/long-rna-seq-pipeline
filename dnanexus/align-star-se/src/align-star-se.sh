@@ -78,9 +78,9 @@ main() {
 
     echo "Convert bedGraph to bigWigs.  Spike-ins must be excluded and piping doesn't work"
     grep ^chr Signal.UniqueMultiple.str1.out.bg > signalAll.bg
-    /usr/bin/bedGraphToBigWig signalAll.bg out/chrNameLength.txt    ${reads_fn}_STAR_signalAll.bw
+    /usr/bin/bedGraphToBigWig signalAll.bg out/chrNameLength.txt    ${reads_fn}_STAR_signal_unstranded_All.bw
     grep ^chr Signal.Unique.str1.out.bg         > signalUniq.bg
-    /usr/bin/bedGraphToBigWig signalUniq.bg out/chrNameLength.txt   ${reads_fn}_STAR_signalUniq.bw
+    /usr/bin/bedGraphToBigWig signalUniq.bg out/chrNameLength.txt   ${reads_fn}_STAR_signal_unstranded_Uniq.bw
     # The following line(s) use the dx command-line tool to upload your file
     # outputs after you have created them on the local file system.  It assumes
     # that you have used the output field name for the filename for each output,
@@ -95,8 +95,8 @@ main() {
     genome_bam=$(dx upload ${reads_fn}_STAR_genome.bam --brief)
     genome_bai=$(dx upload ${reads_fn}_STAR_genome.bai --brief)
     annotation_bam=$(dx upload ${reads_fn}_STAR_annotation.bam --brief)
-    all_bw=$(dx upload ${reads_fn}_STAR_signalAll.bw --brief)
-    unique_bw=$(dx upload ${reads_fn}_STAR_signalUniq.bw --brief)
+    all_unstranded_bw=$(dx upload ${reads_fn}_STAR_signal_unstranded_All.bw --brief)
+    unique_unstranded_bw=$(dx upload ${reads_fn}_STAR_signal_unstranded_Uniq.bw --brief)
 
     # The following line(s) use the utility dx-jobutil-add-output to format and
     # add output variables to your job's output as appropriate for the output
@@ -106,6 +106,6 @@ main() {
     dx-jobutil-add-output genome_bam "$genome_bam" --class=file
     dx-jobutil-add-output genome_bai "$genome_bai" --class=file
     dx-jobutil-add-output annotation_bam "$annotation_bam" --class=file
-    dx-jobutil-add-output all_bw "$all_bw" --class=file
-    dx-jobutil-add-output unique_bw "$unique_bw" --class=file
+    dx-jobutil-add-output all_unstranded_bw "$all_unstranded_bw" --class=file
+    dx-jobutil-add-output unique_unstranded_bw "$unique_unstranded_bw" --class=file
 }

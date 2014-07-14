@@ -1,0 +1,62 @@
+{
+  "name": "bam-to-bigwig-stranded",
+  "title": "Long-RNA-Seq-BAM-to-BW-tophat-stranded",
+  "summary": "Converts BAMs from tophat alignments from stranded libraries to bigwig format",
+  "dxapi": "1.0.0",
+  "version": "0.0.1",
+  "categories": [
+    "ENCODE"
+  ],
+  "inputSpec": [
+    {
+      "name": "bam_file",
+      "label": "Input BAM file for all mapped reads",
+      "class": "file",
+      "optional": false
+    },
+    {
+      "name": "bai_file",
+      "label": "Input BAM index (BAI) file for all mapped reads",
+      "class": "file",
+      "optional": false
+    },
+    {
+      "name": "star_index",
+      "label": "Genome Index files from STAR (need ChrNameLength.txt)",
+      "class": "file",
+      "optional": false
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "all_plus_bw",
+      "label": "BigWig file for all plus-stranded reads",
+      "class": "file"
+    },
+    {
+      "name": "unique_plus_bw",
+      "label": "BigWig file of uniquely mapped plus-stranded reads",
+      "class": "file"
+    }
+    {
+      "name": "all_minus_bw",
+      "label": "BigWig file for all minus-stranded reads",
+      "class": "file"
+    },
+    {
+      "name": "unique_minus_bw",
+      "label": "BigWig file of uniquely mapped minus-stranded reads",
+      "class": "file"
+    }
+  ],
+  "runSpec": {
+    "interpreter": "bash",
+    "file": "src/bam-to-bigwig-stranded.sh"
+  },
+  "access": {
+    "network": [
+      "*"
+    ]
+  },
+  "authorizedUsers": []
+}
