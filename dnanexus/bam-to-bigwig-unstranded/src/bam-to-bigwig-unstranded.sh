@@ -26,7 +26,8 @@ main() {
     # recover the original filenames, you can use the output of "dx describe
     # "$variable" --name".
 
-    $bam_fn=`dx describe $bam_file --name` | cut -d'.' -f1
+    echo "Download files"
+    bam_fn=`dx describe "$bam_file" --name | cut -d'.' -f1`
     dx download "$bam_file" -o $bam_fn.bam
 
     dx download "$bai_file" -o $bam_fn.bai
@@ -35,10 +36,12 @@ main() {
     ## Note we only need the chrNameLength.txt, not any STAR specific indices
 
 
+    echo "install Georgi's bam->wiggle"
     git clone https://github.com/georgimarinov/GeorgiScripts
     (cd GeorgiScripts; git checkout e7a6ae12e65b7b8a391dc511b8d94b7173225bbb)
     ## note initial version
-
+    pip install pysam
+    #GeorgiScript dependency
     # Fill in your application code here.
     #
     # To report any recognized errors in the correct format in
@@ -53,12 +56,14 @@ main() {
     # reported in the job_error.json file, then the failure reason
     # will be AppInternalError with a generic error message.
 
+    echo "make wiggle from all mapped reads"
     python GeorgiScripts/makewigglefromBAM-NH.py --- ${bam_fn}.bam out/chrNameLength.txt tmpAllUn.wig \
            -RPM -notitle -fragments second-read-strand
     wigToBigWig tmpAllUn.wig stdin out/chrNameLength.txt \
     ${bam_fn}_tophat_signal_unstranded_All.bw
 
-    python GeorgiScripts/makewigglefromBAM-NH.py --- ${bam_fn}.bam out/chrNameLength.txt tmpUniqMinus.wig \
+    echo "make wiggle from uniquely mapping reads"
+    python GeorgiScripts/makewigglefromBAM-NH.py --- ${bam_fn}.bam out/chrNameLength.txt tmpUniqUn.wig \
           -nomulti -RPM -notitle -fragments second-read-strand
     perl -pe 's/-//g' < tmpUniqUn.wig | wigToBigWig stdin out/chrNameLength.txt \
     ${bam_fn}_tophat_signal_unstranded_Unique.bw

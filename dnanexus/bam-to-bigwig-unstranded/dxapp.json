@@ -41,7 +41,13 @@
   ],
   "runSpec": {
     "interpreter": "bash",
-    "file": "src/bam-to-bigwig-unstranded.sh"
+    "file": "src/bam-to-bigwig-unstranded.sh",
+    "execDepends": [
+      {
+        "name": "samtools",
+        "version": "0.1.18-1ubuntu2"
+      }
+    ]
   },
   "access": {
     "network": [

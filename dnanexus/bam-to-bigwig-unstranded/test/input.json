@@ -1,0 +1,21 @@
+{
+    "bam_file": {
+        "$dnanexus_link": {
+            "project": "project-BKjyBz00ZZ0PZF5V7Gv00zqG", 
+            "id": "file-BP2Vpfj0FG9ZQX355GK33kp4"
+        }
+    }, 
+    "bai_file": {
+        "$dnanexus_link": {
+            "project": "project-BKjyBz00ZZ0PZF5V7Gv00zqG", 
+            "id": "file-BP2Vpg80FG9ZQX355GK33kp8"
+        }
+    }, 
+    "star_index": {
+        "$dnanexus_link": {
+            "project": "project-BKjyBz00ZZ0PZF5V7Gv00zqG", 
+            "id": "file-BP2GzvQ056qJ1YG1f4yY8Qbg"
+        }
+    }
+}
+

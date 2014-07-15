@@ -26,7 +26,7 @@ main() {
     # recover the original filenames, you can use the output of "dx describe
     # "$variable" --name".
 
-    $bam_fn=`dx describe $bam_file --name` | cut -d'.' -f1
+    bam_fn=`dx describe $bam_file --name | cut -d'.' -f1`
     dx download "$bam_file" -o $bam_fn.bam
 
     dx download "$bai_file" -o $bam_fn.bai
@@ -38,7 +38,7 @@ main() {
     git clone https://github.com/georgimarinov/GeorgiScripts
     (cd GeorgiScripts; git checkout e7a6ae12e65b7b8a391dc511b8d94b7173225bbb)
     ## note initial version
-
+    pip install pysam
     # Fill in your application code here.
     #
     # To report any recognized errors in the correct format in
