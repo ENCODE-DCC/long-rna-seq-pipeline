@@ -42,6 +42,14 @@
   "runSpec": {
     "interpreter": "bash",
     "file": "src/bam-to-bigwig-unstranded.sh",
+    "bundledDepends": [
+      {
+        "name": "resources.tar.gz",
+        "id": {
+            "$dnanexus_link": "file-BKfxJ5801BJZBZ4yQZb00F4z"
+        }
+      }
+    ],
     "execDepends": [
       {
         "name": "samtools",

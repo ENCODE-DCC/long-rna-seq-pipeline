@@ -59,13 +59,13 @@ main() {
     echo "make wiggle from all mapped reads"
     python GeorgiScripts/makewigglefromBAM-NH.py --- ${bam_fn}.bam out/chrNameLength.txt tmpAllUn.wig \
            -RPM -notitle -fragments second-read-strand
-    wigToBigWig tmpAllUn.wig stdin out/chrNameLength.txt \
+    /usr/bin/wigToBigWig tmpAllUn.wig stdin out/chrNameLength.txt \
     ${bam_fn}_tophat_signal_unstranded_All.bw
 
     echo "make wiggle from uniquely mapping reads"
     python GeorgiScripts/makewigglefromBAM-NH.py --- ${bam_fn}.bam out/chrNameLength.txt tmpUniqUn.wig \
           -nomulti -RPM -notitle -fragments second-read-strand
-    perl -pe 's/-//g' < tmpUniqUn.wig | wigToBigWig stdin out/chrNameLength.txt \
+    perl -pe 's/-//g' < tmpUniqUn.wig | /usr/bin/wigToBigWig stdin out/chrNameLength.txt \
     ${bam_fn}_tophat_signal_unstranded_Unique.bw
 
 

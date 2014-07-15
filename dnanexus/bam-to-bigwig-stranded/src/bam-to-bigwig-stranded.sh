@@ -55,22 +55,22 @@ main() {
 
     python GeorgiScripts/makewigglefromBAM-NH.py --- ${bam_fn}.bam out/chrNameLength.txt tmpAllMinus.wig \
           -stranded - -RPM -notitle -fragments second-read-strand
-    wigToBigWig tmpAllMinus.wig stdin out/chrNameLength.txt \
+    /usr/bin/wigToBigWig tmpAllMinus.wig stdin out/chrNameLength.txt \
     ${bam_fn}_tophat_signal_minus_All.bw
 
     python GeorgiScripts/makewigglefromBAM-NH.py --- ${bam_fn}.bam out/chrNameLength.txt tmpAllPlus.wig \
           -stranded + -RPM -notitle -fragments second-read-strand
-    wigToBigWig tmpAllPlus.wig stdin out/chrNameLength.txt \
+    /usr/bin/wigToBigWig tmpAllPlus.wig stdin out/chrNameLength.txt \
     ${bam_fn}_tophat_signal_plus_All.bw
 
     python GeorgiScripts/makewigglefromBAM-NH.py --- ${bam_fn}.bam out/chrNameLength.txt tmpUniqMinus.wig \
           -stranded - -nomulti -RPM -notitle -fragments second-read-strand
-    perl -pe 's/-//g' < tmpUniqMinus.wig | wigToBigWig stdin out/chrNameLength.txt \
+    perl -pe 's/-//g' < tmpUniqMinus.wig | /usr/bin/wigToBigWig stdin out/chrNameLength.txt \
     ${bam_fn}_tophat_signal_minus_Unique.bw
 
     python GeorgiScripts/makewigglefromBAM-NH.py --- ${bam_fn}.bam out/chrNameLength.txt tmpUniqPlus.wig \
           -stranded + -nomulti -RPM -notitle -fragments second-read-strand
-    perl -pe 's/-//g' < tmpUniqPlus.wig | wigToBigWig stdin out/chrNameLength.txt \
+    perl -pe 's/-//g' < tmpUniqPlus.wig | /usr/bin/wigToBigWig stdin out/chrNameLength.txt \
     ${bam_fn}_tophat_signal_plus_Unique.bw
 
 
