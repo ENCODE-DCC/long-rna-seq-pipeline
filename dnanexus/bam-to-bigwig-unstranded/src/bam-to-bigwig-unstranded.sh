@@ -53,25 +53,15 @@ main() {
     # reported in the job_error.json file, then the failure reason
     # will be AppInternalError with a generic error message.
 
-    python GeorgiScripts/makewigglefromBAM-NH.py --- ${bam_fn}.bam out/chrNameLength.txt tmpAllMinus.wig \
-          -stranded - -RPM -notitle -fragments second-read-strand
-    wigToBigWig tmpAllMinus.wig stdin out/chrNameLength.txt \
-    ${bam_fn}_tophat_signal_minus_All.bw
-
-    python GeorgiScripts/makewigglefromBAM-NH.py --- ${bam_fn}.bam out/chrNameLength.txt tmpAllPlus.wig \
-          -stranded + -RPM -notitle -fragments second-read-strand
-    wigToBigWig tmpAllPlus.wig stdin out/chrNameLength.txt \
-    ${bam_fn}_tophat_signal_plus_All.bw
+    python GeorgiScripts/makewigglefromBAM-NH.py --- ${bam_fn}.bam out/chrNameLength.txt tmpAllUn.wig \
+           -RPM -notitle -fragments second-read-strand
+    wigToBigWig tmpAllUn.wig stdin out/chrNameLength.txt \
+    ${bam_fn}_tophat_signal_unstranded_All.bw
 
     python GeorgiScripts/makewigglefromBAM-NH.py --- ${bam_fn}.bam out/chrNameLength.txt tmpUniqMinus.wig \
-          -stranded - -nomulti -RPM -notitle -fragments second-read-strand
-    perl -pe 's/-//g' < tmpUniqMinus.wig | wigToBigWig stdin out/chrNameLength.txt \
-    ${bam_fn}_tophat_signal_minus_Unique.bw
-
-    python GeorgiScripts/makewigglefromBAM-NH.py --- ${bam_fn}.bam out/chrNameLength.txt tmpUniqPlus.wig \
-          -stranded + -nomulti -RPM -notitle -fragments second-read-strand
-    perl -pe 's/-//g' < tmpUniqPlus.wig | wigToBigWig stdin out/chrNameLength.txt \
-    ${bam_fn}_tophat_signal_plus_Unique.bw
+          -nomulti -RPM -notitle -fragments second-read-strand
+    perl -pe 's/-//g' < tmpUniqUn.wig | wigToBigWig stdin out/chrNameLength.txt \
+    ${bam_fn}_tophat_signal_unstranded_Unique.bw
 
 
     # The following line(s) use the dx command-line tool to upload your file
@@ -80,18 +70,14 @@ main() {
     # but you can change that behavior to suit your needs.  Run "dx upload -h"
     # to see more options to set metadata.
 
-    all_minus_bw=$(dx upload ${bam_fn}_tophat_signal_minus_All.bw --brief)
-    all_plus_bw=$(dx upload ${bam_fn}_tophat_signal_plus_All.bw--brief)
-    unique_minus_bw=$(dx upload ${bam_fn}_tophat_signal_minus_Unique.bw--brief)
-    unique_plus_bw=$(dx upload ${bam_fn}_tophat_signal_plus_Unique.bw --brief)
+    all_unstranded_bw=$(dx upload ${bam_fn}_tophat_signal_unstranded_All.bw --brief)
+    unique_unstranded_bw=$(dx upload ${bam_fn}_tophat_signal_unstranded_Unique.bw--brief)
 
     # The following line(s) use the utility dx-jobutil-add-output to format and
     # add output variables to your job's output as appropriate for the output
     # class.  Run "dx-jobutil-add-output -h" for more information on what it
     # does.
 
-    dx-jobutil-add-output all_bw "$all_minus_bw" --class=file
-    dx-jobutil-add-output all_bw "$all_plus_bw" --class=file
-    dx-jobutil-add-output unique_bw "$unique_minus_bw" --class=file
-    dx-jobutil-add-output unique_bw "$unique_plus_bw" --class=file
+    dx-jobutil-add-output all_bw "$all_unstranded_bw" --class=file
+    dx-jobutil-add-output unique_bw "$unique_unstranded_bw" --class=file
 }

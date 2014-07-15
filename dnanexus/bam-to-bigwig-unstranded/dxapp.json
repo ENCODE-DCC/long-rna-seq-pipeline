@@ -1,0 +1,52 @@
+{
+  "name": "bam-to-bigwig-unstranded",
+  "title": "Long-RNA-Seq-BAM-to-BW-tophat-unstranded",
+  "summary": "Converts BAMs from tophat alignments from unstranded libraries to bigwig format",
+  "dxapi": "1.0.0",
+  "version": "0.0.1",
+  "categories": [
+    "ENCODE"
+  ],
+  "inputSpec": [
+    {
+      "name": "bam_file",
+      "label": "Input BAM file for all mapped reads",
+      "class": "file",
+      "optional": false
+    },
+    {
+      "name": "bai_file",
+      "label": "Input BAM index (BAI) file for all mapped reads",
+      "class": "file",
+      "optional": false
+    },
+    {
+      "name": "star_index",
+      "label": "Genome Index files from STAR (need ChrNameLength.txt)",
+      "class": "file",
+      "optional": false
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "all_unstranded_bw",
+      "label": "BigWig file for all unstranded reads",
+      "class": "file"
+    },
+    {
+      "name": "unique_unstranded_bw",
+      "label": "BigWig file of uniquely mapped unstranded reads",
+      "class": "file"
+    }
+  ],
+  "runSpec": {
+    "interpreter": "bash",
+    "file": "src/bam-to-bigwig-unstranded.sh"
+  },
+  "access": {
+    "network": [
+      "*"
+    ]
+  },
+  "authorizedUsers": []
+}
