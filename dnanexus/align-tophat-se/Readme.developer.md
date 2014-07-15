@@ -1,4 +1,4 @@
-# align-star-se Developer Readme
+# align-tophat-se Developer Readme
 
 <!--
 TODO: Please edit this Readme.developer.md file to include information

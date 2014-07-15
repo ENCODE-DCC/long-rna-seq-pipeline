@@ -1,5 +1,5 @@
 <!-- dx-header -->
-# Long-RNA-Seq-align-star-se (DNAnexus Platform App)
+# Long-RNA-Seq-align-tophat-se (DNAnexus Platform App)
 
 Align Single-ended reads to genome and transcriptome using STAR for the ENCODE long-rna-seq pipeline
 

@@ -1,0 +1,73 @@
+{
+  "name": "align-tophat-pe",
+  "title": "Long-RNA-Seq-align-tophat-pe",
+  "summary": "Align Paired-ended reads to genome and transcriptome using tophat for the ENCODE long-rna-peq pipeline",
+  "dxapi": "1.0.0",
+  "version": "0.0.1",
+  "categories": [
+    "ENCODE"
+  ],
+  "inputSpec": [
+    {
+      "name": "reads_1",
+      "label": "Pair 1 Reads to align (fastq.gz)",
+      "class": "file",
+      "optional": false
+    },
+    {
+      "name": "reads_2",
+      "label": "Pair 2 Reads to align (fastq.gz)",
+      "class": "file",
+      "optional": false
+    },
+    {
+      "name": "tophat_index",
+      "label": "Genome indexed for tophat",
+      "class": "file",
+      "optional": false
+    },
+    {
+      "name": "library_id",
+      "label": "Identifier for biosample library",
+      "class": "string",
+      "optional": false
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "genome_bam",
+      "label": "BAM file of alignment to whole genome",
+      "class": "file"
+    },
+    {
+      "name": "genome_bai",
+      "label": "BAM index (bai) of alignment to whole genome",
+      "class": "file"
+    }
+  ],
+  "runSpec": {
+    "interpreter": "bash",
+    "file": "src/align-tophat-pe.sh",
+    "systemRequirements": {
+      "main": {
+        "instanceType": "mem3_hdd2_x8"
+      },
+      "myEntryPoint": {
+        "instanceType": "mem3_hdd2_x8"
+      }
+    },
+    "execDepends": [
+      {
+        "name": "samtools",
+        "version": "0.1.18-1ubuntu2"
+      },
+      {"name":"gawk"}
+    ]
+  },
+  "access": {
+    "network": [
+      "*"
+    ]
+  },
+  "authorizedUsers": []
+}
