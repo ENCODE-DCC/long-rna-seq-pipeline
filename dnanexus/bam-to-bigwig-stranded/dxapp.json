@@ -37,7 +37,7 @@
       "name": "unique_plus_bw",
       "label": "BigWig file of uniquely mapped plus-stranded reads",
       "class": "file"
-    }
+    },
     {
       "name": "all_minus_bw",
       "label": "BigWig file for all minus-stranded reads",
