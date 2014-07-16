@@ -18,6 +18,7 @@
 main() {
 
     echo "Value of reads: '$reads_1'"
+    echo "Value of reads: '$reads_2'"
     echo "Value of tophat_index: '$tophat_index'"
     echo "Value of library_id: '$library_id'"
 
@@ -65,7 +66,7 @@ main() {
        --min-anchor-length 8 --splice-mismatches 0 --read-gap-length 2 \
        --mate-inner-dist 50 --mate-std-dev 20 --segment-length 25 \
        --b2-L 20 --b2-N 0 --b2-D 15 --b2-R 2 \
-       ${index_prefix} ${reads_1_fn}.fastq.gz ${reads_2_fn}.fastq.gz
+       ${index_prefix} ${reads1_fn}.fastq.gz ${reads2_fn}.fastq.gz
 
     # Building a new header
     echo "make new header"
