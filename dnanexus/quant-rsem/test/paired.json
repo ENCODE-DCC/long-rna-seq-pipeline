@@ -1,0 +1,12 @@
+{
+  "read_prefix": "full_pipe1m_paired_test",
+  "rsem_index": {
+    "$dnanexus_link": "file-BP2F7Xj064y4QX355GK2Yqb8"
+  },
+  "annotation_bam": {
+    "$dnanexus_link": "file-BP2v858026YXP47zJvB007q2"
+  },
+  "stranded": true,
+  "rnd_seed": 12345,
+  "paired_end": true
+}

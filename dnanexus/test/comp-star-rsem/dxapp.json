@@ -1,0 +1,66 @@
+{
+  "name": "comp-star-rsem",
+  "title": "Compares STAR/RSEM output to Alex",
+  "summary": "comp-star-rsem",
+  "dxapi": "1.0.0",
+  "version": "0.0.1",
+  "categories": [],
+  "inputSpec": [
+    {
+      "name": "star_log",
+      "label": "Log file created at DNAnexus by STAR",
+      "class": "file",
+      "optional": false
+    },
+    {
+      "name": "star_bam",
+      "label": "BAM file created at DNAnexus by STAR",
+      "class": "file",
+      "optional": false
+    },
+    {
+      "name": "rsem_isoform_quant",
+      "label": "Quantification file created at DNAnexus by RSEM",
+      "class": "file",
+      "optional": false
+    },
+    {
+      "name": "rsem_gene_quant",
+      "label": "Quantification file crated at DNAnexus by RSEM (genes)",
+      "class": "file",
+      "optional": false
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "log_diff",
+      "label": "Diff of log files (should be empty)",
+      "class": "file"
+    },
+    {
+      "name": "bam_diff",
+      "label": "Are BAMs different?",
+      "class": "boolean"
+    },
+    {
+      "name": "isoform_quant_diff",
+      "label": "Diff of isoform quantification files (shoudld be empty)",
+      "class": "file"
+    },
+    {
+      "name": "gene_quant_diff",
+      "label": "Diff of gene quantification files (should be empty)",
+      "class": "file"
+    },
+    {
+      "name": "bigwig_diff",
+      "label": "Are BigWigs different?",
+      "class": "boolean"
+    }
+  ],
+  "runSpec": {
+    "interpreter": "bash",
+    "file": "src/comp-star-rsem.sh"
+  },
+  "authorizedUsers": []
+}
