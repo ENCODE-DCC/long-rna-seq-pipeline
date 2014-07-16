@@ -35,6 +35,11 @@
   ],
   "outputSpec": [
     {
+      "name": "star_log",
+      "label": "Log file for STAR, contains QC metrics",
+      "class": "file"
+    },
+    {
       "name": "genome_bam",
       "label": "BAM file of alignment to whole genome",
       "class": "file"

@@ -65,7 +65,7 @@ main() {
        --min-anchor-length 8 --splice-mismatches 0 --read-gap-length 2 \
        --mate-inner-dist 50 --mate-std-dev 20 --segment-length 25 \
        --b2-L 20 --b2-N 0 --b2-D 15 --b2-R 2 \
-       ${index_prefix} ${reads_1}.fastq.gz ${reads_2}.fastq.gz
+       ${index_prefix} ${reads_1_fn}.fastq.gz ${reads_2_fn}.fastq.gz
 
     # Building a new header
     echo "make new header"
