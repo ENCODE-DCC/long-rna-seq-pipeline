@@ -556,6 +556,7 @@ def filter_fusion(bwt_idx_prefix, params):
             gene2, gene2_name, gene2_where, gene2_belong, gene2_sense, ens_gene2, ens_gene2_name = find_gene(chr2, coord2, dir[1], False)
 
             if gene1_name == gene2_name or ens_gene1_name == ens_gene2_name or ens_gene1 == ens_gene2:
+                # if dir in ["ff", "rr"]:
                 continue
 
             if gene1 == "N/A" or gene2 == "N/A" or (string.find(gene1, "ENS") == 0 and string.find(gene2, "ENS") == 0):
@@ -579,18 +580,16 @@ def filter_fusion(bwt_idx_prefix, params):
                 left_dist[i] = '%d' % min(9, int(left_dist[i]))
                 right_dist[i] ='%d' % min(9, int(right_dist[i]))
 
+            """
             swap = False
             if (dir == 'ff' and gene1_sense == '-' and gene2_sense == '-') or \
-               (dir == 'rr' and gene1_sense == '+' and gene2_sense == '+') or \
-               (dir == 'fr' and gene1_sense == '-' and gene2_sense == '+') or \
-               (dir == 'rf' and gene1_sense == '+' and gene2_sense == '-'):
+                    (dir == 'fr' and gene1_sense == '-' and gene2_sense == '+') or \
+                    (dir == 'rf' and gene1_sense == '+' and gene2_sense == '-'):
                 swap = True
 
             if swap:
                 if dir == 'ff':
                     dir = 'rr'
-                elif dir == 'rr':
-                    dir = 'ff'
 
                 info[0] = "%s-%s" % (chr2, chr1)
                 info[1:3] = info[1:3][::-1]
@@ -603,6 +602,7 @@ def filter_fusion(bwt_idx_prefix, params):
                 for j in range(len(pairs)):
                     pair = pairs[j].split(':')
                     pairs[j] = ':'.join(pair[::-1])
+            """
 
             # check if this is due to trans-splicing.
             if gene1_sense in "+-" and gene2_sense in "+-":
@@ -640,10 +640,7 @@ def filter_fusion(bwt_idx_prefix, params):
 
     re_mir = re.compile(r'^(MIR)')
     def read_genes(gene_file_name, offset = 1, id = -4):
-        gene_list, temp_gene_list = [], []
-        if not os.path.exists(gene_file_name):
-            return gene_list
-        
+        gene_list = []
         gene_file = open(gene_file_name, 'r')
         for line in gene_file:
             line = line[:-1].split('\t')[offset:]
@@ -652,7 +649,7 @@ def filter_fusion(bwt_idx_prefix, params):
             right_coords = line[9].split(',')[:num_exons]
             
             if line[1] in chr_order and not re_mir.findall(line[id]):
-                temp_gene_list.append([line[0], line[1], int(line[3]), int(line[4]), line[id], left_coords, right_coords, line[2]])
+                gene_list.append([line[0], line[1], int(line[3]), int(line[4]), line[id], left_coords, right_coords, line[2]])
 
         gene_file.close()
 
@@ -674,22 +671,22 @@ def filter_fusion(bwt_idx_prefix, params):
                     else:
                         return 1                   
 
-        temp_gene_list = sorted(temp_gene_list, cmp=my_cmp)
-        gene_list = []
-        if len(temp_gene_list) >= 1:
-            gene_list.append(temp_gene_list[0])
+        gene_list = sorted(gene_list, cmp=my_cmp)
+        temp_list = []
+        if len(gene_list) >= 1:
+            temp_list.append(gene_list[0])
 
         # remove overlapping genes, that is, the longest genes are preferred
-        for i in range(1, len(temp_gene_list)):
-            gene1 = temp_gene_list[i-1]
-            gene2 = temp_gene_list[i]
+        for i in range(1, len(gene_list)):
+            gene1 = gene_list[i-1]
+            gene2 = gene_list[i]
 
             if gene1[1] == gene2[1] and gene1[3] >= gene2[3]:
                 continue
 
-            gene_list.append(gene2)
+            temp_list.append(gene2)
             
-        return gene_list
+        return temp_list
 
     refGene_list = read_genes("refGene.txt")
     ensGene_list = read_genes("ensGene.txt")
@@ -1058,8 +1055,6 @@ def read_dist(params):
                         left_pos, right_pos = right_pos + 1, left_pos - 1
                     elif dir == 'rf':
                         left_pos, right_pos = right_pos - 1, left_pos + 1
-                    elif dir == 'rr':
-                        left_pos, right_pos = right_pos + 1, left_pos + 1
 
                     reversed_cigars = []
                     cigars.reverse()
@@ -1080,8 +1075,6 @@ def read_dist(params):
 
                     if dir == 'ff':
                         dir = 'rr'
-                    elif dir == 'rr':
-                        dir = 'ff'
 
                     return dir, antisense == False, left_pos, right_pos, reverse_complement(seq), qual[::-1], reversed_cigars
 
@@ -1236,7 +1229,7 @@ def generate_html(params):
             sample_isoform_file = open(sample_isoform_filename, "r")
             for line in sample_isoform_file:
                 line = line[:-1].lstrip()
-                fields = line.split('\t')
+                fields = line[:-1].split('\t')
 
                 def read_coords(value_dic, value_str):
                     chr1, chr2 = "", ""
@@ -1265,9 +1258,6 @@ def generate_html(params):
 
                     for value in values:
                         value = value.strip()
-                        if not value:
-                            continue
-                        
                         name, value = value.split(' ')
 
                         value_dic[name] = value[1:-1]
@@ -1408,18 +1398,9 @@ def generate_html(params):
             if chr2_coord < _chr2_left -2 or chr2_coord > _chr2_right + 2:
                 continue
 
-            transcripts = fusion_gene[-1]
-            for transcript in transcripts:
-                exons = transcript[-1]
-                for exon in exons:
-                    if exon[0] != "fusion":
-                        continue
-
-                    if chr1_coord == exon[2] and chr2_coord == exon[4]:
-                        return fusion_gene
+            return fusion_gene
 
         return None
-
 
     def read_fusion_list(fusion_list):
         re_find_chromosomes = re.compile(r'Homo sapiens chromosome (\d+|[XY])')
@@ -1662,8 +1643,8 @@ def generate_html(params):
                         num_read = int(stats[0])
                         pair = int(stats[1])
                         pair_fusion = int(stats[2])
-                        anti_read = int(stats[3])
-                        anti_pair = int(stats[4])
+                        # anti_read = int(stats[3])
+                        # anti_pair = int(stats[4])
                         pair_coords = output["pair_coords"]
 
                         dist = 1000000
@@ -1679,11 +1660,14 @@ def generate_html(params):
                                     pair += 1
 
 
+                        # we no longer consider reads or pairs that contradict fusions
+                        """
                         anti_read += 0.5
                         if pair == 0:
                             rate = num_read / anti_read
                         else:
                             rate = pair / anti_read
+                        """
 
                         fusion_gene = find_fusion_gene(fusion_gene_list, \
                                                        output["sample_name"], \
@@ -1729,8 +1713,7 @@ def generate_html(params):
                         # lcount and rcount both are in [0, 300]
                         max_avg = 300
                         score = lcount + rcount + (min(max_avg, lavg) + min(max_avg, ravg)) - abs(lcount - rcount) \
-                            - min(max_avg, abs(lavg - ravg)) - (lgap + rgap) - (lder + rder) * max_avg - min(dist, 1000) \
-                            + rate
+                            - min(max_avg, abs(lavg - ravg)) - (lgap + rgap) - (lder + rder) * max_avg + min(dist, 1000)
 
                         if output["assembled"]:
                             score += 300 + min(num_fusions - 1, 5) * 200 + min(num_alternative_splicing_with_same_fusion, 5) * 100 \
@@ -1753,8 +1736,6 @@ def generate_html(params):
                     output["ravg"] = 0
                     output["rgap"] = 0
                     output["rder"] = 0
-                    output["score"] = 0
-                    output["assembled"] = False
 
             line_no += 1
 
@@ -2039,7 +2020,6 @@ def generate_html(params):
 
                 # daehwan - for debugging purposes
                 # html_post.append(r'<TD ALIGN="RIGHT">%.2f</TD>' % fusion["score"])
-                # html_post.append(r'<TD ALIGN="RIGHT">%s</TD>' % fusion["test"])
 
                 fusion_gene = find_fusion_gene(fusion_gene_list, sample_name, chr1, fusion["left_coord"], chr2, fusion["right_coord"])
                 fusion["fusion_gene"] = fusion_gene
@@ -2083,10 +2063,10 @@ def generate_html(params):
         html_post.append(r'5. Gene on the "right" side <BR>')
         html_post.append(r'6. Chromosome ID on the right <BR>')
         html_post.append(r'7. Coordinates on the right <BR>')
-        html_post.append(r'8. Number of spanning reads - this is the number of reads that span a fusion point all on their own.  In other words, the read itself has a fusion break point within it. <BR>')
-        html_post.append(r'9. Number of spanning mate pairs -  this is the number of pairs of reads where one read maps entirely on the left and the other read maps entirely on the right of the fusion break point.  Neither read is split, so these pairs are not counted at all in (8). <BR>')
-        html_post.append(r'10. Number of spanning mate pairs where one end spans a fusion (reads spanning fusion with only a few bases are included). <BR>')
-        html_post.append(r'If you follow the the 9th column, it shows coordinates "number1:number2" where one end is located at a distance of "number1" bases from the left genomic coordinate of a fusion and "number2" is similarly defined.')
+        html_post.append(r'8. Number of spanning reads <BR>')
+        html_post.append(r'9. Number of spanning mate pairs <BR>')
+        html_post.append(r'10. Number of spanning mate pairs where one end spans a fusion (reads spanning fusion with only a few bases are included) <BR>')
+        html_post.append(r'If you follow the the 9th column, it shows coordinates "number1:number2" where one end is located at a distance of "number1" bases from the left genomic coordinate of a fusion and "number2" is similarly defined')
         html_post.append(r'<BR/><BR/><BR/>')
 
         fusion_gene_drawn = [False for i in range(len(cluster_list))]
@@ -2588,7 +2568,7 @@ def prog_path(program):
 
 
 def get_version():
-   return "2.0.9"
+   return "2.0.8"
 
 
 def main(argv=None):

@@ -187,12 +187,6 @@ bowtie_path = None
 fail_str = "\t[FAILED]\n"
 gtf_juncs = None #file name with junctions extracted from given GFF file
 
-# version of GFF transcriptome parser accepted for pre-built transcriptome indexes
-# TopHat will automatically rebuild a transcriptome index if the version
-#   found in the {transcriptome_index}.ver file is lower than this value
-# -do NOT increment this unless you want TopHat to force a rebuild of all users' transcriptome indexes!
-GFF_T_VER = 209 #GFF parser version
-
 #mapping types:
 
 _reads_vs_G, _reads_vs_T, _segs_vs_G, _segs_vs_J = range(1,5)
@@ -1260,9 +1254,9 @@ def subprocess_setup():
 
 # Check that the Bowtie index specified by the user is present and all files
 # are there.
-def check_bowtie_index(idx_prefix, is_bowtie2, add="(genome)"):
+def check_bowtie_index(idx_prefix, is_bowtie2):
     if currentStage >= resumeStage:
-       th_log("Checking for Bowtie index files "+add+"..")
+       th_log("Checking for Bowtie index files")
     idxext="ebwt"
     bowtie_ver=""
     if is_bowtie2:
@@ -1274,8 +1268,7 @@ def check_bowtie_index(idx_prefix, is_bowtie2, add="(genome)"):
     idx_rev_1 = idx_prefix + ".rev.1."+idxext
     idx_rev_2 = idx_prefix + ".rev.2."+idxext
 
-    #bwtbotherr = "Warning: we do not recommend to have both Bowtie1 and Bowtie2 indexes in the same directory \n the genome sequence (*.fa) may not be compatible with one of them"
-    bwtbotherr = "\tFound both Bowtie1 and Bowtie2 indexes."
+    bwtbotherr = "Warning: we do not recommend to have both Bowtie1 and Bowtie2 indexes in the same directory \n the genome sequence (*.fa) may not be compatible with one of them"
     if os.path.exists(idx_fwd_1) and \
        os.path.exists(idx_fwd_2) and \
        os.path.exists(idx_rev_1) and \
@@ -1516,7 +1509,7 @@ def check_bowtie(params):
         if bowtie_version[1] < 1 and bowtie_version[2] < 5:
             die("Error: TopHat requires Bowtie 2.0.5 or later")
     else:
-        if bowtie_version[0] < 1 and (bowtie_version[1] < 12 or bowtie_version[2] < 9):
+        if bowtie_version[1] < 12 or bowtie_version[2] < 9:
             die("Error: TopHat requires Bowtie 0.12.9 or later")
     th_logp("\t\t  Bowtie version:\t %s" % ".".join([str(x) for x in bowtie_version]))
 
@@ -2391,8 +2384,7 @@ def bowtie(params,
             bowtie_proc.stdout.close()
             m2g_cmd = [prog_path("map2gtf")]
             m2g_cmd += ["--sam-header", genome_sam_header_filename]
-            #m2g_cmd.append(params.gff_annotation)
-            m2g_cmd.append(params.transcriptome_index+".fa.tlst")
+            m2g_cmd.append(params.gff_annotation)
             m2g_cmd.append("-") #incoming uncompressed BAM stream
             m2g_cmd.append(mapped_reads)
             m2g_log = logging_dir + "m2g_"+readfile_basename+".out"
@@ -3216,20 +3208,17 @@ def m2g_convert_coords(params, sam_header_filename, gtf_fname, reads, out_fname)
         die(err_msg + "\n")
 
 
-def gtf_to_fasta(params, trans_gtf, genome, out_basename):
-    """ Build the transcriptome data files from a GTF.
+def gtf_to_fasta(params, trans_gtf, genome, out_fname):
+    """ Make the transcriptome from a GTF.
 
     Arguments:
     - `trans_gtf`:
     - `genome`:
-    - `out_basename`:
-    Returns:
-    - name of the FASTA file
+    - `out_fname`:
     """
-    out_fname=out_basename + ".fa"
-    out_fver=out_basename + ".ver"
-    if resumeStage > currentStage and fileExists(out_fname) and fileExists(out_fver):
-       return out_fname
+    # TODO: Call gtf_to_fasta
+    if resumeStage > currentStage and fileExists(out_fname):
+       return
     g2f_cmd = [prog_path("gtf_to_fasta")]
     g2f_cmd.extend(params.cmd())
     g2f_cmd.append(trans_gtf)
@@ -3249,10 +3238,6 @@ def gtf_to_fasta(params, trans_gtf, genome, out_basename):
     except OSError, o:
         err_msg = fail_str + str(o)
         die(err_msg + "\n")
-    fver = open(out_fver, "w", 0)
-    print >> fver, "%d %d %d" % (GFF_T_VER, os.path.getsize(trans_gtf), os.path.getsize(out_fname))
-    fver.close()
-    return out_fname
 
 def map2gtf(params, genome_sam_header_filename, ref_fasta, left_reads, right_reads):
     """ Main GTF mapping function
@@ -3274,15 +3259,14 @@ def map2gtf(params, genome_sam_header_filename, ref_fasta, left_reads, right_rea
     t_out_dir = tmp_dir
     if currentStage < resumeStage or (params.transcriptome_index and not params.transcriptome_outdir):
        m2g_bwt_idx = params.transcriptome_index
-       th_log("Using pre-built transcriptome data..")
+       th_log("Using pre-built transcriptome index..")
     else:
-       th_log("Building transcriptome data files..")
+       th_log("Creating transcriptome data files..")
        if params.transcriptome_outdir:
          t_out_dir=params.transcriptome_outdir+"/"
-       m2g_ref_name  = t_out_dir + gtf_name
-       m2g_ref_fasta = gtf_to_fasta(params, params.gff_annotation, ref_fasta, m2g_ref_name)
+       m2g_ref_fasta = t_out_dir + gtf_name + ".fa"
+       gtf_to_fasta(params, params.gff_annotation, ref_fasta, m2g_ref_fasta)
        m2g_bwt_idx = build_idx_from_fa(params.bowtie2, m2g_ref_fasta, t_out_dir, params.read_params.color)
-       params.transcriptome_index = m2g_bwt_idx
 
     transcriptome_header_filename = get_index_sam_header(params, m2g_bwt_idx)
 
@@ -3780,8 +3764,9 @@ def prog_path(program):
         die("Error locating program: "+program)
     return progpath
 
+# FIXME: this should get set during the make dist autotools phase of the build
 def get_version():
-   return "2.0.9"
+   return "2.0.8"
 
 def mlog(msg):
   print >> sys.stderr, "[DBGLOG]:"+msg
@@ -3792,34 +3777,6 @@ def test_input_file(filename):
     except IOError:
         die("Error: Opening file %s" % filename)
     return
-
-def validate_transcriptome(params):
- tgff=params.transcriptome_index+".gff"
- if os.path.exists(tgff):
-   if params.gff_annotation and tgff!=params.gff_annotation:
-       if (os.path.getsize(tgff)!=os.path.getsize(params.gff_annotation)):
-         return False
-   tfa=params.transcriptome_index+".fa"
-   tverf=params.transcriptome_index+".ver"
-   tver=0
-   tfa_size=0
-   tgff_size=0
-   if os.path.exists(tverf):
-     inf = open(tverf, 'r')
-     fline = inf.readline()
-     inf.close()
-     dlst = fline.split()
-     if len(dlst)>2:
-         tver, tgff_size, tfa_size = map(lambda f: int(f), dlst)
-   else:
-     return False
-   tlst=tfa+".tlst"
-   if os.path.exists(tlst) and os.path.getsize(tlst)>0 and \
-      os.path.exists(tfa) and os.path.getsize(tfa)>0 and os.path.getsize(tfa)== tfa_size and \
-      os.path.exists(tgff) and os.path.getsize(tgff)>0 and os.path.getsize(tgff)==tgff_size \
-      and tver >= GFF_T_VER:
-        return True
- return False
 
 def main(argv=None):
     warnings.filterwarnings("ignore", "tmpnam is a potential security risk")
@@ -3894,8 +3851,9 @@ def main(argv=None):
                     new_subdir=True
                if new_subdir or (os.path.exists(params.transcriptome_index) and os.path.isdir(params.transcriptome_index)):
                    params.transcriptome_index = os.path.join(params.transcriptome_index, gff_basename)
-           if not validate_transcriptome(params):
-                  #(re)generate the transcriptome data files
+               gff_out=params.transcriptome_index+".gff"
+               if not (os.path.exists(gff_out) and os.path.getsize(gff_out)==os.path.getsize(params.gff_annotation)):
+                  #generate the transcriptome data files
                   tpath, tname = os.path.split(params.transcriptome_index)
                   params.transcriptome_outdir=tpath
            t_gff=params.transcriptome_index+".gff"
@@ -3903,13 +3861,14 @@ def main(argv=None):
               #will create the transcriptome data files
               if not os.path.exists(params.transcriptome_outdir):
                 os.makedirs(params.transcriptome_outdir)
-              if params.gff_annotation:
-                   copy(params.gff_annotation, t_gff)
+              copy(params.gff_annotation, t_gff)
            else:
               #try to use existing transcriptome data files
-              #if validate_transcriptome(params):
-              check_bowtie_index(params.transcriptome_index, params.bowtie2, "(transcriptome)")
-           params.gff_annotation = t_gff
+
+              if not (os.path.exists(t_gff) and os.path.getsize(t_gff)>10):
+                  die("Error: GFF transcripts file not found or invalid (%s)" % t_gff)
+              check_bowtie_index(params.transcriptome_index, params.bowtie2)
+           params.gff_annotation=t_gff
            #end @ transcriptome_index given
 
         (ref_fasta, ref_seq_dict) = check_index(bwt_idx_prefix, params.bowtie2)
@@ -4059,7 +4018,6 @@ def main(argv=None):
 
 
         th_logp("-----------------------------------------------")
-        th_log("A summary of the alignment counts can be found in %salign_summary.txt" % output_dir);
         th_log("Run complete: %s elapsed" %  formatTD(duration))
 
     except Usage, err:

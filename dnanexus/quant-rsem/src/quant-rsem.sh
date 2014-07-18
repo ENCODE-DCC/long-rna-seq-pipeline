@@ -44,7 +44,7 @@ main() {
     (cd RSEM; make)
 
     extraFlags=""
-    if [ -n "$paired" ]
+    if [ -n "paired" ]
     then
         echo 'using paired-end flag'
         extraFlags="--paired-end "
