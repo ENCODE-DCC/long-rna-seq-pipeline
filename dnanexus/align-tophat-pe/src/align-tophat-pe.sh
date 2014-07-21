@@ -41,8 +41,9 @@ main() {
     tar zxvf tophat_index.tgz
 
     # unzips into "out/"
-    index_prefix=`ls out/*.ver | cut -d'.' -f1`
-    echo "found $index_prefix ver file"
+    gff=`ls out/*.gff`
+    index_prefix=${gff%.gff}
+    echo "found $index_prefix gff file"
 
     # Fill in your application code here.
     #
