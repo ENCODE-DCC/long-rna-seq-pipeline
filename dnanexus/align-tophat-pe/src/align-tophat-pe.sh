@@ -72,11 +72,11 @@ main() {
     # Building a new header
     echo "make new header"
     HD="@HD\tVN:1.4\tSO:coordinate"
-    stCommand="perl tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | samtools view -bS - -o - | samtools sort -m10G - sortedFixedMapped; samtools merge -h newHeader.sam out_tophat.bam sortedFixedMapped.bam tophat_out/unmapped.bam"
+    stCommand="perl tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | /usr/bin/samtools view -bS - -o - | /usr/bin/samtools sort -m10G - sortedFixedMapped; /usr/bin/samtools merge -h newHeader.sam out_tophat.bam sortedFixedMapped.bam tophat_out/unmapped.bam"
     newPG="@PG\tID:Samtools\tPN:Samtools\tCL:"$stCommand"\tPP:Tophat\tVN:VN:0.1.19-96b5f2294a"
     libraryComment="@CO\tLIBID:${library_id}"
 
-    samtools view -H tophat_out/accepted_hits.bam | \
+    /usr/bin/samtools view -H tophat_out/accepted_hits.bam | \
     gawk -v HD="$HD" -v newPG="$newPG" -v library="$libraryComment" \
        '{     if ($0 ~ /^@PG/) {PG=$0}
          else if ($0 ~ /^@HD/) {print HD; }
@@ -91,17 +91,17 @@ main() {
 
     echo "fix unmapped bam and sort before merge"
     perl xweiEncodeScripts/tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | \
-                          samtools view -bS - | samtools sort -m10G - sortedFixedMapped
+                          /usr/bin/samtools view -bS - | /usr/bin/samtools sort -m10G - sortedFixedMapped
 
     echo "merge aligned and unaligned into single bam, using the patched up header"
-    samtools merge -h newHeader.sam out_tophat.bam sortedFixedMapped.bam tophat_out/unmapped.bam
-    samtools index out_tophat.bam
+    /usr/bin/samtools merge -h newHeader.sam out_tophat.bam sortedFixedMapped.bam tophat_out/unmapped.bam
+    /usr/bin/samtools index out_tophat.bam
 
-    mv out_tophat.bam ${reads_1_fn}-${reads_2_fn}_tophat_genome.bam
-    mv out_tophat.bam.bai ${reads_1_fn}-${reads_2_fn}_tophat_genome.bai
+    mv out_tophat.bam ${reads1_fn}-${reads2_fn}_tophat_genome.bam
+    mv out_tophat.bam.bai ${reads1_fn}-${reads2_fn}_tophat_genome.bai
 
-    genome_bam=$(dx upload ${reads_1_fn}-${reads_2_fn}_tophat_genome.bam --brief)
-    genome_bai=$(dx upload ${reads_1_fn}-${reads_2_fn}_tophat_genome.bai --brief)
+    genome_bam=$(dx upload ${reads1_fn}-${reads2_fn}_tophat_genome.bam --brief)
+    genome_bai=$(dx upload ${reads1_fn}-${reads2_fn}_tophat_genome.bai --brief)
      # The following line(s) use the utility dx-jobutil-add-output to format and
     # add output variables to your job's output as appropriate for the output
     # class.  Run "dx-jobutil-add-output -h" for more information on what it
