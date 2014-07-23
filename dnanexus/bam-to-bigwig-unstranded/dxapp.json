@@ -21,8 +21,8 @@
       "optional": false
     },
     {
-      "name": "star_index",
-      "label": "Genome Index files from STAR (need ChrNameLength.txt)",
+      "name": "chr_index",
+      "label": "chomosome/name length file",
       "class": "file",
       "optional": false
     }
@@ -50,12 +50,14 @@
         }
       }
     ],
-    "execDepends": [
-      {
-        "name": "samtools",
-        "version": "0.1.18-1ubuntu2"
+    "systemRequirements": {
+      "main": {
+        "instanceType": "mem3_hdd2_x8"
+      },
+      "myEntryPoint": {
+        "instanceType": "mem3_hdd2_x8"
       }
-    ]
+    }
   },
   "access": {
     "network": [

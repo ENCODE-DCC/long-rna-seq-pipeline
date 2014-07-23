@@ -19,7 +19,7 @@ main() {
 
     echo "Value of bam_file: '$bam_file'"
     echo "Value of bai_file: '$bai_file'"
-    echo "Value of star_index: '$star_index'"
+    echo "Value of chr_index: '$chr_index'"
 
     # The following line(s) use the dx command-line tool to download your file
     # inputs to the local file system using variable names for the filenames. To
@@ -32,9 +32,7 @@ main() {
 
     dx download "$bai_file" -o $bam_fn.bai
 
-    dx download "$star_index" -o - | tar zxvf -
-    ## Note we only need the chrNameLength.txt, not any STAR specific indices
-
+    dx download "$chr_index" -o chrNameLength.txt
 
     echo "install Georgi's bam->wiggle"
     git clone https://github.com/georgimarinov/GeorgiScripts
@@ -57,15 +55,15 @@ main() {
     # will be AppInternalError with a generic error message.
 
     echo "make wiggle from all mapped reads"
-    python GeorgiScripts/makewigglefromBAM-NH.py --- ${bam_fn}.bam out/chrNameLength.txt tmpAllUn.wig \
+    python GeorgiScripts/makewigglefromBAM-NH.py --- ${bam_fn}.bam chrNameLength.txt tmpAllUn.wig \
            -RPM -notitle -fragments second-read-strand
-    /usr/bin/wigToBigWig tmpAllUn.wig stdin out/chrNameLength.txt \
+    /usr/bin/wigToBigWig tmpAllUn.wig stdin chrNameLength.txt \
     ${bam_fn}_tophat_signal_unstranded_All.bw
 
     echo "make wiggle from uniquely mapping reads"
-    python GeorgiScripts/makewigglefromBAM-NH.py --- ${bam_fn}.bam out/chrNameLength.txt tmpUniqUn.wig \
+    python GeorgiScripts/makewigglefromBAM-NH.py --- ${bam_fn}.bam chrNameLength.txt tmpUniqUn.wig \
           -nomulti -RPM -notitle -fragments second-read-strand
-    perl -pe 's/-//g' < tmpUniqUn.wig | /usr/bin/wigToBigWig stdin out/chrNameLength.txt \
+    perl -pe 's/-//g' < tmpUniqUn.wig | /usr/bin/wigToBigWig stdin chrNameLength.txt \
     ${bam_fn}_tophat_signal_unstranded_Unique.bw
 
 

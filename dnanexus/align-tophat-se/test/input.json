@@ -1,0 +1,9 @@
+{
+  "library_id": "simulated_reads",
+  "reads": {
+    "$dnanexus_link": "file-BKyBZBQ0YG01jF6GXZFV79j0"
+  },
+  "tophat_index": {
+    "$dnanexus_link": "file-BP4Qq0803Zkyxb2Zx8b00KfG"
+  }
+}
