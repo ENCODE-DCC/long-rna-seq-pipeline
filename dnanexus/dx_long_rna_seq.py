@@ -6,7 +6,7 @@ import subprocess
 import dxpy
 
 
-ENCODE_DNA_ME_PROJECT_NAME = 'dna-me-pipeline'
+ENCODE_DNA_ME_PROJECT_NAME = 'long-rna-seq-pipeline'
 ''' This DNA Nexus project holds all the created applets and folders'''
 
 ENCODE_REFERENCES_PROJECT = 'ENCODE Reference Files'
@@ -27,10 +27,17 @@ APPLETS = {}
 
 # TODO - load from pipeline object or .json text mockups
 ANALYSIS_STEPS = [
-    'index',
-    'trim',
-    'map',
-    'extract'
+    'merge-annotation'
+    'prep-star',
+    'prep-rsem',
+    'prep-tophat',
+    'align-star-se',
+    'align-star-pe',
+    'align-tophat-se',
+    'align-tophat-pe',
+    'quant-rsem',
+    'bam-to-bigwig-stranded',
+    'bam-to-bigwig-unstranded'
 ]
 
 def get_args():
@@ -54,6 +61,11 @@ def get_args():
 
     ap.add_argument('-p', '--paired',
                     help='Force use of paired-end pipeline',
+                    action='store_true',
+                    required=False)
+
+    ap.add_argument('-s', '--stranded',
+                    help='Force use stranded pipeline',
                     action='store_true',
                     required=False)
 
