@@ -23,12 +23,12 @@ GENOME_REFERENCES = {
 # Note this should be referred to by: biosample.donor.organism.name for any dataset
     'mouse':  {
         'male': {
-            'genome': 'mm10.fa.gz',
+            'genome': 'male.mm9.fa.gz',
             'gene_annotation': '',
             'trna_annotation': ''
         },
         'female': {
-            'genome': 'mm10.fa.gz',
+            'genome': 'female.mm9.fa.gz',
             'gene_annotation': '',
             'trna_annotation': ''
         }
@@ -36,13 +36,13 @@ GENOME_REFERENCES = {
     'human':  {
         'male': {
             'genome': 'male.hg19.fa.gz',
-            'gene_annotation': '',
-            'trna_annotation': ''
+            'gene_annotation': 'gencode.v19.annotation.gtf.gz',
+            'trna_annotation': 'gencode.v19.tRNAs.gtf.gz'
         },
         'female': {
             'genome': 'female.hg19.fa.gz',
-            'gene_annotation': '',
-            'trna_annotation': ''
+            'gene_annotation': 'gencode.v19.annotation.gtf.gz',
+            'trna_annotation': 'gencode.v19.tRNAs.gtf.gz'
         }
     },
     'test':   'chr21.fa.gz'
