@@ -15,6 +15,7 @@ dataType=$5 # RNA-seq type, possible values: str_SE str_PE unstr_SE unstr_PE
 # Log.final.out                                 # mapping statistics to be used for QC, text, STAR formatting
 # Quant.genes.results                           # RSEM gene quantifications, tab separated text, RSEM formatting
 # Quant.isoforms.results                        # RSEM transcript quantifications, tab separated text, RSEM formatting
+# Quant.pdf                                     # RSEM diagnostic plots
 # Signal.{Unique,UniqueMultiple}.strand{+,-}.bw # 4 bigWig files for stranded data
 # Signal.{Unique,UniqueMultiple}.unstranded.bw  # 4 bigWig files for stranded data
 
@@ -137,4 +138,9 @@ esac
 echo $RSEM $RSEMparCommon $RSEMparRun $RSEMparType Aligned.toTranscriptome.out.bam $RSEMrefDir Quant
 $RSEM $RSEMparCommon $RSEMparRun $RSEMparType Aligned.toTranscriptome.out.bam $RSEMrefDir Quant >& Log.rsem
 
-
+###### RSEM diagnostic plot creation
+# Notes:
+# 1. rsem-plot-model requires R (and the Rscript executable)
+# 2. This command produces the file Quant.pdf, which contains multiple plots
+echo rsem-plot-model Quant Quant.pdf
+rsem-plot-model Quant Quant.pdf
