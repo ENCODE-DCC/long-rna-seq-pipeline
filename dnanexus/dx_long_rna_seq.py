@@ -94,6 +94,10 @@ def get_args():
                     help='Organism to map to',
                     required=True)
 
+    ap.add_argument('-l', '--library',
+                    help='ENCODE accession of biosample library (for BAM header)',
+                    required=True)
+
     ap.add_argument('-t', '--test',
                     help='Use test input folder',
                     action='store_true',
@@ -136,101 +140,109 @@ def find_applet_by_name(applet_name, applets_project_id):
     return APPLETS[(applet_name, applets_project_id)]
 
 
-def populate_workflow(wf, replicates, experiment, paired, gender, organism, applets_project_id, export):
+def populate_workflow(wf, replicates, experiment, inputs, applets_project_id, export):
     '''This function will populate the workflow for the methyl-seq Pipeline.'''
 
-    gene_annotation = find_reference_file_by_name()
-    trna_annotation = find_reference_file_by_name()
+    gene_annotation = find_reference_file_by_name(GENOME_REFERENCES[inputs['organism']][inputs['gender']]['gene_annotation'])
+    trna_annotation = find_reference_file_by_name(GENOME_REFERENCES[inputs['organism']][inputs['gender']]['trna_annotation'])
     spike_in = find_reference_file_by_name() ### note not in reference project
-    genome = find_reference_file_by_name(GENOME_REFERENCES[organism], ENCODE_REFERENCES_PROJECT)
-    index_prefix = inputs['inputs['spec_name']']
-    if not export:
-        genome = find_reference_file_by_name(GENOME_REFERENCES[organism], ENCODE_REFERENCES_PROJECT)
-        index_input = {
-            'genome': genome
-        }
-    else:
-        genome = None
-        index_input = None
-        # TODO somethink like loop over analysis_steps in pipeline objects
-        ### INDEX
+    genome = find_reference_file_by_name(GENOME_REFERENCES[inputs['organism']][inputs['gender']]['genome'], ENCODE_REFERENCES_PROJECT)
+    index_prefix = inputs['spec_name']
 
-    stage_id = wf.add_stage(find_applet_by_name('index', applets_project_id), stage_input=index_input, folder=experiment)
-    index_output = dxpy.dxlink({
+    #'merge-annotation',
+    if export:
+        merge_input = {}
+    else:
+        merge_input = {
+            'gene_annotation': gene_annotation,
+            'trna_annotation': trna_annotation,
+            'spike_in': spike_in
+        }
+    stage_id = wf.add_stage(find_applet_by_name('merge_annotation', applets_project_id), stage_input=merge_input, folder=experiment)
+    merge_output = dxpy.dxlink({
         'stage': stage_id,
-        'outputField': 'meIndex'
+        'outputField': 'combined_gtf'
     })
-    ### TRIM
-    if not paired:
-        if not export:
-            trim_input = {
-                'reads': [ dxpy.dxlink(r) for r in replicates ]
-            }
-        else:
-            trim_input = {}
-
-        stage_id = wf.add_stage(find_applet_by_name('trim-se', applets_project_id), stage_input=trim_input, folder=experiment)
-        trim_output = dxpy.dxlink({
-            'stage': stage_id,
-            'outputField': 'trimmed_reads'
-        })
-
-        ### MAP
-        map_input = {
-            'trimmed_reads': trim_output,
-            'meIndex': index_output
-        }
-        if genome:
-            map_input['genome'] = genome
-        stage_id = wf.add_stage(find_applet_by_name('map-se', applets_project_id), stage_input=map_input, folder=experiment)
-        map_output = dxpy.dxlink({
-            'stage': stage_id,
-            'outputField': 'mapped_files'
-        })
-    else:
-        if len(replicates) != 2:
-            print "Must have exactly 2 replicates for paired-end pipeline"
-            exit(1)
-
-        if not export:
-            trim_input = {
-                'pair1_reads': dxpy.dxlink(replicates[0]),
-                'pair2_reads': dxpy.dxlink(replicates[1])
-            }
-        else:
-            trim_input = {}
-
-        stage_id = wf.add_stage(find_applet_by_name('trim-pe', applets_project_id), stage_input=trim_input, folder=experiment)
-        trim1_output = dxpy.dxlink({
-            'stage': stage_id,
-            'outputField': 'trimmed_reads1'
-        })
-        trim2_output = dxpy.dxlink({
-            'stage': stage_id,
-            'outputField': 'trimmed_reads2'
-        })
-
-        ### MAP
-        map_input = {
-            'pair_1': trim1_output,
-            'pair_2': trim2_output,
-            'meIndex': index_output
-        }
-        if genome:
-            map_input['genome'] = genome
-        stage_id = wf.add_stage(find_applet_by_name('map-pe', applets_project_id), stage_input=map_input, folder=experiment)
-        map_output = dxpy.dxlink({
-            'stage': stage_id,
-            'outputField': 'mapped_files'
-        })
-
-    ### EXTRACT
-    extract_input = {
-        'mapped_files': map_output
+    #'prep-star', if export:
+    prep_input = {
+        'annotations': merge_output
     }
-    if genome:
-        extract_input['genome'] = genome
-    stage_id = wf.add_stage(find_applet_by_name('extract', applets_project_id), stage_input=extract_input, folder=experiment)
+    if not export:
+        prep_input['genome'] = genome
+        prep_input['spike_in'] = spike_in
+        prep_input['index_prefix'] = index_prefix
+    stage_id = wf.add_stage(find_applet_by_name('prep-star', applets_project_id), stage_input=prep_input, folder=experiment)
+    prep_star_output = dxpy.dxlink({
+        'stage': stage_id,
+        'outputField': 'star_index'
+    })
+    #'prep-rsem',
+    stage_id = wf.add_stage(find_applet_by_name('prep-rsem', applets_project_id), stage_input=prep_input, folder=experiment)
+    prep_rsem_output = dxpy.dxlink({
+        'stage': stage_id,
+        'outputField': 'rsem_index'
+    })
+    #'prep-tophat',
+    stage_id = wf.add_stage(find_applet_by_name('prep-tophat', applets_project_id), stage_input=prep_input, folder=experiment)
+    prep_tophat_output = dxpy.dxlink({
+        'stage': stage_id,
+        'outputField': 'tophat_index'
+    })
+
+    ## alignment steps
+    align_input = {
+    }
+    align_input['library_id'] = inputs['library_id']
+    if not inputs['paired']:
+        star_step = 'star_align_se'
+        th_step = 'tophat_align_se'
+        align_input['reads'] = dxpy.dxlink(replicates[0])
+    else:
+        star_step = 'star_align_pe'
+        th_step = 'tophat_align_pe'
+        align_input['reads_1'] = dxpy.dxlink(replicates[0])
+        align_input['reads_2'] = dxpy.dxlink(replicates[1])
+
+
+    align_input['star_index'] = prep_star_output
+    if export:
+        del align_input['library_id']
+        if align_input.get('reads'):
+            del align_input['reads']
+        elif align_input.get('reads_1'):
+            del align_input['reads_1']
+            del align_input['reads_2']
+    stage_id = wf.add_stage(find_applet_by_name(star_step, applets_project_id), stage_input=align_input, folder=experiment)
+    star_annotation_output = dxpy.dxlink({
+        'stage': stage_id,
+        'outputField': 'annotation_bam'
+    })
+
+    del align_input['star_index']
+    align_input['tophat_index'] = prep_tophat_output
+    stage_id = wf.add_stage(find_applet_by_name(th_step, applets_project_id), stage_input=align_input, folder=experiment)
+    tophat_genome_output = dxpy.dxlink({
+        'stage': stage_id,
+        'outputField': 'genome_bam'
+    })
+    ## above file is needed for bam-to-bigwig (unimplemented)
+
+    #'quant-rsem'
+    quant_input = {
+        'rsem_index': prep_rsem_output,
+        'annotation_bam': star_annotation_output,
+        'paired': inputs['paired'],
+        'stranded': inputs['stranded']
+    }
+    if not export:
+        quant_input['read_prefix'] = inputs['index_prefix']
+        quant_input['rnd_seed'] = inputs['rnd_seed']
+
+    stage_id = wf.add_stage(find_applet_by_name('quant-rsem', applets_project_id), stage_input=quant_input, folder=experiment)
+
+    ## below unimplemented
+    #'bam-to-bigwig-stranded',
+    #'bam-to-bigwig-unstranded'
 
 def copy_files(fids, project_id, folder):
     new_fids = []
@@ -295,22 +307,27 @@ def main():
         print "Looking for " + ", ".join(args.replicates)
         sys.exit(1)
 
-
+    inputs = {
+        'rnd_seed': 12345
+    }
     inputs['paired'] = args.paired
     inputs['gender']= args.gender
     inputs['organism'] = args.organism
+    inputs['library_id'] = args.library
     #TODO determine paired or gender from ENCSR metadata
     # Now create a new workflow ()
     inputs['spec_name'] = args.experiment+'-'+'-'.join([ r.split('.')[0] for r in args.replicates])
     title_root = 'dx_dna_me_'
     name_root = 'ENCODE Bismark DNA-ME pipeline: '
     desc = 'The ENCODE Bismark pipeline for WGBS shotgun methylation analysis for experiment'
-    if paired:
+    if args.paired:
         title_root = title_root + '_paired_end'
         name_root = name_root + '(paired-end)'
+        inputs['stranded'] = True
     else:
         title_root = title_root + '_single_end'
         name_root = name_root + '(single-end)'
+        inputs['stranded'] = False
 
 
     if args.export:
