@@ -7,7 +7,7 @@ import subprocess
 import dxpy
 
 
-ENCODE_DNA_ME_PROJECT_NAME = 'dna-me-pipeline'
+ENCODE_DNA_ME_PROJECT_NAME = 'long-rna-seq-pipeline'
 ''' This DNA Nexus project holds all the created applets and folders'''
 
 ENCODE_REFERENCES_PROJECT = 'ENCODE Reference Files'
@@ -17,29 +17,29 @@ ENCODE_SNAPSHOT_PROJECT = 'ENCODE-SDSC-snapshot-20140505'
 ''' This DNA Nexus project holds ENCFF files; should be replaced by a more permanent store '''
 
 ENCODE_PUBLIC_PROJECT = 'ENCODE Universal Processing Pipelines'
-PUBLIC_FOLDER = '/WG Bisulfite (Methylation)'
+PUBLIC_FOLDER = '/RNA-Seq (long)'
 
 GENOME_REFERENCES = {
 # Note this should be referred to by: biosample.donor.organism.name for any dataset
     'mouse':  {
-        'male': {
+        'm': {
             'genome': 'male.mm9.fa.gz',
             'gene_annotation': '',
             'trna_annotation': ''
         },
-        'female': {
+        'f': {
             'genome': 'female.mm9.fa.gz',
             'gene_annotation': '',
             'trna_annotation': ''
         }
     },
     'human':  {
-        'male': {
+        'm': {
             'genome': 'male.hg19.fa.gz',
             'gene_annotation': 'gencode.v19.annotation.gtf.gz',
             'trna_annotation': 'gencode.v19.tRNAs.gtf.gz'
         },
-        'female': {
+        'f': {
             'genome': 'female.hg19.fa.gz',
             'gene_annotation': 'gencode.v19.annotation.gtf.gz',
             'trna_annotation': 'gencode.v19.tRNAs.gtf.gz'
@@ -143,9 +143,9 @@ def find_applet_by_name(applet_name, applets_project_id):
 def populate_workflow(wf, replicates, experiment, inputs, applets_project_id, export):
     '''This function will populate the workflow for the methyl-seq Pipeline.'''
 
-    gene_annotation = find_reference_file_by_name(GENOME_REFERENCES[inputs['organism']][inputs['gender']]['gene_annotation'])
-    trna_annotation = find_reference_file_by_name(GENOME_REFERENCES[inputs['organism']][inputs['gender']]['trna_annotation'])
-    spike_in = find_reference_file_by_name() ### note not in reference project
+    gene_annotation = find_reference_file_by_name(GENOME_REFERENCES[inputs['organism']][inputs['gender']]['gene_annotation'], ENCODE_REFERENCES_PROJECT)
+    trna_annotation = find_reference_file_by_name(GENOME_REFERENCES[inputs['organism']][inputs['gender']]['trna_annotation'], ENCODE_REFERENCES_PROJECT)
+    spike_in = find_reference_file_by_name('ENCFF001RTP.fasta', ENCODE_DNA_ME_PROJECT_NAME) ### note not in reference project
     genome = find_reference_file_by_name(GENOME_REFERENCES[inputs['organism']][inputs['gender']]['genome'], ENCODE_REFERENCES_PROJECT)
     index_prefix = inputs['spec_name']
 
@@ -295,7 +295,7 @@ def main():
     replicates = []
     for rep in args.replicates:
         dx_rep = dxpy.find_data_objects(classname='file', name=rep,
-                                        name_mode='glob', project=source_id,
+                                        name_mode='exact', project=source_id,
                                         return_handler=False)
         replicates.extend(dx_rep)
 
@@ -317,16 +317,16 @@ def main():
     #TODO determine paired or gender from ENCSR metadata
     # Now create a new workflow ()
     inputs['spec_name'] = args.experiment+'-'+'-'.join([ r.split('.')[0] for r in args.replicates])
-    title_root = 'dx_dna_me_'
-    name_root = 'ENCODE Bismark DNA-ME pipeline: '
-    desc = 'The ENCODE Bismark pipeline for WGBS shotgun methylation analysis for experiment'
+    title_root = 'dx_long_rna_seq_'
+    name_root = 'ENCODE Long RNA Seq: '
+    desc = 'The ENCODE RNA Seq pipeline for long RNAs'
     if args.paired:
-        title_root = title_root + '_paired_end'
-        name_root = name_root + '(paired-end)'
+        title_root = title_root + '_paired_end '
+        name_root = name_root + '(paired-end) '
         inputs['stranded'] = True
     else:
-        title_root = title_root + '_single_end'
-        name_root = name_root + '(single-end)'
+        title_root = title_root + '_single_end '
+        name_root = name_root + '(single-end) '
         inputs['stranded'] = False
 
 
@@ -339,9 +339,9 @@ def main():
                                  project=project_id)
     else:
         project_id = project.get_id()
-        wf = dxpy.new_dxworkflow(title='dx_dna_me_'+inputs['spec_name'],
-                             name='ENCODE Bismark DNA-ME pipeline: '+inputs['spec_name'],
-                             description='The ENCODE Bismark pipeline for WGBS shotgun methylation analysis for experiment' + args.experiment,
+        wf = dxpy.new_dxworkflow(title=title_root+inputs['spec_name'],
+                             name=name_root+inputs['spec_name'],
+                             description=desc+' for experiment:' + args.experiment,
                              folder='/'+args.experiment,
                              project=project.get_id())
 
