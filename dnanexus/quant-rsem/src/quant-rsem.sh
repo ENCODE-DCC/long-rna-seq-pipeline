@@ -19,7 +19,7 @@ main() {
 
     echo "Value of annotation_bam: '$annotation_bam'"
     echo "Value of read_prefix: '$read_prefix'"
-    echo "Value of paired_end: '$paired_end'"
+    echo "Value of paired: '$paired'"
     echo "Value of stranded: '$stranded'"
     echo "Value of rsem_index: '$rsem_index'"
     echo "Random number seed": '$rnd_seed'""
