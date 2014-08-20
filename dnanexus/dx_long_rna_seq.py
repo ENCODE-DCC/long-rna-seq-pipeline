@@ -194,12 +194,12 @@ def populate_workflow(wf, replicates, experiment, inputs, applets_project_id, ex
     }
     align_input['library_id'] = inputs['library_id']
     if not inputs['paired']:
-        star_step = 'star-align-se'
-        th_step = 'tophat-align-se'
+        star_step = 'align-star-se'
+        th_step = 'align-tophat-se'
         align_input['reads'] = dxpy.dxlink(replicates[0])
     else:
-        star_step = 'star-align-pe'
-        th_step = 'tophat-align-pe'
+        star_step = 'align-star-pe'
+        th_step = 'align-tophat-pe'
         align_input['reads_1'] = dxpy.dxlink(replicates[0])
         align_input['reads_2'] = dxpy.dxlink(replicates[1])
 
@@ -235,7 +235,7 @@ def populate_workflow(wf, replicates, experiment, inputs, applets_project_id, ex
         'stranded': inputs['stranded']
     }
     if not export:
-        quant_input['read_prefix'] = inputs['index_prefix']
+        quant_input['read_prefix'] = index_prefix
         quant_input['rnd_seed'] = inputs['rnd_seed']
 
     stage_id = wf.add_stage(find_applet_by_name('quant-rsem', applets_project_id), stage_input=quant_input, folder=experiment)

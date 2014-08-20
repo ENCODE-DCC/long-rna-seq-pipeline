@@ -34,8 +34,8 @@
       "optional": true
     },
     {
-      "name": "paired_end",
-      "label": "Library was paired_end",
+      "name": "paired",
+      "label": "Library was paired ended",
       "class": "boolean",
       "optional": false
     },
