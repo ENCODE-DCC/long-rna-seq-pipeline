@@ -158,7 +158,7 @@ def populate_workflow(wf, replicates, experiment, inputs, applets_project_id, ex
             'trna_annotation': trna_annotation,
             'spike_in': spike_in
         }
-    stage_id = wf.add_stage(find_applet_by_name('merge_annotation', applets_project_id), stage_input=merge_input, folder=experiment)
+    stage_id = wf.add_stage(find_applet_by_name('merge-annotation', applets_project_id), stage_input=merge_input, folder=experiment)
     merge_output = dxpy.dxlink({
         'stage': stage_id,
         'outputField': 'combined_gtf'
@@ -194,12 +194,12 @@ def populate_workflow(wf, replicates, experiment, inputs, applets_project_id, ex
     }
     align_input['library_id'] = inputs['library_id']
     if not inputs['paired']:
-        star_step = 'star_align_se'
-        th_step = 'tophat_align_se'
+        star_step = 'star-align-se'
+        th_step = 'tophat-align-se'
         align_input['reads'] = dxpy.dxlink(replicates[0])
     else:
-        star_step = 'star_align_pe'
-        th_step = 'tophat_align_pe'
+        star_step = 'star-align-pe'
+        th_step = 'tophat-align-pe'
         align_input['reads_1'] = dxpy.dxlink(replicates[0])
         align_input['reads_2'] = dxpy.dxlink(replicates[1])
 
