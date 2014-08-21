@@ -88,7 +88,7 @@ main() {
     # to see more options to set metadata.
     echo `ls`
 
-    mv Aligned.sortedByCoord.out.bam ${reads_fn}__STAR_genome.bam
+    mv Aligned.sortedByCoord.out.bam ${reads_fn}_STAR_genome.bam
     mv Aligned.sortedByCoord.out.bam.bai ${reads_fn}_STAR_genome.bai
     mv Aligned.toTranscriptome.out.bam ${reads_fn}_STAR_annotation.bam
     mv Log.final.out ${reads_fn}_STAR_Log.final.out
