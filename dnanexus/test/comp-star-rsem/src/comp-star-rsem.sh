@@ -21,10 +21,11 @@ main() {
     echo "Value of star_bam: '$star_bam'"
     echo "Value of rsem_isoform_quant: '$rsem_isoform_quant'"
     echo "Value of rsem_gene_quant: '$rsem_gene_quant'"
+    echo "Value of dataset: '$data_dir'"
 
     # The following line(s) use the dx command-line tool to download your file
     # inputs to the local file system using variable names for the filenames. To
-    # recover the original filenames, you can use the output of "dx describe
+    # recover the original filenames, you can use the output of "dx describe"
     # "$variable" --name".
 
     dx download "$star_log" -o star_log
@@ -49,21 +50,22 @@ main() {
     # reported in the job_error.json file, then the failure reason
     # will be AppInternalError with a generic error message.
     echo Log.final.out
-    diff <(awk 'NR>4{print}' $1/Log.final.out) <(awk 'NR>4{print}' $2/Log.final.out) | head
+    diff <(awk 'NR>4{print}' /data/$data_dir/Log.final.out) <(awk 'NR>4{print}' star_log) > log_diff
 
     echo Aligned.sortedByCoord.out.bam
-    diff  <(samtools view $1/Aligned.sortedByCoord.out.bam) <(samtools view $2/Aligned.sortedByCoord.out.bam) | head
+    diff  <(samtools view /data/$data_dir/Aligned.sortedByCoord.out.bam) <(samtools view star_bam) | head > bam_diff
 
     echo Quant.isoforms.results
-    diff  <(cut -f1-8 $1/Quant.isoforms.results) <(cut -f1-8 $2/Quant.isoforms.results) | head
+    diff  <(cut -f1-8 /data/$data_dir/Quant.isoforms.results) <(cut -f1-8 rsem_isoform_quant) > isoform_quant_diff
     echo Quant.genes.results
-    diff  <(cut -f1-7 $1/Quant.genes.results) <(cut -f1-7 $2/Quant.genes.results)| head
+    diff  <(cut -f1-7 /data/$data_dir/Quant.genes.results) <(cut -f1-7 rsem_gene_quant) >  qene_quant_diff
 
-    for ii in `cd $1; ls *bw`
-    do
-        echo $ii
-        diff $1/$ii $2/$ii | head
-    done
+    # don't worry about bigwigs for now
+    #for ii in `cd $data_dir; ls *bw`
+    #do
+    #    echo $ii
+    #    diff $data_dir/$ii $2/$ii | head
+    #done
 
     # The following line(s) use the dx command-line tool to upload your file
     # outputs after you have created them on the local file system.  It assumes
@@ -72,6 +74,7 @@ main() {
     # to see more options to set metadata.
 
     log_diff=$(dx upload log_diff --brief)
+    bam_diff=$(dx upload bam_diff --brief)
     isoform_quant_diff=$(dx upload isoform_quant_diff --brief)
     gene_quant_diff=$(dx upload gene_quant_diff --brief)
 
@@ -81,8 +84,8 @@ main() {
     # does.
 
     dx-jobutil-add-output log_diff "$log_diff" --class=file
-    dx-jobutil-add-output bam_diff "$bam_diff" --class=boolean
+    dx-jobutil-add-output bam_diff "$bam_diff" --class=file
     dx-jobutil-add-output isoform_quant_diff "$isoform_quant_diff" --class=file
     dx-jobutil-add-output gene_quant_diff "$gene_quant_diff" --class=file
-    dx-jobutil-add-output bigwig_diff_pass "$bigwig_diff_pass" --class=boolean
+    dx-jobutil-add-output bigwig_diff_pass "true" --class=boolean
 }

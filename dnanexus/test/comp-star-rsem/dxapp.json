@@ -7,6 +7,12 @@
   "categories": [],
   "inputSpec": [
     {
+      "name": "data_dir",
+      "label": "Directory of outputs to compare dx results to",
+      "class": "string",
+      "optional": false
+    },
+    {
       "name": "star_log",
       "label": "Log file created at DNAnexus by STAR",
       "class": "file",
@@ -40,7 +46,7 @@
     {
       "name": "bam_diff",
       "label": "Are BAMs different?",
-      "class": "boolean"
+      "class": "file"
     },
     {
       "name": "isoform_quant_diff",
@@ -60,7 +66,14 @@
   ],
   "runSpec": {
     "interpreter": "bash",
-    "file": "src/comp-star-rsem.sh"
+    "file": "src/comp-star-rsem.sh",
+    "execDepends": [
+      {
+        "name": "samtools",
+        "version": "0.1.18-1ubuntu2"
+      },
+      {"name":"gawk"}
+    ]
   },
   "authorizedUsers": []
 }
