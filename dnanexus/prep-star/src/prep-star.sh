@@ -69,7 +69,7 @@ main() {
     # to see more options to set metadata.
     echo "dowload and install STAR"
     git clone https://github.com/alexdobin/STAR
-    (cd STAR; git checkout tags/STAR_2.3.1z12)
+    (cd STAR; git checkout tags/STAR_2.4.0a)
     (cd STAR; make)
     echo "prepare reference"
     mkdir out
