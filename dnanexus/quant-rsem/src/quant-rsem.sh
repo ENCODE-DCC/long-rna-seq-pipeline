@@ -44,13 +44,13 @@ main() {
     (cd RSEM; make)
 
     extraFlags=""
-    if [ -n "$paired" != "false"]
+    if [ "$paired" == "true" ]
     then
         echo 'using paired-end flag'
         extraFlags="--paired-end "
     fi
 
-    if [ -n "$stranded" != "false" ]
+    if [ "$stranded" == "true" ]
     then
         echo 'using stranded flag'
         extraFlags=${extraFlags}"--forward-prob 0"

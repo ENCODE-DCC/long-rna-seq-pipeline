@@ -1,0 +1,12 @@
+{
+  "read_prefix": "TST002PE-Read1-Read2",
+  "rsem_index": {
+    "$dnanexus_link": "file-BPxgVXj0pq72V1qgKbFQ4gZ7"
+  },
+  "paired": true,
+  "annotation_bam": {
+    "$dnanexus_link": "file-BPxkY800xky9K9gFKJFYKVkX"
+  },
+  "stranded": true,
+  "rnd_seed": 12345
+}
