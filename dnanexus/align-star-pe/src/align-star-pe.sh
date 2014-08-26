@@ -68,7 +68,7 @@ main() {
     STAR/STAR --genomeDir out --readFilesIn ${reads1_fn}.fastq.gz ${reads2_fn}.fastq.gz                    \
          --readFilesCommand zcat --runThreadN 8 --genomeLoad NoSharedMemory          \
          --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1    \
-         --outFilterMismatchNmax 999 --outFilterMismatchNoverLmax 0.04                  \
+         --outFilterMismatchNmax 999 --outFilterMismatchNoverReadLmax 0.04 0.04                  \
          --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000         \
          --outSAMheaderCommentFile COfile.txt --outSAMheaderHD @HD VN:1.4 SO:coordinate   \
          --outSAMunmapped Within --outFilterType BySJout --outSAMattributes NH HI AS NM MD \
