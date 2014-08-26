@@ -68,10 +68,6 @@
     "interpreter": "bash",
     "file": "src/comp-star-rsem.sh",
     "execDepends": [
-      {
-        "name": "samtools",
-        "version": "0.1.18-1ubuntu2"
-      },
       {"name":"gawk"}
     ]
   },

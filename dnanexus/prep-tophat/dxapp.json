@@ -11,13 +11,7 @@
   ],
   "runSpec": {
     "interpreter": "bash",
-    "file": "src/prep-tophat.sh",
-    "execDepends": [
-      {
-        "name": "samtools",
-        "version": "0.1.18-1ubuntu2"
-      }
-    ]
+    "file": "src/prep-tophat.sh"
   },
   "access": {
     "network": [
