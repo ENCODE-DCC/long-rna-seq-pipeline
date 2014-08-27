@@ -69,6 +69,19 @@
     "file": "src/comp-star-rsem.sh",
     "execDepends": [
       {"name":"gawk"}
+    ],
+    "systemRequirements": {
+      "main": {
+        "instanceType": "mem3_hdd2_x4"
+      },
+      "myEntryPoint": {
+        "instanceType": "mem3_hdd2_x4"
+      }
+    }
+  },
+  "access": {
+    "network": [
+      "*"
     ]
   },
   "authorizedUsers": []

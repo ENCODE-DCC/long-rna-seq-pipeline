@@ -53,16 +53,25 @@ main() {
 #    diff <(awk 'NR>4{print}' /data/$data_dir/Log.final.out) <(awk 'NR>4{print}' star_log) > log_diff
     awk 'NR>4{print}' /data/"$data_dir"/Log.final.out > a.log
     awk 'NR>4{print}' star_log > b.log
-    echo `ls`
     diff a.log b.log > log_diff
 
     echo Aligned.sortedByCoord.out.bam
     diff  <(/usr/bin/samtools view /data/"$data_dir"/Aligned.sortedByCoord.out.bam) <(/usr/bin/samtools view star_bam) | head > bam_diff
 
     echo Quant.isoforms.results
-    diff  <(cut -f1-8 /data/"$data_dir"/Quant.isoforms.results) <(cut -f1-8 rsem_isoform_quant) > isoform_quant_diff
+    echo `ls /data/"$data_dir"`
+    cut -f1-8 /data/"$data_dir"/Quant.isoforms.results > iso.a.diff
+    cut -f1-8 rsem_isoform_quant > iso.b.diff
+    echo `ls *diff`
+    diff iso.a.diff iso.b.diff > isoform_quant_diff
+    #diff  <(cut -f1-8 /data/"$data_dir"/Quant.isoforms.results) <(cut -f1-8 rsem_isoform_quant) > isoform_quant_diff
     echo Quant.genes.results
-    diff  <(cut -f1-7 /data/"$data_dir"/Quant.genes.results) <(cut -f1-7 rsem_gene_quant) >  qene_quant_diff
+    echo `ls`
+    #diff  <(cut -f1-7 /data/"$data_dir"/Quant.genes.results) <(cut -f1-7 rsem_gene_quant) >  qene_quant_diff
+    cut -f1-7 /data/"$data_dir"/Quant.genes.results > genes.a.diff
+    cut -f1-7 rsem_isoform_quant > genes.b.diff
+    echo `ls *diff`
+    diff genes.a.diff genes.b.diff > gene_quant_diff
 
     # don't worry about bigwigs for now
     #for ii in `cd $data_dir; ls *bw`
