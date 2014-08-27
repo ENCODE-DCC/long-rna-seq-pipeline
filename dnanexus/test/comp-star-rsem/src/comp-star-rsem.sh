@@ -50,15 +50,19 @@ main() {
     # reported in the job_error.json file, then the failure reason
     # will be AppInternalError with a generic error message.
     echo Log.final.out
-    diff <(awk 'NR>4{print}' /data/$data_dir/Log.final.out) <(awk 'NR>4{print}' star_log) > log_diff
+#    diff <(awk 'NR>4{print}' /data/$data_dir/Log.final.out) <(awk 'NR>4{print}' star_log) > log_diff
+    awk 'NR>4{print}' /data/"$data_dir"/Log.final.out > a.log
+    awk 'NR>4{print}' star_log > b.log
+    echo `ls`
+    diff a.log b.log > log_diff
 
     echo Aligned.sortedByCoord.out.bam
-    diff  <(samtools view /data/$data_dir/Aligned.sortedByCoord.out.bam) <(samtools view star_bam) | head > bam_diff
+    diff  <(/usr/bin/samtools view /data/"$data_dir"/Aligned.sortedByCoord.out.bam) <(/usr/bin/samtools view star_bam) | head > bam_diff
 
     echo Quant.isoforms.results
-    diff  <(cut -f1-8 /data/$data_dir/Quant.isoforms.results) <(cut -f1-8 rsem_isoform_quant) > isoform_quant_diff
+    diff  <(cut -f1-8 /data/"$data_dir"/Quant.isoforms.results) <(cut -f1-8 rsem_isoform_quant) > isoform_quant_diff
     echo Quant.genes.results
-    diff  <(cut -f1-7 /data/$data_dir/Quant.genes.results) <(cut -f1-7 rsem_gene_quant) >  qene_quant_diff
+    diff  <(cut -f1-7 /data/"$data_dir"/Quant.genes.results) <(cut -f1-7 rsem_gene_quant) >  qene_quant_diff
 
     # don't worry about bigwigs for now
     #for ii in `cd $data_dir; ls *bw`
