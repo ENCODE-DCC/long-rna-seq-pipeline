@@ -1,5 +1,5 @@
 {
-    "data_dir": "STAR_RSEM_tests/STAR_2.4.0a/Female.unstr_SE", 
+    "data_dir": "Female.unstr_SE", 
     "star_log": {
         "$dnanexus_link": {
             "project": "project-BKjyBz00ZZ0PZF5V7Gv00zqG", 
