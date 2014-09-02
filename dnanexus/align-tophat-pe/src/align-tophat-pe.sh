@@ -16,10 +16,6 @@
 # to modify this file.
 
 main() {
-    reads_1=$1
-    reads_2=$2
-    tophat_index=$3
-    library_id=$4
     echo "Value of reads: '$reads_1'"
     echo "Value of reads: '$reads_2'"
     echo "Value of tophat_index: '$tophat_index'"
@@ -113,5 +109,4 @@ main() {
     dx-jobutil-add-output genome_bam "$genome_bam" --class=file
     dx-jobutil-add-output genome_bai "$genome_bai" --class=file
 }
-main $1  $2  $3  $4
 

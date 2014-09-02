@@ -15,15 +15,9 @@
 # See https://wiki.dnanexus.com/Developer-Portal for tutorials on how
 # to modify this file.
 
-set -o
 set -x
 
 main() {
-    star_log=$1
-    star_bam=$2
-    rsem_isoform_quant=$3
-    rsem_gene_quant=$4
-    data_dir=$5
     echo "Value of star_log: '$star_log'"
     echo "Value of star_bam: '$star_bam'"
     echo "Value of rsem_isoform_quant: '$rsem_isoform_quant'"
@@ -64,10 +58,13 @@ main() {
 #    diff <(awk 'NR>4{print}' test/$data_dir/Log.final.out) <(awk 'NR>4{print}' star_log) > log_diff
     awk 'NR>4{print}' Log.final.out > a.log
     awk 'NR>4{print}' star_log > b.log
+    echo `ls *log`
+
     diff a.log b.log > log_diff
 
+    echo `ls *diff`
     echo Aligned.sortedByCoord.out.bam
-    diff  <(/usr/bin/samtools view Aligned.sortedByCoord.out.bam) <(/usr/bin/samtools view star_bam) | head > bam_diff
+    diff  <(/usr/bin/samtools view Aligned.sortedByCoord.out.bam) <(/usr/bin/samtools view star_bam)  > bam_diff
 
     echo Quant.isoforms.results
     #cut -f1-8 Quant.isoforms.results > iso.a.diff
@@ -76,12 +73,8 @@ main() {
     #diff iso.a.diff iso.b.diff > isoform_quant_diff
     diff  <(cut -f1-8 Quant.isoforms.results) <(cut -f1-8 rsem_isoform_quant) > isoform_quant_diff
     echo Quant.genes.results
-    #echo `ls`
+    echo `ls *diff`
     diff  <(cut -f1-7 Quant.genes.results) <(cut -f1-7 rsem_gene_quant) >  gene_quant_diff
-    #cut -f1-7 Quant.genes.results > genes.a.diff
-    #cut -f1-7 rsem_isoform_quant > genes.b.diff
-    #echo `ls *diff`
-    #$diff genes.a.diff genes.b.diff > gene_quant_diff
 
     # don't worry about bigwigs for now
     #for ii in `cd $data_dir; ls *bw`
@@ -95,7 +88,6 @@ main() {
     # that you have used the output field name for the filename for each output,
     # but you can change that behavior to suit your needs.  Run "dx upload -h"
     # to see more options to set metadata.
-    exit
     log_diff=$(dx upload log_diff --brief)
     bam_diff=$(dx upload bam_diff --brief)
     isoform_quant_diff=$(dx upload isoform_quant_diff --brief)
@@ -112,4 +104,3 @@ main() {
     dx-jobutil-add-output gene_quant_diff "$gene_quant_diff" --class=file
     dx-jobutil-add-output bigwig_diff_pass "true" --class=boolean
 }
-main $1  $2  $3  $4 $5
