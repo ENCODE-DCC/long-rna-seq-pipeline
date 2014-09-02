@@ -22,7 +22,7 @@ main() {
     star_log=$1
     star_bam=$2
     rsem_isoform_quant=$3
-    resm_gene_quant=$4
+    rsem_gene_quant=$4
     data_dir=$5
     echo "Value of star_log: '$star_log'"
     echo "Value of star_bam: '$star_bam'"
@@ -70,18 +70,18 @@ main() {
     diff  <(/usr/bin/samtools view Aligned.sortedByCoord.out.bam) <(/usr/bin/samtools view star_bam) | head > bam_diff
 
     echo Quant.isoforms.results
-    cut -f1-8 Quant.isoforms.results > iso.a.diff
-    cut -f1-8 rsem_isoform_quant > iso.b.diff
-    echo `ls *diff`
+    #cut -f1-8 Quant.isoforms.results > iso.a.diff
+    #cut -f1-8 rsem_isoform_quant > iso.b.diff
+    #echo `ls *diff`
     #diff iso.a.diff iso.b.diff > isoform_quant_diff
-    #diff  <(cut -f1-8 test/"$data_dir"/Quant.isoforms.results) <(cut -f1-8 rsem_isoform_quant) > isoform_quant_diff
+    diff  <(cut -f1-8 Quant.isoforms.results) <(cut -f1-8 rsem_isoform_quant) > isoform_quant_diff
     echo Quant.genes.results
-    echo `ls`
-    #diff  <(cut -f1-7 test/"$data_dir"/Quant.genes.results) <(cut -f1-7 rsem_gene_quant) >  qene_quant_diff
-    cut -f1-7 Quant.genes.results > genes.a.diff
-    cut -f1-7 rsem_isoform_quant > genes.b.diff
-    echo `ls *diff`
-    diff genes.a.diff genes.b.diff > gene_quant_diff
+    #echo `ls`
+    diff  <(cut -f1-7 Quant.genes.results) <(cut -f1-7 rsem_gene_quant) >  gene_quant_diff
+    #cut -f1-7 Quant.genes.results > genes.a.diff
+    #cut -f1-7 rsem_isoform_quant > genes.b.diff
+    #echo `ls *diff`
+    #$diff genes.a.diff genes.b.diff > gene_quant_diff
 
     # don't worry about bigwigs for now
     #for ii in `cd $data_dir; ls *bw`
@@ -95,7 +95,7 @@ main() {
     # that you have used the output field name for the filename for each output,
     # but you can change that behavior to suit your needs.  Run "dx upload -h"
     # to see more options to set metadata.
-
+    exit
     log_diff=$(dx upload log_diff --brief)
     bam_diff=$(dx upload bam_diff --brief)
     isoform_quant_diff=$(dx upload isoform_quant_diff --brief)
