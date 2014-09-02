@@ -16,7 +16,10 @@
 # to modify this file.
 
 main() {
-
+    reads_1=$1
+    reads_2=$2
+    tophat_index=$3
+    library_id=$4
     echo "Value of reads: '$reads_1'"
     echo "Value of reads: '$reads_2'"
     echo "Value of tophat_index: '$tophat_index'"
@@ -61,7 +64,7 @@ main() {
     echo "set up headers"
 
     echo "map reads"
-    /usr/bin/tophat --no-discordant --no-mixed -p 8 -z0 --min-intron-length 20 --max-intron-length 1000000 \
+    ../resources/usr/bin/tophat --no-discordant --no-mixed -p 8 -z0 --min-intron-length 20 --max-intron-length 1000000 \
        --read-mismatches 4 --read-edit-dist 4 --max-multihits 20 --library-type fr-firststrand \
        --transcriptome-index ${index_prefix} \
        --min-anchor-length 8 --splice-mismatches 0 --read-gap-length 2 \
@@ -76,7 +79,7 @@ main() {
     newPG="@PG\tID:Samtools\tPN:Samtools\tCL:"$stCommand"\tPP:Tophat\tVN:VN:0.1.19-96b5f2294a"
     libraryComment="@CO\tLIBID:${library_id}"
 
-    /usr/bin/samtools view -H tophat_out/accepted_hits.bam | \
+    ../resources/usr/bin/samtools view -H tophat_out/accepted_hits.bam | \
     gawk -v HD="$HD" -v newPG="$newPG" -v library="$libraryComment" \
        '{     if ($0 ~ /^@PG/) {PG=$0}
          else if ($0 ~ /^@HD/) {print HD; }
@@ -90,12 +93,13 @@ main() {
     # sort before merge
 
     echo "fix unmapped bam and sort before merge"
+    exit
     perl xweiEncodeScripts/tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | \
                           /usr/bin/samtools view -bS - | /usr/bin/samtools sort -m10G - sortedFixedMapped
 
     echo "merge aligned and unaligned into single bam, using the patched up header"
-    /usr/bin/samtools merge -h newHeader.sam out_tophat.bam sortedFixedMapped.bam tophat_out/unmapped.bam
-    /usr/bin/samtools index out_tophat.bam
+    ../resources/usr/bin/samtools merge -h newHeader.sam out_tophat.bam sortedFixedMapped.bam tophat_out/unmapped.bam
+    ../resources/usr/bin/samtools index out_tophat.bam
 
     mv out_tophat.bam ${reads1_fn}-${reads2_fn}_tophat_genome.bam
     mv out_tophat.bam.bai ${reads1_fn}-${reads2_fn}_tophat_genome.bai
@@ -110,3 +114,5 @@ main() {
     dx-jobutil-add-output genome_bam "$genome_bam" --class=file
     dx-jobutil-add-output genome_bai "$genome_bai" --class=file
 }
+main $1  $2  $3  $4
+
