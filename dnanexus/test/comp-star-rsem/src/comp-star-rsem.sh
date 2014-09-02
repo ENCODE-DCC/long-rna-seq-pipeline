@@ -19,7 +19,11 @@ set -o
 set -x
 
 main() {
-
+    star_log=$1
+    star_bam=$2
+    rsem_isoform_quant=$3
+    resm_gene_quant=$4
+    data_dir=$5
     echo "Value of star_log: '$star_log'"
     echo "Value of star_bam: '$star_bam'"
     echo "Value of rsem_isoform_quant: '$rsem_isoform_quant'"
@@ -110,3 +114,4 @@ main() {
     dx-jobutil-add-output gene_quant_diff "$gene_quant_diff" --class=file
     dx-jobutil-add-output bigwig_diff_pass "true" --class=boolean
 }
+main $1  $2  $3  $4 $5
