@@ -93,9 +93,8 @@ main() {
     # sort before merge
 
     echo "fix unmapped bam and sort before merge"
-    exit
-    perl xweiEncodeScripts/tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | \
-                          /usr/bin/samtools view -bS - | /usr/bin/samtools sort -m10G - sortedFixedMapped
+    perl xweiEncodeScripts/tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam accepted_hits.all.bam
+    /usr/bin/samtools sort accepted_hits.all.bam sortedFixedMapped
 
     echo "merge aligned and unaligned into single bam, using the patched up header"
     ../resources/usr/bin/samtools merge -h newHeader.sam out_tophat.bam sortedFixedMapped.bam tophat_out/unmapped.bam

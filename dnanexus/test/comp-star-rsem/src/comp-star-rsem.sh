@@ -15,6 +15,9 @@
 # See https://wiki.dnanexus.com/Developer-Portal for tutorials on how
 # to modify this file.
 
+set -o
+set -x
+
 main() {
 
     echo "Value of star_log: '$star_log'"
@@ -36,6 +39,9 @@ main() {
 
     dx download "$rsem_gene_quant" -o rsem_gene_quant
 
+    #dx select ${DX_PROJECT_CONTEXT_ID}
+    dx download --project-context-id project-BKjyBz00ZZ0PZF5V7Gv00zqG --recursive test/"$data_dir"/
+
     # Fill in your application code here.
     #
     # To report any recognized errors in the correct format in
@@ -49,26 +55,28 @@ main() {
     # exit code will prematurely exit the script; if no error was
     # reported in the job_error.json file, then the failure reason
     # will be AppInternalError with a generic error message.
+    find
+
     echo Log.final.out
-#    diff <(awk 'NR>4{print}' /data/$data_dir/Log.final.out) <(awk 'NR>4{print}' star_log) > log_diff
-    awk 'NR>4{print}' /data/"$data_dir"/Log.final.out > a.log
+#    diff <(awk 'NR>4{print}' test/$data_dir/Log.final.out) <(awk 'NR>4{print}' star_log) > log_diff
+    awk 'NR>4{print}' test/"$data_dir"/Log.final.out > a.log
     awk 'NR>4{print}' star_log > b.log
     diff a.log b.log > log_diff
 
     echo Aligned.sortedByCoord.out.bam
-    diff  <(/usr/bin/samtools view /data/"$data_dir"/Aligned.sortedByCoord.out.bam) <(/usr/bin/samtools view star_bam) | head > bam_diff
+    diff  <(/usr/bin/samtools view test/"$data_dir"/Aligned.sortedByCoord.out.bam) <(/usr/bin/samtools view star_bam) | head > bam_diff
 
     echo Quant.isoforms.results
-    echo `ls /data/"$data_dir"`
-    cut -f1-8 /data/"$data_dir"/Quant.isoforms.results > iso.a.diff
+    echo `ls test/"$data_dir"`
+    cut -f1-8 test/"$data_dir"/Quant.isoforms.results > iso.a.diff
     cut -f1-8 rsem_isoform_quant > iso.b.diff
     echo `ls *diff`
     diff iso.a.diff iso.b.diff > isoform_quant_diff
-    #diff  <(cut -f1-8 /data/"$data_dir"/Quant.isoforms.results) <(cut -f1-8 rsem_isoform_quant) > isoform_quant_diff
+    #diff  <(cut -f1-8 test/"$data_dir"/Quant.isoforms.results) <(cut -f1-8 rsem_isoform_quant) > isoform_quant_diff
     echo Quant.genes.results
     echo `ls`
-    #diff  <(cut -f1-7 /data/"$data_dir"/Quant.genes.results) <(cut -f1-7 rsem_gene_quant) >  qene_quant_diff
-    cut -f1-7 /data/"$data_dir"/Quant.genes.results > genes.a.diff
+    #diff  <(cut -f1-7 test/"$data_dir"/Quant.genes.results) <(cut -f1-7 rsem_gene_quant) >  qene_quant_diff
+    cut -f1-7 test/"$data_dir"/Quant.genes.results > genes.a.diff
     cut -f1-7 rsem_isoform_quant > genes.b.diff
     echo `ls *diff`
     diff genes.a.diff genes.b.diff > gene_quant_diff
