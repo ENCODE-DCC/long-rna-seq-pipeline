@@ -15,7 +15,7 @@
 # See https://wiki.dnanexus.com/Developer-Portal for tutorials on how
 # to modify this file.
 
-set -x
+#set -x
 
 main() {
     echo "Value of star_log: '$star_log'"
@@ -56,8 +56,10 @@ main() {
 
     echo Log.final.out
 #    diff <(awk 'NR>4{print}' test/$data_dir/Log.final.out) <(awk 'NR>4{print}' star_log) > log_diff
+    diff Log.final.out star_log > noawk.log.diff
     awk 'NR>4{print}' Log.final.out > a.log
     awk 'NR>4{print}' star_log > b.log
+
     echo `ls *log`
 
     diff a.log b.log > log_diff
