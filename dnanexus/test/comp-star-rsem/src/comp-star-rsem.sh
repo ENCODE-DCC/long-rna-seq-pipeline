@@ -16,6 +16,7 @@
 # to modify this file.
 
 set -x
+set +e
 
 main() {
     echo "Value of star_log: '$star_log'"
@@ -55,12 +56,7 @@ main() {
     find
 
     echo Log.final.out
-#    diff <(awk 'NR>4{print}' test/$data_dir/Log.final.out) <(awk 'NR>4{print}' star_log) > log_diff
-    awk 'NR>4{print}' Log.final.out > a.log
-    awk 'NR>4{print}' star_log > b.log
-    echo `ls *log`
-
-    diff a.log b.log > log_diff
+    diff <(awk 'NR>4{print}' test/$data_dir/Log.final.out) <(awk 'NR>4{print}' star_log) > log_diff
 
     echo `ls *diff`
     echo Aligned.sortedByCoord.out.bam
@@ -102,5 +98,5 @@ main() {
     dx-jobutil-add-output bam_diff "$bam_diff" --class=file
     dx-jobutil-add-output isoform_quant_diff "$isoform_quant_diff" --class=file
     dx-jobutil-add-output gene_quant_diff "$gene_quant_diff" --class=file
-    dx-jobutil-add-output bigwig_diff_pass "true" --class=boolean
+    dx-jobutil-add-output bigwig_diff "true" --class=boolean
 }

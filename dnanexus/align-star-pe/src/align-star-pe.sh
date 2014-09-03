@@ -100,7 +100,10 @@ main() {
     mv Aligned.sortedByCoord.out.bam.bai ${reads1_fn}-${reads2_fn}_STAR_genome.bai
     mv Aligned.toTranscriptome.out.bam ${reads1_fn}-${reads2_fn}_STAR_annotation.bam
     mv Log.final.out ${reads1_fn}-${reads2_fn}_STAR_Log.final.out
+    mv Log.out ${reads1_fn}-${reads2_fn}_STAR_Log.out
 
+
+    detail_log=$(dx upload ${reads1_fn}-${reads2_fn}_STAR_Log.out --brief)
     star_log=$(dx upload ${reads1_fn}-${reads2_fn}_STAR_Log.final.out --brief)
     genome_bam=$(dx upload ${reads1_fn}-${reads2_fn}_STAR_genome.bam --brief)
     genome_bai=$(dx upload ${reads1_fn}-${reads2_fn}_STAR_genome.bai --brief)
@@ -115,6 +118,7 @@ main() {
     # class.  Run "dx-jobutil-add-output -h" for more information on what it
     # does.
 
+    dx-jobutil-add-output detail_log "$detail_log" --class=file
     dx-jobutil-add-output star_log "$star_log" --class=file
     dx-jobutil-add-output genome_bam "$genome_bam" --class=file
     dx-jobutil-add-output genome_bai "$genome_bai" --class=file
