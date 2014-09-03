@@ -33,7 +33,7 @@
       "label": "Full STAR log with input parameters",
       "class": "file"
     },
-   {
+    {
       "name": "star_log",
       "label": "Log file for STAR, contains QC metrics",
       "class": "file"

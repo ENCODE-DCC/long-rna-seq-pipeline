@@ -147,6 +147,8 @@ def populate_workflow(wf, replicates, experiment, inputs, applets_project_id, ex
     trna_annotation = find_reference_file_by_name(GENOME_REFERENCES[inputs['organism']][inputs['gender']]['trna_annotation'], ENCODE_REFERENCES_PROJECT)
     spike_in = find_reference_file_by_name('ENCFF001RTP.fasta', ENCODE_DNA_ME_PROJECT_NAME) ### note not in reference project
     genome = find_reference_file_by_name(GENOME_REFERENCES[inputs['organism']][inputs['gender']]['genome'], ENCODE_REFERENCES_PROJECT)
+    rsem_genome = find_reference_file_by_name(GENOME_REFERENCES[inputs['organism']]['m']['genome'], ENCODE_REFERENCES_PROJECT)
+    # RSEM always takes male genome
     index_prefix = inputs['spec_name']
 
     #'merge-annotation',
@@ -176,17 +178,21 @@ def populate_workflow(wf, replicates, experiment, inputs, applets_project_id, ex
         'stage': stage_id,
         'outputField': 'star_index'
     })
-    #'prep-rsem',
-    stage_id = wf.add_stage(find_applet_by_name('prep-rsem', applets_project_id), stage_input=prep_input, folder=experiment)
-    prep_rsem_output = dxpy.dxlink({
-        'stage': stage_id,
-        'outputField': 'rsem_index'
-    })
     #'prep-tophat',
     stage_id = wf.add_stage(find_applet_by_name('prep-tophat', applets_project_id), stage_input=prep_input, folder=experiment)
     prep_tophat_output = dxpy.dxlink({
         'stage': stage_id,
         'outputField': 'tophat_index'
+    })
+    #'prep-rsem',
+    if not export:
+        prep_input['genome'] = rsem_genome
+        ## overwrite with male only
+
+    stage_id = wf.add_stage(find_applet_by_name('prep-rsem', applets_project_id), stage_input=prep_input, folder=experiment)
+    prep_rsem_output = dxpy.dxlink({
+        'stage': stage_id,
+        'outputField': 'rsem_index'
     })
 
     ## alignment steps
