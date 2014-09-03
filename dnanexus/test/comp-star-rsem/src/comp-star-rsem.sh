@@ -16,6 +16,8 @@
 # to modify this file.
 
 #set -x
+set +e
+# diff returning 1 will exit script otherwise!!
 
 main() {
     echo "Value of star_log: '$star_log'"
@@ -56,7 +58,6 @@ main() {
 
     echo Log.final.out
 #    diff <(awk 'NR>4{print}' test/$data_dir/Log.final.out) <(awk 'NR>4{print}' star_log) > log_diff
-    diff Log.final.out star_log > noawk.log.diff
     awk 'NR>4{print}' Log.final.out > a.log
     awk 'NR>4{print}' star_log > b.log
 
@@ -64,6 +65,7 @@ main() {
 
     diff a.log b.log > log_diff
 
-    log_diff=$(dx upload log_diff --brief)
+    echo "Did the diff"
+    log_diff=$(dx upload a.log --brief)
     dx-jobutil-add-output log_diff "$log_diff" --class=file
 }
