@@ -31,11 +31,11 @@ main() {
 
     dx download "$star_log" -o star_log
 
-    dx download "$star_bam" -o star_bam
+    #dx download "$star_bam" -o star_bam
 
-    dx download "$rsem_isoform_quant" -o rsem_isoform_quant
+    #dx download "$rsem_isoform_quant" -o rsem_isoform_quant
 
-    dx download "$rsem_gene_quant" -o rsem_gene_quant
+    #dx download "$rsem_gene_quant" -o rsem_gene_quant
 
     dx download project-BKjyBz00ZZ0PZF5V7Gv00zqG:/test/"$data_dir"/*
     #dx download project-BKjyBz00ZZ0PZF5V7Gv00zqG:test/"$data_dir"/Log.final.out
@@ -62,45 +62,6 @@ main() {
 
     diff a.log b.log > log_diff
 
-    echo `ls *diff`
-    echo Aligned.sortedByCoord.out.bam
-    diff  <(/usr/bin/samtools view Aligned.sortedByCoord.out.bam) <(/usr/bin/samtools view star_bam)  > bam_diff
-
-    echo Quant.isoforms.results
-    #cut -f1-8 Quant.isoforms.results > iso.a.diff
-    #cut -f1-8 rsem_isoform_quant > iso.b.diff
-    #echo `ls *diff`
-    #diff iso.a.diff iso.b.diff > isoform_quant_diff
-    diff  <(cut -f1-8 Quant.isoforms.results) <(cut -f1-8 rsem_isoform_quant) > isoform_quant_diff
-    echo Quant.genes.results
-    echo `ls *diff`
-    diff  <(cut -f1-7 Quant.genes.results) <(cut -f1-7 rsem_gene_quant) >  gene_quant_diff
-
-    # don't worry about bigwigs for now
-    #for ii in `cd $data_dir; ls *bw`
-    #do
-    #    echo $ii
-    #    diff $data_dir/$ii $2/$ii | head
-    #done
-
-    # The following line(s) use the dx command-line tool to upload your file
-    # outputs after you have created them on the local file system.  It assumes
-    # that you have used the output field name for the filename for each output,
-    # but you can change that behavior to suit your needs.  Run "dx upload -h"
-    # to see more options to set metadata.
     log_diff=$(dx upload log_diff --brief)
-    bam_diff=$(dx upload bam_diff --brief)
-    isoform_quant_diff=$(dx upload isoform_quant_diff --brief)
-    gene_quant_diff=$(dx upload gene_quant_diff --brief)
-
-    # The following line(s) use the utility dx-jobutil-add-output to format and
-    # add output variables to your job's output as appropriate for the output
-    # class.  Run "dx-jobutil-add-output -h" for more information on what it
-    # does.
-
     dx-jobutil-add-output log_diff "$log_diff" --class=file
-    dx-jobutil-add-output bam_diff "$bam_diff" --class=file
-    dx-jobutil-add-output isoform_quant_diff "$isoform_quant_diff" --class=file
-    dx-jobutil-add-output gene_quant_diff "$gene_quant_diff" --class=file
-    dx-jobutil-add-output bigwig_diff_pass "true" --class=boolean
 }

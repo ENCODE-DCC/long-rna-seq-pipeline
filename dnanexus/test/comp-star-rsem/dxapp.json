@@ -42,26 +42,6 @@
       "name": "log_diff",
       "label": "Diff of log files (should be empty)",
       "class": "file"
-    },
-    {
-      "name": "bam_diff",
-      "label": "Are BAMs different?",
-      "class": "file"
-    },
-    {
-      "name": "isoform_quant_diff",
-      "label": "Diff of isoform quantification files (shoudld be empty)",
-      "class": "file"
-    },
-    {
-      "name": "gene_quant_diff",
-      "label": "Diff of gene quantification files (should be empty)",
-      "class": "file"
-    },
-    {
-      "name": "bigwig_diff",
-      "label": "Are BigWigs different?",
-      "class": "boolean"
     }
   ],
   "runSpec": {
