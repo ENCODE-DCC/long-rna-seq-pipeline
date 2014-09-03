@@ -1,0 +1,3 @@
+@PG	ID:Bowtie	VN:2.1.0.0
+@PG	ID:Samtools	VN:0.1.17.0
+@CO	ID:Gencode	VN:19
