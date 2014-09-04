@@ -75,7 +75,7 @@ main() {
     newPG="@PG\tID:Samtools\tPN:Samtools\tCL:"$stCommand"\tPP:Tophat\tVN:VN:0.1.19-96b5f2294a"
     libraryComment="@CO\tLIBID:${library_id}"
 
-    ../resources/usr/bin/samtools view -H tophat_out/accepted_hits.bam | \
+    /usr/bin/samtools view -H tophat_out/accepted_hits.bam | \
     gawk -v HD="$HD" -v newPG="$newPG" -v library="$libraryComment" \
        '{     if ($0 ~ /^@PG/) {PG=$0}
          else if ($0 ~ /^@HD/) {print HD; }
@@ -93,8 +93,8 @@ main() {
     /usr/bin/samtools sort accepted_hits.all.bam sortedFixedMapped
 
     echo "merge aligned and unaligned into single bam, using the patched up header"
-    ../resources/usr/bin/samtools merge -h newHeader.sam out_tophat.bam sortedFixedMapped.bam tophat_out/unmapped.bam
-    ../resources/usr/bin/samtools index out_tophat.bam
+    /usr/bin/samtools merge -h newHeader.sam out_tophat.bam sortedFixedMapped.bam tophat_out/unmapped.bam
+    /usr/bin/samtools index out_tophat.bam
 
     mv out_tophat.bam ${reads1_fn}-${reads2_fn}_tophat_genome.bam
     mv out_tophat.bam.bai ${reads1_fn}-${reads2_fn}_tophat_genome.bai
