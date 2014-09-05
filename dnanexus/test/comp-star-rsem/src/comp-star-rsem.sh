@@ -19,25 +19,15 @@ set -x
 set +e
 
 main() {
-    echo "Value of star_log: '$star_log'"
-    echo "Value of star_bam: '$star_bam'"
-    echo "Value of rsem_isoform_quant: '$rsem_isoform_quant'"
-    echo "Value of rsem_gene_quant: '$rsem_gene_quant'"
-    echo "Value of dataset: '$data_dir'"
+    echo "Value of test dataset: '$test_dir'"
+    echo "Value of standard dataset: '$data_dir'"
 
     # The following line(s) use the dx command-line tool to download your file
     # inputs to the local file system using variable names for the filenames. To
     # recover the original filenames, you can use the output of "dx describe"
     # "$variable" --name".
 
-    dx download "$star_log" -o star_log
-
-    dx download "$star_bam" -o star_bam
-
-    dx download "$rsem_isoform_quant" -o rsem_isoform_quant
-
-    dx download "$rsem_gene_quant" -o rsem_gene_quant
-
+    dx download project-BKjyBz00ZZ0PZF5V7Gv00zqG:/"$test_dir"/*
     dx download project-BKjyBz00ZZ0PZF5V7Gv00zqG:/test/"$data_dir"/*
     #dx download project-BKjyBz00ZZ0PZF5V7Gv00zqG:test/"$data_dir"/Log.final.out
     # Fill in your application code here.
@@ -56,21 +46,21 @@ main() {
     find
 
     echo Log.final.out
-    diff <(awk 'NR>4{print}' test/$data_dir/Log.final.out) <(awk 'NR>4{print}' star_log) > log_diff
+    diff <(awk 'NR>4{print}' Log.final.out) <(awk 'NR>4{print}' *_STAR_Log.final.out) > log_diff
 
     echo `ls *diff`
     echo Aligned.sortedByCoord.out.bam
-    diff  <(/usr/bin/samtools view Aligned.sortedByCoord.out.bam) <(/usr/bin/samtools view star_bam)  > bam_diff
+    diff  <(/usr/bin/samtools view Aligned.sortedByCoord.out.bam) <(/usr/bin/samtools view *_STAR_genome.bam)  > bam_diff
 
     echo Quant.isoforms.results
     #cut -f1-8 Quant.isoforms.results > iso.a.diff
     #cut -f1-8 rsem_isoform_quant > iso.b.diff
     #echo `ls *diff`
     #diff iso.a.diff iso.b.diff > isoform_quant_diff
-    diff  <(cut -f1-8 Quant.isoforms.results) <(cut -f1-8 rsem_isoform_quant) > isoform_quant_diff
+    diff  <(cut -f1-8 Quant.isoforms.results) <(cut -f1-8 *_rsem_quant.isoforms.results) > isoform_quant_diff
     echo Quant.genes.results
     echo `ls *diff`
-    diff  <(cut -f1-7 Quant.genes.results) <(cut -f1-7 rsem_gene_quant) >  gene_quant_diff
+    diff  <(cut -f1-7 Quant.genes.results) <(cut -f1-7 *_rsem_quant.genes.results) >  gene_quant_diff
 
     # don't worry about bigwigs for now
     #for ii in `cd $data_dir; ls *bw`

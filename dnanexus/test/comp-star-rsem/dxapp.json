@@ -13,27 +13,9 @@
       "optional": false
     },
     {
-      "name": "star_log",
-      "label": "Log file created at DNAnexus by STAR",
-      "class": "file",
-      "optional": false
-    },
-    {
-      "name": "star_bam",
-      "label": "BAM file created at DNAnexus by STAR",
-      "class": "file",
-      "optional": false
-    },
-    {
-      "name": "rsem_isoform_quant",
-      "label": "Quantification file created at DNAnexus by RSEM",
-      "class": "file",
-      "optional": false
-    },
-    {
-      "name": "rsem_gene_quant",
-      "label": "Quantification file crated at DNAnexus by RSEM (genes)",
-      "class": "file",
+      "name": "test_dir",
+      "label": "Directory of dx results",
+      "class": "string",
       "optional": false
     }
   ],
