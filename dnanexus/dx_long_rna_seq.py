@@ -108,6 +108,12 @@ def get_args():
                     action='store_true',
                     required=False)
 
+    ap.add_argument('-n', '--nthreads',
+                    help='Number of threads to run STAR/RSEM (default: 8)',
+                    type=int,
+                    default=8,
+                    required=False)
+
     return ap.parse_args()
 
 def find_reference_file_by_name(reference_name, project_name):
@@ -197,6 +203,7 @@ def populate_workflow(wf, replicates, experiment, inputs, applets_project_id, ex
 
     ## alignment steps
     align_input = {
+        'nthreads': inputs['nthreads']
     }
     align_input['library_id'] = inputs['library_id']
     if not inputs['paired']:
@@ -238,7 +245,8 @@ def populate_workflow(wf, replicates, experiment, inputs, applets_project_id, ex
         'rsem_index': prep_rsem_output,
         'annotation_bam': star_annotation_output,
         'paired': inputs['paired'],
-        'stranded': inputs['stranded']
+        'stranded': inputs['stranded'],
+        'nthreads': inputs['nthreads']
     }
     if not export:
         quant_input['read_prefix'] = index_prefix
@@ -320,6 +328,7 @@ def main():
     inputs['gender']= args.gender
     inputs['organism'] = args.organism
     inputs['library_id'] = args.library
+    inputs['nthreads'] = args.nthreads
     #TODO determine paired or gender from ENCSR metadata
     # Now create a new workflow ()
     inputs['spec_name'] = args.experiment+'-'+'-'.join([ r.split('.')[0] for r in args.replicates])

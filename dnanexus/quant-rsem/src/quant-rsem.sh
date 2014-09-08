@@ -23,6 +23,8 @@ main() {
     echo "Value of stranded: '$stranded'"
     echo "Value of rsem_index: '$rsem_index'"
     echo "Random number seed": '$rnd_seed'""
+    echo "Value of nthreads: '$nthreads'"
+
 
     # The following line(s) use the dx command-line tool to download your file
     # inputs to the local file system using variable names for the filenames. To
@@ -71,7 +73,7 @@ main() {
     # will be AppInternalError with a generic error message.
     echo "quantitate with flags: ${extraFlags}"
     RSEM/rsem-calculate-expression --bam --estimate-rspd --calc-ci --seed ${rnd_seed} \
-                                 -p 8 --ci-memory 60000 ${extraFlags} \
+                                 -p {$nthreads} --ci-memory 60000 ${extraFlags} \
                                  annotation.bam ${index_prefix} ${read_prefix}_rsem_quant
 
     echo `ls ${read_prefix}*`

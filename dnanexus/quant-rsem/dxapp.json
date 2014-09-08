@@ -44,6 +44,13 @@
       "label": "Library was stranded",
       "class": "boolean",
       "optional": false
+    },
+    {
+      "name": "nthreads",
+      "label": "Number of threads to use",
+      "class": "int",
+      "optional": true,
+      "default": 8
     }
   ],
   "outputSpec": [
