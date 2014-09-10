@@ -73,7 +73,7 @@ main() {
     # will be AppInternalError with a generic error message.
     echo "quantitate with flags: ${extraFlags}"
     RSEM/rsem-calculate-expression --bam --estimate-rspd --calc-ci --seed ${rnd_seed} \
-                                 -p {$nthreads} --ci-memory 60000 ${extraFlags} \
+                                 -p ${nthreads} --ci-memory 60000 ${extraFlags} \
                                  annotation.bam ${index_prefix} ${read_prefix}_rsem_quant
 
     echo `ls ${read_prefix}*`

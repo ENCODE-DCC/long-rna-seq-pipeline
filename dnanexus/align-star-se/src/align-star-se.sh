@@ -64,7 +64,7 @@ main() {
 
     echo "map reads"
     STAR/STAR --genomeDir out --readFilesIn ${reads_fn}.fastq.gz                    \
-         --readFilesCommand zcat --runThreadN {$nthreads} --genomeLoad NoSharedMemory          \
+         --readFilesCommand zcat --runThreadN ${nthreads} --genomeLoad NoSharedMemory          \
          --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1    \
          --outFilterMismatchNmax 999 --outFilterMismatchNoverReadLmax 0.04     \
          --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000         \

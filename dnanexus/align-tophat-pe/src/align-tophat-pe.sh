@@ -61,7 +61,7 @@ main() {
     echo "set up headers"
 
     echo "map reads"
-    /usr/bin/tophat --no-discordant --no-mixed -p {$nthreads} -z0 --min-intron-length 20 --max-intron-length 1000000 \
+    /usr/bin/tophat --no-discordant --no-mixed -p ${nthreads} -z0 --min-intron-length 20 --max-intron-length 1000000 \
        --read-mismatches 4 --read-edit-dist 4 --max-multihits 20 --library-type fr-firststrand \
        --transcriptome-index ${index_prefix} \
        --min-anchor-length 8 --splice-mismatches 0 --read-gap-length 2 \
