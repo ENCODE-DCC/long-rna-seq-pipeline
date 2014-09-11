@@ -1,0 +1,55 @@
+{
+  "name": "comp-tophat",
+  "title": "Compares tophat output to Xintao",
+  "summary": "comp-tophat",
+  "dxapi": "1.0.0",
+  "version": "0.0.1",
+  "categories": [],
+  "inputSpec": [
+    {
+      "name": "data_dir",
+      "label": "Directory of outputs to compare dx results to",
+      "class": "string",
+      "optional": false
+    },
+    {
+      "name": "test_dir",
+      "label": "Directory of dx results",
+      "class": "string",
+      "optional": false
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "bam_diff",
+      "label": "Are BAMs different?",
+      "class": "file"
+    },
+    {
+      "name": "bigwig_diff",
+      "label": "Are BigWigs different?",
+      "class": "boolean"
+    }
+  ],
+  "runSpec": {
+    "interpreter": "bash",
+    "file": "src/comp-tophat.sh",
+    "execDepends": [
+      {"name":"gawk"}
+    ],
+    "systemRequirements": {
+      "main": {
+        "instanceType": "mem3_hdd2_x4"
+      },
+      "myEntryPoint": {
+        "instanceType": "mem3_hdd2_x4"
+      }
+    }
+  },
+  "access": {
+    "network": [
+      "*"
+    ]
+  },
+  "authorizedUsers": []
+}
