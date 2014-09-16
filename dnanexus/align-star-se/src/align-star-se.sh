@@ -14,9 +14,12 @@
 #
 # See https://wiki.dnanexus.com/Developer-Portal for tutorials on how
 # to modify this file.
-
+ulimit -v -v 30660128550
 main() {
-
+    reads=$1
+    star_index=$2
+    library_id=$3
+    nthreads=1
     echo "Value of reads: '$reads'"
     echo "Value of star_index: '$star_index'"
     echo "Value of library_id: '$library_id'"
@@ -73,9 +76,9 @@ main() {
          --outWigType bedGraph --outWigStrand Unstranded --outSAMstrandField intronMotif    \
          --outSAMtype BAM SortedByCoordinate --quantMode TranscriptomeSAM
 
-    echo "index bam"
-    samtools index Aligned.sortedByCoord.out.bam
-    echo `ls`
+    #echo "index bam"
+    #samtools index Aligned.sortedByCoord.out.bam
+    #echo `ls`
 
     echo "Convert bedGraph to bigWigs.  Spike-ins must be excluded and piping doesn't work"
     grep ^chr Signal.UniqueMultiple.str1.out.bg > signalAll.bg
@@ -107,6 +110,7 @@ main() {
     # add output variables to your job's output as appropriate for the output
     # class.  Run "dx-jobutil-add-output -h" for more information on what it
     # does.
+    exit
 
     dx-jobutil-add-output detail_log "$detail_log" --class=file
     dx-jobutil-add-output star_log "$star_log" --class=file
@@ -116,3 +120,4 @@ main() {
     dx-jobutil-add-output all_unstranded_bw "$all_unstranded_bw" --class=file
     dx-jobutil-add-output unique_unstranded_bw "$unique_unstranded_bw" --class=file
 }
+main $1 $2 $3
