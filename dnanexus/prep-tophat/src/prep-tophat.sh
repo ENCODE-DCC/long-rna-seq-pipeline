@@ -46,8 +46,8 @@ main() {
     gunzip "$genome_fn".fa.gz
     ref="$genome_fn".fa
 
-    dx download file-BKyfb080ZZ0P4jQFVGB01966 -o tiny.fq.gz
-    gunzip tiny.fq.gz
+    #dx download file-BKyfb080ZZ0P4jQFVGB01966 -o tiny.fq.gz
+    #gunzip tiny.fq.gz
 
     if [ -n "$spike_in" ]
     then
@@ -93,13 +93,14 @@ main() {
 
     echo `cat "out/${index_prefix}_bamCommentLines.txt"`
 
-    echo "run a quicky tophat to generate index"
-    /usr/bin/tophat --no-discordant --no-mixed -p 8 -z0 --min-intron-length 20 --max-intron-length 1000000 \
-           --read-mismatches 4 --read-edit-dist 4 --max-multihits 20 --library-type fr-firststrand \
-           --GTF ${annotation_fn}.gtf --transcriptome-index=out/${index_prefix} \
-           out/${index_prefix} tiny.fq
+    #echo "run a quicky tophat to generate index"
+    #/usr/bin/tophat --no-discordant --no-mixed -p 8 -z0 --min-intron-length 20 --max-intron-length 1000000 \
+    #       --read-mismatches 4 --read-edit-dist 4 --max-multihits 20 --library-type fr-firststrand \
+    #       --GTF ${annotation_fn}.gtf --transcriptome-index=out/${index_prefix} \
+    #       out/${index_prefix} tiny.fq
 
     echo "tar and upload"
+    mv *.gtf out
     echo `ls out/`
     tar -czf ${index_prefix}_tophatIndex.tgz out/${index_prefix}*
 

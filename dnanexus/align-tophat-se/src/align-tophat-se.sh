@@ -59,43 +59,31 @@ main() {
     echo "set up headers"
 
     echo "map reads"
-    /usr/bin/tophat --no-discordant --no-mixed -p ${nthreads} -z0 --min-intron-length 20 --max-intron-length 1000000 \
-       --read-mismatches 4 --read-edit-dist 4 --max-multihits 20 \
-       --transcriptome-index ${index_prefix} \
-       --min-anchor-length 8 --splice-mismatches 0 --read-gap-length 2 \
-       --mate-inner-dist 50 --mate-std-dev 20 --segment-length 25 \
-       --b2-L 20 --b2-N 0 --b2-D 15 --b2-R 2 \
-       ${index_prefix} ${reads_fn}.fastq.gz
 
-    # Building a new header
-    echo "make new header"
-    HD="@HD\tVN:1.4\tSO:coordinate"
-    stCommand="perl tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | samtools view -bS - -o - | samtools sort -m10G - sortedFixedMapped; samtools merge -h newHeader.sam out_tophat.bam sortedFixedMapped.bam tophat_out/unmapped.bam"
-    newPG="@PG\tID:Samtools\tPN:Samtools\tCL:"$stCommand"\tPP:Tophat\tVN:VN:0.1.19-96b5f2294a"
-    libraryComment="@CO\tLIBID:${library_id}"
+    /usr/bin/tophat -p ${nthreads} -z0 -a 8 -m 0 --min-intron-length 20 --max-intron-length 1000000 \
+       --read-edit-dist 4 --read-mismatches 4 -g 20  --no-discordant --no-mixed \
+       --library-type fr-firststrand --transcriptome-index ${index_prefix} ${index_prefix} ${reads_fn}.fastq.gz
 
-    samtools view -H tophat_out/accepted_hits.bam | \
-    gawk -v HD="$HD" -v newPG="$newPG" -v library="$libraryComment" \
-       '{     if ($0 ~ /^@PG/) {PG=$0}
-         else if ($0 ~ /^@HD/) {print HD; }
-         else if($0 ~ /^@SQ/) {print $0};
-        }; END{print newPG"\n"PG"\n"library;}' > newHeader.sam
+    /usr/bin/samtools view -H tophat_out/accepted_hits.bam > header.txt
+    echo "@PG  ID:Bowtie   VN:2.1.0.0" >> header.txt
+    echo "@PG ID:Samtools VN:0.1.17.0" >> header.txt
+    echo "@CO ID:Gencode  VN:19" >> header.txt
 
-    # Add reference genome specific accessions to header
-    cat ${index_prefix}_bamCommentLines.txt >> newHeader.sam
+    /usr/bin/samtools reheader header.txt tophat_out/accepted_hits.bam > tmp.bam
+    mv tmp.bam tophat_out/accepted_hits.bam
 
+    /usr/bin/samtools reheader header.txt tophat_out/unmapped.bam > tmp.bam
+    mv tmp.bam tophat_out/unmapped.bam
     # sort before merge
 
     echo "fix unmapped bam and sort before merge"
-    perl xweiEncodeScripts/tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | \
-                          samtools view -bS - | samtools sort -m10G - sortedFixedMapped
+    perl xweiEncodeScripts/tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam tophat_out/accepted_hits.all.bam
 
-    echo "merge aligned and unaligned into single bam, using the patched up header"
-    samtools merge -h newHeader.sam out_tophat.bam sortedFixedMapped.bam tophat_out/unmapped.bam
-    samtools index out_tophat.bam
+    /usr/bin/samtools merge merged.bam tophat_out/accepted_hits.all.bam tophat_out/unmapped.bam
 
-    mv out_tophat.bam ${reads_fn}_tophat_genome.bam
-    mv out_tophat.bam.bai ${reads_fn}_tophat_genome.bai
+    mv merged.bam ${reads_fn}_tophat_genome.bam
+    /usr/bin/samtools index merged.bam merged.bai
+    mv merged.bai ${reads_fn}_tophat_genome.bai
 
     genome_bam=$(dx upload ${reads_fn}_tophat_genome.bam --brief)
     genome_bai=$(dx upload ${reads_fn}_tophat_genome.bai --brief)

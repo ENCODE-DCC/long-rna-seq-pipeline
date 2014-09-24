@@ -45,22 +45,12 @@ main() {
     # will be AppInternalError with a generic error message.
     find
 
-    echo Log.final.out
-    diff <(awk 'NR>4{print}' Log.final.out) <(awk 'NR>4{print}' *_STAR_Log.final.out) > log_diff
+    #echo Log.final.out
+    #diff <(awk 'NR>4{print}' Log.final.out) <(awk 'NR>4{print}' *_STAR_Log.final.out) > log_diff
 
-    echo `ls *diff`
     echo Aligned.sortedByCoord.out.bam
-    diff  <(/usr/bin/samtools view Aligned.sortedByCoord.out.bam) <(/usr/bin/samtools view *_STAR_genome.bam)  > star_bam_diff
+    diff  <(/usr/bin/samtools view merged.bam) <(/usr/bin/samtools view *_tophat_genome.bam)  > tophat_bam_diff
 
-    echo Quant.isoforms.results
-    #cut -f1-8 Quant.isoforms.results > iso.a.diff
-    #cut -f1-8 rsem_isoform_quant > iso.b.diff
-    #echo `ls *diff`
-    #diff iso.a.diff iso.b.diff > isoform_quant_diff
-    diff  <(cut -f1-8 Quant.isoforms.results) <(cut -f1-8 *_rsem_quant.isoforms.results) > isoform_quant_diff
-    echo Quant.genes.results
-    echo `ls *diff`
-    diff  <(cut -f1-7 Quant.genes.results) <(cut -f1-7 *_rsem_quant.genes.results) >  gene_quant_diff
 
     # don't worry about bigwigs for now
     #for ii in `cd $data_dir; ls *bw`
@@ -74,19 +64,19 @@ main() {
     # that you have used the output field name for the filename for each output,
     # but you can change that behavior to suit your needs.  Run "dx upload -h"
     # to see more options to set metadata.
-    log_diff=$(dx upload log_diff --brief)
-    bam_diff=$(dx upload star_bam_diff --brief)
-    isoform_quant_diff=$(dx upload isoform_quant_diff --brief)
-    gene_quant_diff=$(dx upload gene_quant_diff --brief)
+    #log_diff=$(dx upload log_diff --brief)
+    bam_diff=$(dx upload tophat_bam_diff --brief)
+    #isoform_quant_diff=$(dx upload isoform_quant_diff --brief)
+    #gene_quant_diff=$(dx upload gene_quant_diff --brief)
 
     # The following line(s) use the utility dx-jobutil-add-output to format and
     # add output variables to your job's output as appropriate for the output
     # class.  Run "dx-jobutil-add-output -h" for more information on what it
     # does.
 
-    dx-jobutil-add-output log_diff "$log_diff" --class=file
+    #dx-jobutil-add-output log_diff "$log_diff" --class=file
     dx-jobutil-add-output bam_diff "$bam_diff" --class=file
-    dx-jobutil-add-output isoform_quant_diff "$isoform_quant_diff" --class=file
-    dx-jobutil-add-output gene_quant_diff "$gene_quant_diff" --class=file
+    #dx-jobutil-add-output isoform_quant_diff "$isoform_quant_diff" --class=file
+    #dx-jobutil-add-output gene_quant_diff "$gene_quant_diff" --class=file
     dx-jobutil-add-output bigwig_diff "true" --class=boolean
 }
