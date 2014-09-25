@@ -66,23 +66,16 @@ main() {
        --library-type fr-firststrand --transcriptome-index ${index_prefix} ${index_prefix} ${reads_fn}.fastq.gz ${reads2_fn}.fastq.gz
 
     # Building a new header
-    echo "make new header"
-    HD="@HD\tVN:1.4\tSO:coordinate"
-    stCommand="perl tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | /usr/bin/samtools view -bS - -o - | /usr/bin/samtools sort -m10G - sortedFixedMapped; /usr/bin/samtools merge -h newHeader.sam out_tophat.bam sortedFixedMapped.bam tophat_out/unmapped.bam"
-    newPG="@PG\tID:Samtools\tPN:Samtools\tCL:"$stCommand"\tPP:Tophat\tVN:VN:0.1.19-96b5f2294a"
-    libraryComment="@CO\tLIBID:${library_id}"
+    /usr/bin/samtools view -H tophat_out/accepted_hits.bam > header.txt
+    echo "@PG  ID:Bowtie   VN:2.1.0.0" >> header.txt
+    echo "@PG ID:Samtools VN:0.1.17.0" >> header.txt
+    echo "@CO ID:Gencode  VN:19" >> header.txt
 
-    /usr/bin/samtools view -H tophat_out/accepted_hits.bam | \
-    gawk -v HD="$HD" -v newPG="$newPG" -v library="$libraryComment" \
-       '{     if ($0 ~ /^@PG/) {PG=$0}
-         else if ($0 ~ /^@HD/) {print HD; }
-         else if($0 ~ /^@SQ/) {print $0};
-        }; END{print newPG"\n"PG"\n"library;}' > newHeader.sam
+    /usr/bin/samtools reheader header.txt tophat_out/accepted_hits.bam > tmp.bam
+    mv tmp.bam tophat_out/accepted_hits.bam
 
-    # Add reference genome specific accessions to header
-    cat ${index_prefix}_bamCommentLines.txt >> newHeader.sam
-
-
+    /usr/bin/samtools reheader header.txt tophat_out/unmapped.bam > tmp.bam
+    mv tmp.bam tophat_out/unmapped.bam
     # sort before merge
 
     echo "fix unmapped bam and sort before merge"
