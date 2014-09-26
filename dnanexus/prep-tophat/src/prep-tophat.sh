@@ -16,7 +16,10 @@
 # to modify this file.
 
 main() {
-
+    annotations=$1
+    genome=$2
+    spike_in=$3
+    index_prefix="$1-$2-$3"
     echo "Value of annotations: '$annotations'"
     echo "Value of genome: '$genome'"
     echo "Value of spike_in: '$spike_in'"
@@ -100,6 +103,7 @@ main() {
     #       --GTF ${annotation_fn}.gtf --transcriptome-index=out/${index_prefix} \
     #       out/${index_prefix} tiny.fq
 
+    exit
     echo "tar and upload"
     mv *.gtf out/${index_prefix}.gtf
     echo `ls out/`
@@ -114,3 +118,4 @@ main() {
 
     dx-jobutil-add-output tophat_index $tophat_index --class=file
 }
+main $1 $2 $3

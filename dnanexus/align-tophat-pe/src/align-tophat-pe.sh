@@ -16,6 +16,11 @@
 # to modify this file.
 
 main() {
+    reads_1=$1
+    reads_2=$2
+    tophat_index=""
+    library_id="no-library"
+    nthreads=8
     echo "Value of reads: '$reads_1'"
     echo "Value of reads: '$reads_2'"
     echo "Value of tophat_index: '$tophat_index'"
@@ -37,14 +42,14 @@ main() {
     dx download "$reads_2" -o "$reads2_fn".fastq.gz
     #gunzip "$reads_fn".fastq.gz
 
-    dx download "$tophat_index" -o tophat_index.tgz
-    tar zxvf tophat_index.tgz
+    #dx download "$tophat_index" -o tophat_index.tgz
+    #tar zxvf tophat_index.tgz
 
     # unzips into "out/"
-    gff=`ls out/*.gff`
-    index_prefix=${gff%.gff}
-    echo "found $index_prefix gff file"
-
+    #gff=`ls out/*.gff`
+    index_prefix="local_test"
+    #echo "found $index_prefix gff file"
+    mkdir out
     # Fill in your application code here.
     #
     # To report any recognized errors in the correct format in
@@ -89,7 +94,7 @@ main() {
 
     mv out_tophat.bam ${reads1_fn}-${reads2_fn}_tophat_genome.bam
     mv out_tophat.bam.bai ${reads1_fn}-${reads2_fn}_tophat_genome.bai
-
+    exit
     genome_bam=$(dx upload ${reads1_fn}-${reads2_fn}_tophat_genome.bam --brief)
     genome_bai=$(dx upload ${reads1_fn}-${reads2_fn}_tophat_genome.bai --brief)
      # The following line(s) use the utility dx-jobutil-add-output to format and
@@ -100,4 +105,5 @@ main() {
     dx-jobutil-add-output genome_bam "$genome_bam" --class=file
     dx-jobutil-add-output genome_bai "$genome_bai" --class=file
 }
+main $1 $2
 
