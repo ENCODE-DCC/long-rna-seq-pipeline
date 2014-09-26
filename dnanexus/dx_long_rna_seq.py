@@ -209,12 +209,12 @@ def populate_workflow(wf, replicates, experiment, inputs, applets_project_id, ex
     if not inputs['paired']:
         star_step = 'align-star-se'
         th_step = 'align-tophat-se'
-        align_input['reads'] = dxpy.dxlink(replicates[0])
+        align_input['reads'] = replicates[0]
     else:
         star_step = 'align-star-pe'
         th_step = 'align-tophat-pe'
-        align_input['reads_1'] = dxpy.dxlink(replicates[0])
-        align_input['reads_2'] = dxpy.dxlink(replicates[1])
+        align_input['reads_1'] = replicates[0]
+        align_input['reads_2'] = replicates[1]
 
 
     align_input['star_index'] = prep_star_output
@@ -225,6 +225,7 @@ def populate_workflow(wf, replicates, experiment, inputs, applets_project_id, ex
         elif align_input.get('reads_1'):
             del align_input['reads_1']
             del align_input['reads_2']
+
     stage_id = wf.add_stage(find_applet_by_name(star_step, applets_project_id), stage_input=align_input, folder=experiment)
     star_annotation_output = dxpy.dxlink({
         'stage': stage_id,

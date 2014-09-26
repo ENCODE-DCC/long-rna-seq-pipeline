@@ -63,7 +63,7 @@ main() {
     echo "map reads"
     /usr/bin/tophat -p ${nthreads} -z0 -a 8 -m 0 --min-intron-length 20 --max-intron-length 1000000 \
        --read-edit-dist 4 --read-mismatches 4 -g 20  --no-discordant --no-mixed \
-       --library-type fr-firststrand --transcriptome-index ${index_prefix} ${index_prefix} ${reads_fn}.fastq.gz ${reads2_fn}.fastq.gz
+       --library-type fr-firststrand -G ${index_prefix}.gff --transcriptome-index ${index_prefix} ${index_prefix} ${reads_fn}.fastq.gz ${reads2_fn}.fastq.gz
 
     # Building a new header
     /usr/bin/samtools view -H tophat_out/accepted_hits.bam > header.txt

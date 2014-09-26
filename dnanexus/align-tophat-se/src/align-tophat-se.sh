@@ -62,7 +62,7 @@ main() {
 
     /usr/bin/tophat -p ${nthreads} -z0 -a 8 -m 0 --min-intron-length 20 --max-intron-length 1000000 \
        --read-edit-dist 4 --read-mismatches 4 -g 20  \
-       --library-type fr-unstranded --transcriptome-index ${index_prefix} ${index_prefix} ${reads_fn}.fastq.gz
+       --library-type fr-unstranded -G ${index_prefix}.gff --transcriptome-index ${index_prefix} ${index_prefix} ${reads_fn}.fastq.gz
 
 
     /usr/bin/samtools view -H tophat_out/accepted_hits.bam > header.txt
