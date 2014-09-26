@@ -80,7 +80,8 @@ main() {
     # to see more options to set metadata.
 
     mkdir out
-    /usr/bin/bowtie2-build --offrate 3 -f ${ref} out/${index_prefix}
+#    /usr/bin/bowtie2-build --offrate 3 -f ${ref} out/${index_prefix}
+    /usr/bin/bowtie2-build -f ${ref} out/${index_prefix}
 
     # Attempt to make bamCommentLines.txt, which should be reviewed. NOTE tabs handled by assignment.
     echo "create bam header"
@@ -100,7 +101,7 @@ main() {
     #       out/${index_prefix} tiny.fq
 
     echo "tar and upload"
-    mv *.gtf out
+    mv *.gtf out/${index_prefix}.gtf
     echo `ls out/`
     tar -czf ${index_prefix}_tophatIndex.tgz out/${index_prefix}*
 

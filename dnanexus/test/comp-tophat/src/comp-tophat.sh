@@ -48,7 +48,7 @@ main() {
     #echo Log.final.out
     #diff <(awk 'NR>4{print}' Log.final.out) <(awk 'NR>4{print}' *_STAR_Log.final.out) > log_diff
 
-    echo Aligned.sortedByCoord.out.bam
+    echo tophat.bam
     diff  <(/usr/bin/samtools view merged.bam) <(/usr/bin/samtools view *_tophat_genome.bam)  > tophat_bam_diff
 
 
