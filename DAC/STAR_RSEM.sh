@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # STAR mapping / RSEM quantification pipeline
 # usage: from an empty working directory, run
 # ./STAR_RSEM.sh (read1) (read2 or "") (STARgenomeDir) (RSEMrefDir) (dataType) 
@@ -9,6 +11,8 @@ read2=$2 #gzipped fastq file for read1, use "" if single-end
 STARgenomeDir=$3 
 RSEMrefDir=$4
 dataType=$5 # RNA-seq type, possible values: str_SE str_PE unstr_SE unstr_PE
+nThreadsSTAR=$6 # number of threads for STAR
+nThreadsRSEM=$7 # number of threads for RSEM
 
 # output: all in the working directory, fixed names
 # Aligned.sortedByCoord.out.bam                 # alignments, standard sorted BAM, agreed upon formatting
@@ -32,7 +36,7 @@ STARparCommon=" --genomeDir $STARgenomeDir  --readFilesIn $read1 $read2   --outS
  --alignSJoverhangMin 8   --alignSJDBoverhangMin 1 --readFilesCommand zcat "
 
 # STAR parameters: run-time, controlled by DCC
-STARparRun="--runThreadN 12 --genomeLoad LoadAndKeep"
+STARparRun=" --runThreadN $nThreadsSTAR --genomeLoad LoadAndKeep"
 
 # STAR parameters: type of BAM output: quantification or sorted BAM or both
 #     OPTION: sorted BAM output
@@ -76,7 +80,10 @@ $STAR $STARparCommon $STARparRun $STARparBAM $STARparStrand $STARparsMeta
 ###### bedGraph generation, now decoupled from STAR alignment step
 # working subdirectory for this STAR run
 mkdir Signal
+
+echo $STAR --runMode inputAlignmentsFromBAM   --inputBAMfile Aligned.sortedByCoord.out.bam --outWigType bedGraph $STARparWig --outFileNamePrefix ./Signal/ --outWigReferencesPrefix chr
 $STAR --runMode inputAlignmentsFromBAM   --inputBAMfile Aligned.sortedByCoord.out.bam --outWigType bedGraph $STARparWig --outFileNamePrefix ./Signal/ --outWigReferencesPrefix chr
+
 # move the signal files from the subdirectory
 mv Signal/Signal*bg .
 
@@ -115,11 +122,23 @@ esac
 
 ######### RSEM
 
+#### prepare for RSEM: sort transcriptome BAM to ensure the order of the reads, to make RSEM output (not pme) deterministic
+trBAMsortRAM=60G
+
+mv Aligned.toTranscriptome.out.bam Tr.bam 
+
+set -v
+cat <( samtools view -H Tr.bam ) <( samtools view -@ $nThreadsRSEM Tr.bam | awk '{printf $0 " "; getline; print}' | sort -S $trBAMsortRAM -T ./ | tr ' ' '\n' ) | samtools view -@ $nThreadsRSEM -bS - > Aligned.toTranscriptome.out.bam
+set +v
+
+'rm' Tr.bam
+
+
 # RSEM parameters: common
 RSEMparCommon="--bam --estimate-rspd  --calc-ci --no-bam-output --seed 12345"
 
 # RSEM parameters: run-time, number of threads and RAM in MB
-RSEMparRun="-p 12 --ci-memory 30000"
+RSEMparRun=" -p $nThreadsRSEM --ci-memory 30000 "
 
 # RSEM parameters: data type dependent
 
@@ -144,7 +163,7 @@ esac
 
 
 ###### RSEM command
-echo $RSEM $RSEMparCommon $RSEMparRun $RSEMparType Aligned.toTranscriptome.out.bam $RSEMrefDir Quant
+echo $RSEM $RSEMparCommon $RSEMparRun $RSEMparType Aligned.toTranscriptome.out.bam $RSEMrefDir Quant >& Log.rsem
 $RSEM $RSEMparCommon $RSEMparRun $RSEMparType Aligned.toTranscriptome.out.bam $RSEMrefDir Quant >& Log.rsem
 
 ###### RSEM diagnostic plot creation
