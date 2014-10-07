@@ -62,7 +62,7 @@ main() {
 
     echo "dowload and install STAR"
     git clone https://github.com/alexdobin/STAR
-    (cd STAR; git checkout tags/STAR_2.4.0a)
+    (cd STAR; git checkout tags/STAR_2.4.0d)
     (cd STAR; make)
 
     echo "map reads"
