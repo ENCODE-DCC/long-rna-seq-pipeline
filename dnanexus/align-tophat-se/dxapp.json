@@ -16,7 +16,7 @@
     },
     {
       "name": "tophat_index",
-      "label": "Genome indexed for tophat",
+      "label": "Genome and transcriptome indexed for tophat",
       "class": "file",
       "optional": false
     },
