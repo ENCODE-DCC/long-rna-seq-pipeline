@@ -50,8 +50,8 @@ main() {
     # Fill in your application code here.
 
     mkdir out
-    bowtie2-build --offrate 3 -f ${ref} out/$geno_prefix
-    #bowtie2-build -f ${ref} out/$geno_prefix
+    #bowtie2-build --offrate 3 -f ${ref} out/$geno_prefix  ### Definitely has an effect on results
+    bowtie2-build -f ${ref} out/$geno_prefix
     # make sure the combined fa file is preserved in the archive, so that it isn't rebuilt each time
     bowtie2-inspect out/$geno_prefix > out/$geno_prefix.fa
 
