@@ -127,9 +127,16 @@ trBAMsortRAM=60G
 
 mv Aligned.toTranscriptome.out.bam Tr.bam 
 
-set -v
-cat <( samtools view -H Tr.bam ) <( samtools view -@ $nThreadsRSEM Tr.bam | awk '{printf $0 " "; getline; print}' | sort -S $trBAMsortRAM -T ./ | tr ' ' '\n' ) | samtools view -@ $nThreadsRSEM -bS - > Aligned.toTranscriptome.out.bam
-set +v
+case "$dataType" in
+str_SE|unstr_SE)
+      # single-end data
+      cat <( samtools view -H Tr.bam ) <( samtools view -@ $nThreadsRSEM Tr.bam | sort -S $trBAMsortRAM -T ./ ) | samtools view -@ $nThreadsRSEM -bS - > Aligned.toTranscriptome.out.bam
+      ;;
+str_PE|unstr_PE)
+      # paired-end data, merge mates into one line before sorting, and un-merge after sorting
+      cat <( samtools view -H Tr.bam ) <( samtools view -@ $nThreadsRSEM Tr.bam | awk '{printf $0 " "; getline; print}' | sort -S $trBAMsortRAM -T ./ | tr ' ' '\n' ) | samtools view -@ $nThreadsRSEM -bS - > Aligned.toTranscriptome.out.bam
+      ;;
+esac
 
 'rm' Tr.bam
 
