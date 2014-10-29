@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if [ ! -n $1 ] || [ $# -lt 2 ] || [ $1 == "?" ] || [ $1 == "-h" ]; then  
+    echo "Usage: $0 {file1} {file2} [--raw|--ff]"
+    echo "       'diff side-by-side' counts lines differing between two files" 
+    echo "       --raw   opptionally returns raw output of just those lines that differ" 
+    echo "       --ff    opptionally returns raw output of simple diff (not side-by-side)" 
+    exit 1
+fi
+
+if [ $# -gt 2 ]; then
+    if [ $3 == "-raw" ] || [ $3 == "--raw" ] || [ $3 == "raw" ]; then
+        >&2 echo raw side-by-side output to stdout
+        diff --speed-large-files --suppress-common-lines -y $1 $2
+    elif [ $3 == "-ff" ] || [ $3 == "--ff" ] || [ $3 == "ff" ]; then
+        >&2 echo raw diff output to stdout
+        diff $1 $2
+    fi
+else
+    diff --speed-large-files --suppress-common-lines -y $1 $2 | wc -l
+fi
+
+
+

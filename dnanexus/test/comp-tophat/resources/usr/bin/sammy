@@ -1,0 +1,54 @@
+#!/bin/bash
+
+if [ $# -ge 2 ] && [ -e ${2} ]; then  
+    fileRoot=${2%.bam}
+    samfast=""
+    sortfast=""
+    if [ $# -ge 3 ]; then
+        if  [ $3 == "--fast" ] ||  [ $3 == "-fast" ] || [ $3 == "-f" ]; then  
+            samfast="-@ 8"
+            sortfast="-S 60G -T ./"
+        fi
+    fi
+
+    if [ $1 == "--all" ] ||  [ $1 == "-all" ] || [ $1 == "-a" ]; then
+        samtools view $samfast ${fileRoot}.bam | \
+            sort -k1,1 -k2,2n ${sortfast} > ${fileRoot}.sam
+        exit 0
+    elif [ $1 == "--head" ] ||  [ $1 == "-head" ]; then
+        samtools view -H ${fileRoot}.bam > ${fileRoot}_head.sam
+        exit 0
+    elif [ $1 == "--mapped" ] ||  [ $1 == "-mapped" ] || [ $1 == "-m" ]; then
+        samtools view $samfast -F 4 ${fileRoot}.bam | \
+            sort -k1,1 -k2,2n ${sortfast} > ${fileRoot}_mapped.sam
+        exit 0
+    elif [ $1 == "--multi" ] ||  [ $1 == "-multi" ]; then
+        samtools view $samfast -F 4 ${fileRoot}.bam | grep -v -w "NH\:i\:1" | \
+            sort -k1,1 -k2,2n ${sortfast} > ${fileRoot}_multi.sam
+        exit 0
+    elif [ $1 == "--unmapped" ] ||  [ $1 == "-unmapped" ]; then
+        samtools view $samfast -f 4 ${fileRoot}.bam | \
+            sort -k1,1 -k2,2n ${sortfast} > ${fileRoot}_unmapped.sam
+        exit 0
+    elif [ $1 == "--uniq" ] ||  [ $1 == "-uniq" ] || [ $1 == "-u" ]; then
+        samtools view $samfast -F 260 ${fileRoot}.bam | grep -w "NH\:i\:1" | \
+            sort -k1,1 -k2,2n ${sortfast} > ${fileRoot}_uniq.sam
+        #samtools view -F 260 $1.bam | \
+        #awk 'BEGIN{OFS="\t"}{k=12; while($k!=""){split($k,a,":"); if((a[1]=="NH")&&(a[3]==1)){print} k++}}' | \
+        #sort -k1,1 -k2,2n  > $1_uniq.sam
+        exit 0
+    fi
+fi
+
+echo "Usage: $0 <--all|--head|--mapped|--multi|--uniq|--unmapped> {bamfile} [--fast]"
+echo "        filters/sorts a bam down to the raw sam without header lines." 
+echo " --all       no filter, includes all sam lines in '{fileroot}.sam'" 
+echo " --head      includes only the header in '{fileroot}_head.sam'" 
+echo " --mapped    includes only mapped reads in '{fileroot}_mapped.sam'" 
+echo " --multi     includes only multi-mapped reads in '{fileroot}_multi.sam'" 
+echo " --uniq      includes only uniquely mapped reads in '{fileroot}_uniq.sam'" 
+echo " --unmapped  includes only unmapped reads in '{fileroot}_unmapped.sam'" 
+echo " --fast      Process with multiple threads and large memory (requires samtools >= 0.1.19)" 
+exit 1
+
+
