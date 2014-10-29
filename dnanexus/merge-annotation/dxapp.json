@@ -17,7 +17,7 @@
     ]
   },
   "summary": "Takes GENCODE and spike-ins and creates a single GTF file for quantitation",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "inputSpec": [
     {
       "optional": false,

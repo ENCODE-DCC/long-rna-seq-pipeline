@@ -27,7 +27,7 @@
     ]
   },
   "summary": "Prepare reference genome and transcriptome indexes for STAR used in the ENCODE long-rna-seq pipeline",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "inputSpec": [
     {
       "class": "file",
@@ -46,12 +46,6 @@
       "optional": true,
       "name": "spike_in",
       "label": "Spike-in RNA sequences (fasta)"
-    },
-    {
-      "class": "string",
-      "optional": false,
-      "name": "index_prefix",
-      "label": "Prefix for Index files"
     }
   ],
   "dxapi": "1.0.0",

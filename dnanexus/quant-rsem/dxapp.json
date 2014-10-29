@@ -3,7 +3,7 @@
   "title": "Long-RNA-Seq-quantitate-RSEM",
   "summary": "Do genome and transcription quantitations with RSEM from STAR alignments",
   "dxapi": "1.0.0",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "categories": [
     "ENCODE"
   ],
@@ -16,14 +16,8 @@
     },
     {
       "name": "rsem_index",
-      "label": "Genome indexed for RSEM",
+      "label": "Genome indexed for RSEM (tar.gz file)",
       "class": "file",
-      "optional": false
-    },
-    {
-      "name": "read_prefix",
-      "label": "Label for output files (from reads ENCFF)",
-      "class": "string",
       "optional": false
     },
     {
@@ -36,12 +30,6 @@
     {
       "name": "paired",
       "label": "Library was paired ended",
-      "class": "boolean",
-      "optional": false
-    },
-    {
-      "name": "stranded",
-      "label": "Library was stranded",
       "class": "boolean",
       "optional": false
     },

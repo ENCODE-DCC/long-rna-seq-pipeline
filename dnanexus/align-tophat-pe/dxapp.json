@@ -3,7 +3,7 @@
   "title": "Long-RNA-Seq-align-tophat-pe",
   "summary": "Align Paired-ended reads to genome and transcriptome using tophat for the ENCODE long-rna-peq pipeline",
   "dxapi": "1.0.0",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "categories": [
     "ENCODE"
   ],

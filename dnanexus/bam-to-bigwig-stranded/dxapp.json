@@ -3,7 +3,7 @@
   "title": "Long-RNA-Seq-BAM-to-BW-tophat-stranded",
   "summary": "Converts BAMs from tophat alignments from stranded libraries to bigwig format",
   "dxapi": "1.0.0",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "categories": [
     "ENCODE"
   ],
@@ -15,14 +15,8 @@
       "optional": false
     },
     {
-      "name": "bai_file",
-      "label": "Input BAM index (BAI) file for all mapped reads",
-      "class": "file",
-      "optional": false
-    },
-    {
-      "name": "star_index",
-      "label": "Genome Index files from STAR (need ChrNameLength.txt)",
+      "name": "chrom_sizes",
+      "label": "chomosome/name length file",
       "class": "file",
       "optional": false
     }
@@ -47,11 +41,39 @@
       "name": "unique_minus_bw",
       "label": "BigWig file of uniquely mapped minus-stranded reads",
       "class": "file"
+    },
+    {
+      "name": "minusAll_bg",
+      "label": "Temporary bedGraph file",
+      "class": "file"
+    },
+    {
+      "name": "plusAll_bg",
+      "label": "Temporary bedGraph file",
+      "class": "file"
+    },
+    {
+      "name": "minusUniq_bg",
+      "label": "Temporary bedGraph file",
+      "class": "file"
+    },
+    {
+      "name": "plusUniq_bg",
+      "label": "Temporary bedGraph file",
+      "class": "file"
     }
   ],
   "runSpec": {
     "interpreter": "bash",
-    "file": "src/bam-to-bigwig-stranded.sh"
+    "file": "src/bam-to-bigwig-stranded.sh",
+    "systemRequirements": {
+      "main": {
+        "instanceType": "mem3_hdd2_x8"
+      },
+      "myEntryPoint": {
+        "instanceType": "mem3_hdd2_x8"
+      }
+    }
   },
   "access": {
     "network": [

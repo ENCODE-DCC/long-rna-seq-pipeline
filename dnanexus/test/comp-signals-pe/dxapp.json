@@ -1,68 +1,56 @@
 {
-  "name": "comp-star-rsem",
-  "title": "Compares STAR/RSEM output to Alex",
-  "summary": "comp-star-rsem",
+  "name": "comp-signals-pe",
+  "title": "Compares bedGrah signal files from two paired-end STAR or TopHat alignments",
+  "summary": "comp-signals-pe",
   "dxapi": "1.0.0",
   "version": "0.0.2",
   "categories": [],
   "inputSpec": [
     {
-      "name": "set1_log_final",
-      "label": "set1_log_final file",
+      "name": "set1_minus_all",
+      "label": "set1_minus_all file",
       "class": "file",
       "optional": false
     },
     {
-      "name": "set2_log_final",
-      "label": "set2_log_final file",
+      "name": "set2_minus_all",
+      "label": "set2_minus_all file",
       "class": "file",
       "optional": false
     },
     {
-      "name": "set1_genome_bam",
-      "label": "set1_genome_bam file",
+      "name": "set1_minus_uniq",
+      "label": "set1_minus_uniq file",
       "class": "file",
       "optional": false
     },
     {
-      "name": "set2_genome_bam",
-      "label": "set2_genome_bam file",
+      "name": "set2_minus_uniq",
+      "label": "set2_minus_uniq file",
       "class": "file",
       "optional": false
     },
     {
-      "name": "set1_anno_bam",
-      "label": "set1_anno_bam file",
+      "name": "set1_plus_all",
+      "label": "set1_plus_all file",
       "class": "file",
       "optional": false
     },
     {
-      "name": "set2_anno_bam",
-      "label": "set2_anno_bam file",
+      "name": "set2_plus_all",
+      "label": "set2_plus_all file",
       "class": "file",
       "optional": false
     },
     {
-      "name": "set1_isoform_results",
-      "label": "set1_isoform_results file",
+      "name": "set1_plus_uniq",
+      "label": "set1_plus_uniq file",
       "class": "file",
       "optional": false
     },
     {
-      "name": "set2_isoform_results",
-      "label": "set2_isoform_results file",
-      "class": "file",
-      "optional": false
-    },
-    {
-      "name": "set1_gene_results",
-      "label": "set1_gene_results file",
-      "class": "file",
-      "optional": false
-    },
-    {
-      "name": "set2_gene_results",
-      "label": "set2_gene_results file",
+      "name": "set2_plus_uniq",
+      "label": "set2_plus_uniq file",
       "class": "file",
       "optional": false
     }
@@ -76,7 +64,7 @@
   ],
   "runSpec": {
     "interpreter": "bash",
-    "file": "src/comp-star-rsem.sh",
+    "file": "src/comp-signals-pe.sh",
     "execDepends": [
       {"name":"gawk"}
     ],

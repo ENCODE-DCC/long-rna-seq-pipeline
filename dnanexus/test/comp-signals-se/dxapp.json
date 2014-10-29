@@ -1,20 +1,32 @@
 {
-  "name": "comp-tophat",
-  "title": "Compares two tophat bams",
-  "summary": "comp-tophat",
+  "name": "comp-signals-se",
+  "title": "Compares bedGrah signal files from two single-end STAR or TopHat alignments",
+  "summary": "comp-signals-se",
   "dxapi": "1.0.0",
   "version": "0.0.2",
   "categories": [],
   "inputSpec": [
     {
-      "name": "set1_bam",
-      "label": "set1_bam file",
+      "name": "set1_all",
+      "label": "set1_all file",
       "class": "file",
       "optional": false
     },
     {
-      "name": "set2_bam",
-      "label": "set2_bam file",
+      "name": "set2_all",
+      "label": "set2_all file",
+      "class": "file",
+      "optional": false
+    },
+    {
+      "name": "set1_uniq",
+      "label": "set1_uniq file",
+      "class": "file",
+      "optional": false
+    },
+    {
+      "name": "set2_uniq",
+      "label": "set2_uniq file",
       "class": "file",
       "optional": false
     }
@@ -28,7 +40,7 @@
   ],
   "runSpec": {
     "interpreter": "bash",
-    "file": "src/comp-tophat.sh",
+    "file": "src/comp-signals-se.sh",
     "execDepends": [
       {"name":"gawk"}
     ],

@@ -3,7 +3,7 @@
   "title": "Long-RNA-Seq-align-star-pe",
   "summary": "Align Single-ended (plus) reads to genome and transcriptome using STAR for the ENCODE long-rna-peq pipeline",
   "dxapi": "1.0.0",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "categories": [
     "ENCODE"
   ],
@@ -64,26 +64,6 @@
     {
       "name": "annotation_bam",
       "label": "BAM file fo alignment to the annotation (transcriptome)",
-      "class": "file"
-    },
-    {
-      "name": "all_plus_bw",
-      "label": "BigWig file of all plus-stranded reads",
-      "class": "file"
-    },
-    {
-      "name": "unique_plus_bw",
-      "label": "BigWig file of uniquely mapped plus-stranded reads",
-      "class": "file"
-    },
-    {
-      "name": "all_minus_bw",
-      "label": "BigWig file of all minus-stranded reads",
-      "class": "file"
-    },
-    {
-      "name": "unique_minus_bw",
-      "label": "BigWig file of uniquely mapped minus-stranded reads",
       "class": "file"
     }
   ],

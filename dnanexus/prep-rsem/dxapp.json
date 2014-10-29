@@ -3,7 +3,7 @@
   "title": "Long-RNA-Seq-prep-rsem-genome",
   "summary": "Prepare reference genome and transcriptome indexes for RSEM used in the ENCODE long-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "categories": [
     "ENCODE"
   ],
@@ -25,12 +25,6 @@
       "label": "Spike-in RNA sequences (fasta)",
       "class": "file",
       "optional": true
-    },
-    {
-      "name": "index_prefix",
-      "label": "Prefix for Index files",
-      "class": "string",
-      "optional": false
     }
   ],
   "outputSpec": [
