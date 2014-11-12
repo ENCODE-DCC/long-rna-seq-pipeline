@@ -80,12 +80,12 @@ main() {
     samtools index merged.bam
 
     # TODO: shouldn't there be an run identifier here?
-    mv merged.bam ${reads_fn}_tophat_aligned.bam
-    mv merged.bam.bai ${reads_fn}_tophat_aligned.bam.bai
+    mv merged.bam ${reads_fn}_tophat.bam
+    mv merged.bam.bai ${reads_fn}_tophat.bam.bai
 
     echo "* Upload results..."
-    genome_bam=$(dx upload ${reads_fn}_tophat_aligned.bam --brief)
-    genome_bai=$(dx upload ${reads_fn}_tophat_aligned.bam.bai --brief)
+    genome_bam=$(dx upload ${reads_fn}_tophat.bam --brief)
+    genome_bai=$(dx upload ${reads_fn}_tophat.bam.bai --brief)
     dx-jobutil-add-output genome_bam "$genome_bam" --class=file
     dx-jobutil-add-output genome_bai "$genome_bai" --class=file
     echo "* Finished."

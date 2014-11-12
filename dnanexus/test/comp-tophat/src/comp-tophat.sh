@@ -28,25 +28,25 @@ main() {
     dx download "$set1_bam"
     dx download "$set2_bam"
 
-    echo " " >>  ${log_diff_fn}
-    echo "* Comparing all reads [$set1_bam_fn] to [$set2_bam_fn]..." | tee -a ${log_diff_fn}
-    rm -f *.sam
-    samtools view -@ 8 ${set1_bam_fn} > ${set1_bam_fn%.bam}.sam 
-    samtools view -@ 8 ${set2_bam_fn} > ${set2_bam_fn%.bam}.sam
-    #sammy --all ${set1_bam_fn} --fast  # sammy sorts
-    #sammy --all ${set2_bam_fn} --fast
-    echo "Lines:" | tee -a ${log_diff_fn} 
-    wc -l *.sam | tee -a ${log_diff_fn} 
-    echo "md5sum:" | tee -a ${log_diff_fn} 
-    md5sum *.sam | tee -a ${log_diff_fn}
+    #echo " " >>  ${log_diff_fn}
+    #echo "* Comparing all reads [$set1_bam_fn] to [$set2_bam_fn]..." | tee -a ${log_diff_fn}
+    #rm -f *.sam
+    #samtools view -@ 8 ${set1_bam_fn} > ${set1_bam_fn%.bam}.sam 
+    #samtools view -@ 8 ${set2_bam_fn} > ${set2_bam_fn%.bam}.sam
+    ##sammy --all ${set1_bam_fn} --fast  # sammy sorts
+    ##sammy --all ${set2_bam_fn} --fast
+    #echo "- Lines:" | tee -a ${log_diff_fn} 
+    #wc -l *.sam | tee -a ${log_diff_fn} 
+    #echo "- md5sum:" | tee -a ${log_diff_fn} 
+    #md5sum *.sam | tee -a ${log_diff_fn}
 
     echo " " >>  ${log_diff_fn}
     echo "* Comparing uniquely mapped [$set1_bam_fn] to [$set2_bam_fn]..." | tee -a ${log_diff_fn}
     sammy --uniq ${set1_bam_fn} --fast 
     sammy --uniq ${set2_bam_fn} --fast
-    echo "Lines:" | tee -a ${log_diff_fn} 
+    echo "- Lines:" | tee -a ${log_diff_fn} 
     wc -l *_uniq.sam | tee -a ${log_diff_fn} 
-    echo "md5sum:" | tee -a ${log_diff_fn} 
+    echo "- md5sum:" | tee -a ${log_diff_fn} 
     md5sum *_uniq.sam | tee -a ${log_diff_fn}
     #echo "Split and diff:" | tee -a ${log_diff_fn} 
     #rm -f splitFile?_* 
@@ -62,11 +62,11 @@ main() {
     echo "* Comparing multi-mapped [$set1_bam_fn] to [$set2_bam_fn]..." | tee -a ${log_diff_fn}
     sammy --multi ${set1_bam_fn} --fast 
     sammy --multi ${set2_bam_fn} --fast 
-    echo "Lines:" | tee -a ${log_diff_fn} 
+    echo "- Lines:" | tee -a ${log_diff_fn} 
     wc -l *_multi.sam | tee -a ${log_diff_fn} 
-    echo "md5sum:" | tee -a ${log_diff_fn} 
+    echo "- md5sum:" | tee -a ${log_diff_fn} 
     md5sum *_multi.sam | tee -a ${log_diff_fn}
-    echo "Split and diff:" | tee -a ${log_diff_fn} 
+    echo "- Split and diff:" | tee -a ${log_diff_fn} 
     rm -f splitFile?_* 
     split -l 10000000 ${bam1}_multi.sam splitFile1_ 
     split -l 10000000 ${bam2}_multi.sam splitFile2_ 
@@ -74,6 +74,14 @@ main() {
         diss $f splitFile2_${f#splitFile1_} | tee -a ${log_diff_fn}
     done
     ##diff ${bam1}_multi.sam ${bam2}_multi.sam | head | wc -l | tee -a ${log_diff_fn} 
+    echo "- Without sam flag:" | tee -a ${log_diff_fn} 
+    cat ${bam1}_multi.sam | cut -f1,3- | grep -v -w NH\:i\:20 | sort > ${bam1}_multiClip.sam
+    cat ${bam2}_multi.sam | cut -f1,3- | grep -v -w NH\:i\:20 | sort > ${bam2}_multiClip.sam
+    diss ${bam1}_multiClip.sam ${bam2}_multiClip.sam | tee -a ${log_diff_fn} 
+    echo "- Without multi >= 20:" | tee -a ${log_diff_fn} 
+    grep -v -w NH\:i\:20 ${bam1}_multiClip.sam > ${bam1}_multiClipN20.sam
+    grep -v -w NH\:i\:20 ${bam2}_multiClip.sam > ${bam2}_multiClipN20.sam
+    diss ${bam1}_multiClipN20.sam ${bam2}_multiClipN20.sam | tee -a ${log_diff_fn} 
 
 
     echo " " >>  ${log_diff_fn}

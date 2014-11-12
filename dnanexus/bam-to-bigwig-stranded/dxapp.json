@@ -1,7 +1,7 @@
 {
   "name": "bam-to-bigwig-stranded",
-  "title": "Long-RNA-Seq-BAM-to-BW-tophat-stranded",
-  "summary": "Converts BAMs from tophat alignments from stranded libraries to bigwig format",
+  "title": "Long-RNA-Seq-BAM-to-BW-stranded",
+  "summary": "Converts BAMs from alignments from stranded libraries to bigwig format",
   "dxapi": "1.0.0",
   "version": "0.0.2",
   "categories": [

@@ -31,16 +31,16 @@ main() {
     echo "* Comparing STAR Genome aligned bam [$set1_genome_bam_fn] to [$set2_genome_bam_fn]..." | tee -a ${log_diff_fn}
     dx download "$set1_genome_bam"
     dx download "$set2_genome_bam"
-    samtools view -@ 8 ${set1_genome_bam_fn} > ${set1_genome_bam_fn%.bam}.sam 
-    samtools view -@ 8 ${set2_genome_bam_fn} > ${set2_genome_bam_fn%.bam}.sam
+    samtools view -@ 8 ${set1_genome_bam_fn} > ${set1_genome_bam_fn%.bam}_geno.sam 
+    samtools view -@ 8 ${set2_genome_bam_fn} > ${set2_genome_bam_fn%.bam}_geno.sam
     echo "- Lines:" | tee -a ${log_diff_fn} 
-    wc -l *_genome.sam | tee -a ${log_diff_fn} 
+    wc -l *_geno.sam | tee -a ${log_diff_fn} 
     echo "- md5sum:" | tee -a ${log_diff_fn} 
-    md5sum *_genome.sam | tee -a ${log_diff_fn}
+    md5sum *_geno.sam | tee -a ${log_diff_fn}
     #echo "Split and diff:" | tee -a ${log_diff_fn}
     #rm -f splitFile?_* 
-    #split -l 10000000 ${set1_genome_bam_fn%.bam}.sam splitFile1_ 
-    #split -l 10000000 ${set2_genome_bam_fn%.bam}.sam splitFile2_ 
+    #split -l 10000000 ${set1_genome_bam_fn%.bam}_geno.sam splitFile1_ 
+    #split -l 10000000 ${set2_genome_bam_fn%.bam}_geno.sam splitFile2_ 
     #for f in `ls splitFile1_??`; do
     #    diss $f splitFile2_${f#splitFile1_} | tee -a ${log_diff_fn}
     #done
@@ -53,16 +53,16 @@ main() {
     echo "* Comparing STAR Annotation aligned bam [$set1_anno_bam_fn] to [$set2_anno_bam_fn]..." | tee -a ${log_diff_fn}
     dx download "$set1_anno_bam"
     dx download "$set2_anno_bam"
-    samtools view -@ 8 ${set1_anno_bam_fn} > ${set1_anno_bam_fn%.bam}.sam 
-    samtools view -@ 8 ${set2_anno_bam_fn} > ${set2_anno_bam_fn%.bam}.sam
+    samtools view -@ 8 ${set1_anno_bam_fn} > ${set1_anno_bam_fn%.bam}_anno.sam 
+    samtools view -@ 8 ${set2_anno_bam_fn} > ${set2_anno_bam_fn%.bam}_anno.sam
     echo "- Lines:" | tee -a ${log_diff_fn} 
     wc -l *_anno.sam | tee -a ${log_diff_fn} 
     echo "- md5sum:" | tee -a ${log_diff_fn} 
     md5sum *_anno.sam | tee -a ${log_diff_fn}
     #echo "Split and diff:" | tee -a ${log_diff_fn} 
     #rm -f splitFile?_* 
-    #split -l 10000000 ${set1_anno_bam_fn%.bam}.sam splitFile1_ 
-    #split -l 10000000 ${set2_anno_bam_fn%.bam}.sam splitFile2_ 
+    #split -l 10000000 ${set1_anno_bam_fn%.bam}_anno.sam splitFile1_ 
+    #split -l 10000000 ${set2_anno_bam_fn%.bam}_anno.sam splitFile2_ 
     #for f in `ls splitFile1_??`; do
     #    diss $f splitFile2_${f#splitFile1_} | tee -a ${log_diff_fn}
     #done

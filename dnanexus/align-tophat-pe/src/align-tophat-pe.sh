@@ -71,7 +71,7 @@ main() {
     cat ${geno_prefix}_bamCommentLines.txt >> newHeader.sam
 
     echo "* Fix unmapped bam and sort before merge..."
-    perl tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | \
+    perl /usr/bin/tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | \
                 samtools view -bS - | samtools sort - mapped_fixed
 
     echo "* Merge aligned and unaligned into single bam, using the patched up header..."
@@ -79,12 +79,12 @@ main() {
     samtools index merged.bam
 
     # TODO: shouldn't there be an run identifier here?
-    mv merged.bam ${reads1_fn}-${reads2_fn}_tophat_aligned.bam
-    mv merged.bam.bai ${reads1_fn}-${reads2_fn}_tophat_aligned.bam.bai
+    mv merged.bam ${reads1_fn}-${reads2_fn}_tophat.bam
+    mv merged.bam.bai ${reads1_fn}-${reads2_fn}_tophat.bam.bai
 
     echo "* Upload results..."
-    genome_bam=$(dx upload ${reads1_fn}-${reads2_fn}_tophat_aligned.bam --brief)
-    genome_bai=$(dx upload ${reads1_fn}-${reads2_fn}_tophat_aligned.bam.bai --brief)
+    genome_bam=$(dx upload ${reads1_fn}-${reads2_fn}_tophat.bam --brief)
+    genome_bai=$(dx upload ${reads1_fn}-${reads2_fn}_tophat.bam.bai --brief)
     dx-jobutil-add-output genome_bam "$genome_bam" --class=file
     dx-jobutil-add-output genome_bai "$genome_bai" --class=file
     echo "* Finished."

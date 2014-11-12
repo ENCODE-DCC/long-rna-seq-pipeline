@@ -1,7 +1,7 @@
 {
   "name": "bam-to-bigwig-unstranded",
-  "title": "Long-RNA-Seq-BAM-to-BW-tophat-unstranded",
-  "summary": "Converts BAMs from tophat alignments from unstranded libraries to bigwig format",
+  "title": "Long-RNA-Seq-BAM-to-BW-unstranded",
+  "summary": "Converts BAMs from alignments from unstranded libraries to bigwig format",
   "dxapi": "1.0.0",
   "version": "0.0.2",
   "categories": [
