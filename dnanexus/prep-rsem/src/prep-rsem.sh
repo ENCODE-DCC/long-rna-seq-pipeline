@@ -66,9 +66,9 @@ main() {
 
     echo "* Tar and upload..."
     echo `ls out/*`
-    tar -czf ${genome_fn}_${annotation_fn}__rsemIndex.tgz out/*
+    tar -czf ${genome_fn}_${annotation_fn}_rsemIndex.tgz out/*
 
-    rsem_index=$(dx upload ${genome_fn}_${annotation_fn}__rsemIndex.tgz --brief)
+    rsem_index=$(dx upload ${genome_fn}_${annotation_fn}_rsemIndex.tgz --brief)
     dx-jobutil-add-output rsem_index $rsem_index --class=file
     echo "* Finished."
 }

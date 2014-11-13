@@ -50,13 +50,13 @@ STEPS = {
     # for each step: app, list of any params, inputs and results (both as fileToken: app_obj_name)
     'concatR1': {
                 'app':     'concat-fastqs',
-                'params':  { 'concatR1root': 'outfile_root' },
+                'params':  { 'rootR1': 'outfile_root' },
                 'inputs':  { 'reads1_set': 'fastq_files' },
                 'results': { 'reads1': 'combined_fastq' }
                 },
     'concatR2': {
                 'app':     'concat-fastqs',
-                'params':  { 'concatR1root': 'outfile_root' },
+                'params':  { 'rootR2': 'outfile_root' },
                 'inputs':  { 'reads2_set': 'fastq_files' },
                 'results': { 'reads2': 'combined_fastq' }
                 },
@@ -198,8 +198,7 @@ GENOME_REFERENCES = {
 APPLETS = {}
 # Used for caching applets that might be called more than once in pipeline
 FILES = {}
-# Used for caching files that might be called more than once in pipeline
-# NOTE: Currently this contains find_data_objects() DICTs, could change to use dxlinks
+# Used for caching file dxlinks that might be needed more than once in building the workflow
 
 def get_args():
     '''Parse the input arguments.'''
@@ -326,7 +325,7 @@ def pipelineSpecificExtras(organism, gender, annotation, experiment, replicate, 
     extras['name']  += experiment+"_rep"+replicate
     extras['subTitle'] = organism+", "+gender+" and annotation '"+annotation+"'."
 
-    # Non-file app innputs
+    # Non-file app inputs
     extras['rootR1'] = experiment + 'rep' + replicate + '_concatR1'
     extras['rootR2'] = experiment + 'rep' + replicate + '_concatR2'
     ### LRNA specific
@@ -386,25 +385,21 @@ def findFile(filePath,project=None,verbose=False,multiple=False):
             return None
         fids = []
         for fileDict in fileDicts:
-            FILES[fileDict['id']] = fileDict
+            FILES[fileDict['id']] = dxpy.dxlink(fileDict)
             fids += [ fileDict['id'] ]
         return fids
     else:
         #print "- FOUND '" + proj + ":" + filePath + "'."
-        #print fileDicts[0]
-        #print dxpy.is_dxlink(fileDicts[0])
-        #print dxpy.dxlink(fileDicts[0])
-        FILES[fileDicts[0]['id']] = fileDicts[0] #dxpy.dxlink(fileDicts[0])
+        FILES[fileDicts[0]['id']] = dxpy.dxlink(fileDicts[0])
         return fileDicts[0]['id']
 
 def moveFiles(fids, folder, projectId):
     '''Moves files to supplied folder.  Expected to be in the same project.'''
     for fid in fids:
-        fileDict = FILES[fid]
-        dxFile = dxpy.DXFile(dxid=fid, project=fileDict['project'])
-        fileName = dxFile.describe()['name']
+        fileDict = dxpy.describe(FILES[fid]) # FILES contain dxLinks
         if fileDict['project'] != projectId:
-            print "ERROR: Failed to move '" + fileName + "' as it is not in '" + projectId + "'."
+            print "ERROR: Failed to move '" + fileDict['name'] + "' as it is not in '" + \
+                                                                                projectId + "'."
             sys.exit(1)
     proj = dxpy.DXProject(projectId)
     if not projectFolderExists(proj, folder):
@@ -415,7 +410,7 @@ def copyFiles(fids, projectId, folder, overwrite=False):
     '''Copies array of dx file dicts to project:/folder, returning new array of dx file dicts.'''
     newFids = []
     for fid in fids:
-        fileDict = FILES[fid]
+        fileDict = dxpy.describe(FILES[fid]) # FILES contain dxLinks
         if fileDict['project'] == projectId:
             # cannot copy into the same project!!!
             # so just leave in place and pretend that we did!
@@ -423,26 +418,24 @@ def copyFiles(fids, projectId, folder, overwrite=False):
             #proj.move(folder,[fid])
             newFids += [ fid ]
             continue
-        dxFile = dxpy.DXFile(dxid=fid, project=fileDict['project'])
-        fileName = dxFile.describe()['name']
 
         # Check to see if file already exists.
-        alreadyThere = findFile(folder+'/'+fileName,projectId)
+        alreadyThere = findFile(folder+'/'+fileDict['name'],projectId)
         if alreadyThere is None or overwrite:
             # remove what is alreadyThere?
             #if alreadyThere is not None:
             #    proj = dxpy.DXProject(projectId)
             #    proj.remove_objects([alreadyThere])
-            newDict = {}
-            newDict['id'] = dxFile.clone(projectId, folder).get_id()
-            newDict['project'] = projectId
+            dxFile = dxpy.get_handler(FILES[fid])
+            newLink = dxpy.dxlink(dxFile.clone(projectId, folder))
         else:
-            newDict = FILES(alreadyThere)
-        if newDict == None:
-            print "ERROR: Failed in copy of '" + fileDict['project'] + ":" + fileName + \
+            newLink = FILES(alreadyThere)
+        if newLink == None:
+            print "ERROR: Failed in copy of '" + fileDict['project'] + ":" + fileDict['name'] + \
                     "' to '" + projectId + ":" + folder + "'."
             sys.exit(1)
-        FILES[newDict['id']] = newDict
+        newDict = dxpy.describe(newLink)
+        FILES[newDict['id']] = newLink
         newFids += [ newDict['id'] ]
 
     return newFids
@@ -524,7 +517,6 @@ def findReferenceFiles(priors,refLoc,extras):
         sys.exit("ERROR: Unable to locate TopHat index file '" + topIx + "'")
     else:
         priors['tophatIndex'] = topIxFid
-        FILES[topIxFid]['name'] = topIx
    
     starIx = refLoc+'/'+GENOME_REFERENCES['starIndex'][extras['organism']][extras['gender']][extras['annotation']]
     starIxFid = findFile(starIx,REF_PROJECT_DEFAULT)
@@ -532,7 +524,6 @@ def findReferenceFiles(priors,refLoc,extras):
         sys.exit("ERROR: Unable to locate STAR index file '" + starIx + "'")
     else:
         priors['starIndex'] = starIxFid
-        FILES[starIxFid]['name'] = starIx
 
     rsemIx = refLoc+'/'+GENOME_REFERENCES['rsemIndex'][extras['organism']][extras['annotation']]
     rsemIxFid = findFile(rsemIx,REF_PROJECT_DEFAULT)
@@ -540,7 +531,6 @@ def findReferenceFiles(priors,refLoc,extras):
         sys.exit("ERROR: Unable to locate RSEM index file '" + rsemIx + "'")
     else:
         priors['rsemIndex'] = rsemIxFid
-        FILES[rsemIxFid]['name'] = rsemIx
 
     chromSizes = refLoc+'/'+GENOME_REFERENCES['chromSizes'][extras['organism']][extras['gender']]
     chromSizesFid = findFile(chromSizes,REF_PROJECT_DEFAULT)
@@ -548,7 +538,6 @@ def findReferenceFiles(priors,refLoc,extras):
         sys.exit("ERROR: Unable to locate Chrom Sizes file '" + chromSizes + "'")
     else:
         priors['chromSizes'] = chromSizesFid
-        FILES[chromSizesFid]['name'] = chromSizes
     ### LRNA specific
 
 def determineStepsToDo(pairedEnd, priors, deprecate, projectId, force=False):
@@ -662,11 +651,11 @@ def logThisRun(runId,resultsFolder,projectId):
 
 def filePathFromFid(fid,projectToo=False):
     '''Returns full dx path to file from a file id.'''
-    dxFile = dxpy.DXFile(fid).describe()
-    path = dxFile['folder'] + '/' + dxFile['name']
+    fileDict = dxpy.describe(FILES[fid]) # FILES contain dxLinks
+    path = fileDict['folder'] + '/' + fileDict['name']
     if projectToo:
-        project = dxpy.DXProject(dxFile['project'])
-        path = project.describe()['name'] + ':' + path
+        projDict = dxpy.describe(fileDict['project'])
+        path = projDict['name'] + ':' + path
     return path
 
 def projectFolderExists(project, folder):
@@ -710,7 +699,12 @@ def createWorkflow(stepsToDo, priors, extras, resultsFolder, projectId, appProje
             if fileToken in prevStepResults:
                 appInputs[ appInp ] = prevStepResults[fileToken]
             elif fileToken in priors:
-                appInputs[ appInp ] = dxpy.dxlink(FILES[ priors[fileToken] ])
+                if isinstance(priors[fileToken], list):
+                    appInputs[ appInp ] = []
+                    for fid in priors[fileToken]:
+                        appInputs[ appInp ] += [ FILES[fid] ]
+                else:
+                    appInputs[ appInp ] = FILES[ priors[fileToken] ]
             else:
                 print "ERROR: step '"+step+"' can't find input '"+fileToken+"'!"
                 sys.exit(1)
