@@ -1,0 +1,43 @@
+{
+  "name": "concat-fastqs",
+  "authorizedUsers": [],
+  "title": "Concatenates fastq.gz files",
+  "summary": "Takes gzipped fastq files and concatenates them.",
+  "version": "0.0.2",
+  "runSpec": {
+    "interpreter": "bash",
+    "file": "src/concat-fastqs.sh",
+    "systemRequirements": {
+      "main": {
+        "instanceType": "mem2_hdd2_x2"
+      },
+      "myEntryPoint": {
+        "instanceType": "mem2_hdd2_x2"
+      }
+    }
+  },
+  "inputSpec": [
+    {
+      "name": "fastq_files",
+      "label": "Gzipped fastq files",
+      "class": "array:file",
+      "optional": false,
+      "patterns": ["*.fastq.gz", "*.fq.gz"]
+    },
+    {
+      "name": "outfile_root",
+      "label": "Root name of output file",
+      "class": "string",
+      "optional": false
+    }
+  ],
+  "outputSpec": [
+    {
+      "class": "file",
+      "name": "combined_fastq",
+      "label": "Combined gzipped fastq file"
+    }
+  ],
+  "dxapi": "1.0.0",
+  "categories": []
+}
