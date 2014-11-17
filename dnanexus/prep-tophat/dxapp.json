@@ -1,7 +1,33 @@
 {
   "name": "prep-tophat",
-  "authorizedUsers": [],
   "title": "Long-RNA-Seq-prep-tophat-genome",
+  "summary": "Prepare reference genome and transcriptome indexes for tophat used in the ENCODE long-rna-seq pipeline",
+  "dxapi": "1.0.0",
+  "version": "1.0.0",
+  "authorizedUsers": [],
+  "inputSpec": [
+    {
+      "class": "file",
+      "optional": false,
+      "name": "annotations",
+      "label": "transcript and other annotations (GTF)",
+      "patterns": ["*.gtf"]
+    },
+    {
+      "class": "file",
+      "optional": false,
+      "name": "genome",
+      "label": "Reference genome (.fa.gz)",
+      "patterns": ["*.fasta.gz", "*.fa.gz"]
+    },
+    {
+      "class": "file",
+      "optional": true,
+      "name": "spike_in",
+      "label": "Spike-in RNA sequences (fasta)",
+      "patterns": ["*.fasta.gz", "*.fa.gz"]
+    }
+  ],
   "outputSpec": [
     {
       "class": "file",
@@ -11,36 +37,21 @@
   ],
   "runSpec": {
     "interpreter": "bash",
-    "file": "src/prep-tophat.sh"
+    "file": "src/prep-tophat.sh",
+    "systemRequirements": {
+      "main": {
+        "instanceType": "mem3_hdd2_x4"
+      },
+      "myEntryPoint": {
+        "instanceType": "mem3_hdd2_x4"
+      }
+    }
   },
   "access": {
     "network": [
       "*"
     ]
   },
-  "summary": "Prepare reference genome and transcriptome indexes for tophat used in the ENCODE long-rna-seq pipeline",
-  "version": "0.0.2",
-  "inputSpec": [
-    {
-      "class": "file",
-      "optional": false,
-      "name": "annotations",
-      "label": "transcript and other annotations (GTF)"
-    },
-    {
-      "class": "file",
-      "optional": false,
-      "name": "genome",
-      "label": "Reference genome (.fa.gz)"
-    },
-    {
-      "class": "file",
-      "optional": true,
-      "name": "spike_in",
-      "label": "Spike-in RNA sequences (fasta)"
-    }
-  ],
-  "dxapi": "1.0.0",
   "categories": [
     "ENCODE"
   ]

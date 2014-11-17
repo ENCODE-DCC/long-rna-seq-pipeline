@@ -1,5 +1,5 @@
 #!/bin/bash
-# prep-rsem 0.0.2
+# prep-rsem 1.0.0
 
 main() {
     # Now in resources/usr/bin
@@ -10,7 +10,7 @@ main() {
     #(cd RSEM; make)
 
     echo "*****"
-    echo "* Running: prep-rsem.sh"
+    echo "* Running: prep-rsem.sh [v1.0.0]"
     echo "* RSEM version: "`rsem-calculate-expression --version | awk '{print $5}'`
     echo "*****"
 

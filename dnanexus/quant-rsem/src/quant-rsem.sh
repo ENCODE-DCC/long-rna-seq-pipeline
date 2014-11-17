@@ -1,5 +1,5 @@
 #!/bin/bash
-# quant-rsem 0.0.2
+# quant-rsem 1.0.0
 
 main() {
     # Now in resources/usr/bin
@@ -10,7 +10,7 @@ main() {
     # (cd RSEM; make)
 
     echo "*****"
-    echo "* Running: quant_rsem.sh"
+    echo "* Running: quant_rsem.sh [v1.0.0]"
     echo "* RSEM version: "`rsem-calculate-expression --version | awk '{print $5}'`
     echo "*****"
 
@@ -48,21 +48,6 @@ main() {
     #fi
 
     # Fill in your application code here.
-
-    # TODO: should this be moved to align-star scripts?
-    #if [ "$paired" == "true" ]; then
-    #    echo "* Sorting for paired-end bam..."
-    #    # paired-end data, merge mates into one line before sorting, and un-merge after sorting
-    #    cat <( samtools view -H ${bam_fn}.bam ) \
-    #        <( samtools view -@ ${nthreads} ${bam_fn}.bam | awk '{printf $0 " "; getline; print}' | \
-    #            sort -S 60G -T ./ | tr ' ' '\n' ) | \
-    #        samtools view -@ ${nthreads} -bS - > ${bam_fn}_sorted.bam
-    #else
-    #    echo "* Sorting for single-end bam..."
-    #    cat <( samtools view -H ${bam_fn}.bam ) \
-    #        <( samtools view -@ ${nthreads} ${bam_fn}.bam | sort -S 60G -T ./ ) | \
-    #        samtools view -@ ${nthreads} -bS - > ${bam_fn}_sorted.bam
-    #fi
 
     echo "* Quantitate with extra flags: [${extraFlags}]..."
     rsem-calculate-expression --bam --estimate-rspd --calc-ci --seed ${rnd_seed} -p ${nthreads} \

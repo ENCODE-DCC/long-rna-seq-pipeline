@@ -1,24 +1,24 @@
 {
   "name": "align-star-se",
   "title": "Long-RNA-Seq-align-star-se",
-  "summary": "Align Single-ended (unstranded) reads to genome and transcriptome using STAR for the ENCODE long-rna-seq pipeline",
+  "summary": "Align single-end (unstranded) reads to genome and transcriptome using STAR for the ENCODE long-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "0.0.2",
-  "categories": [
-    "ENCODE"
-  ],
+  "version": "1.0.0",
+  "authorizedUsers": [],
   "inputSpec": [
     {
       "name": "reads",
       "label": "Reads to align (fastq.gz)",
       "class": "file",
-      "optional": false
+      "optional": false,
+      "patterns": ["*.fastq.gz", "*.fq.gz"]
     },
     {
       "name": "star_index",
       "label": "Genome indexed for STAR",
       "class": "file",
-      "optional": false
+      "optional": false,
+      "patterns": ["*.tgz"]
     },
     {
       "name": "library_id",
@@ -35,11 +35,6 @@
     }
   ],
   "outputSpec": [
-     {
-      "name": "detail_log",
-      "label": "Full STAR log with input parameters",
-      "class": "file"
-    },
     {
       "name": "star_log",
       "label": "Log file for STAR, contains QC metrics",
@@ -48,11 +43,6 @@
     {
       "name": "genome_bam",
       "label": "BAM file of alignment to whole genome",
-      "class": "file"
-    },
-    {
-      "name": "genome_bai",
-      "label": "BAM index (bai) of alignment to whole genome",
       "class": "file"
     },
     {
@@ -71,20 +61,14 @@
       "myEntryPoint": {
         "instanceType": "mem3_hdd2_x8"
       }
-    },
-    "bundledDepends": [
-      {
-        "name": "resources.tar.gz",
-        "id": {
-            "$dnanexus_link": "file-BKfxJ5801BJZBZ4yQZb00F4z"
-        }
-      }
-    ]
+    }
   },
   "access": {
     "network": [
       "*"
     ]
   },
-  "authorizedUsers": []
+  "categories": [
+    "ENCODE"
+  ]
 }

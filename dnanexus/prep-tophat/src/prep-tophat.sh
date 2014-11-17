@@ -1,5 +1,5 @@
 #!/bin/bash
-# prep-star 0.0.2
+# prep-star 1.0.0
 
 main() {
     # Now in resources/usr/bin
@@ -9,7 +9,7 @@ main() {
     #wget http://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.1.0/bowtie2-2.1.0-linux-x86_64.zip/download
 
     echo "*****"
-    echo "* Running: prep_tophat.sh"
+    echo "* Running: prep_tophat.sh [v1.0.0]"
     echo "* TopHat version: "`tophat -v | awk '{print $2}'`
     echo "* bowtie2 version: "`bowtie2 --version 2>&1 | grep bowtie | awk '{print $3}'`
     echo "*****"

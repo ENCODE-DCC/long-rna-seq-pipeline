@@ -1,5 +1,5 @@
 #!/bin/bash
-# align-tophat-se 0.0.2
+# align-tophat-se 1.0.0
 
 main() {
     # Now in resources/usr/bin
@@ -11,7 +11,7 @@ main() {
     #wget wget https://github.com/xweigit/xweiEncodeScripts/archive/v1.0.tar.gz
 
     echo "*****"
-    echo "* Running: align-tophat-se.sh"
+    echo "* Running: align-tophat-se.sh [v1.0.0]"
     echo "* TopHat version: "`tophat -v | awk '{print $2}'`
     echo "* bowtie2 version: "`bowtie2 --version 2>&1 | grep bowtie | awk '{print $3}'`
     echo "* samtools version: "`samtools 2>&1 | grep Version | awk '{print $2}'`
@@ -77,16 +77,16 @@ main() {
 
     echo "* Merge aligned and unaligned into single bam, using the patched up header..."
     samtools merge -h newHeader.sam merged.bam mapped_fixed.bam tophat_out/unmapped.bam
-    samtools index merged.bam
+    # Note: no longer making unused index.
+    #samtools index merged.bam
 
-    # TODO: shouldn't there be an run identifier here?
     mv merged.bam ${reads_fn}_tophat.bam
-    mv merged.bam.bai ${reads_fn}_tophat.bam.bai
+    #mv merged.bam.bai ${reads_fn}_tophat.bam.bai
 
     echo "* Upload results..."
     genome_bam=$(dx upload ${reads_fn}_tophat.bam --brief)
-    genome_bai=$(dx upload ${reads_fn}_tophat.bam.bai --brief)
+    #genome_bai=$(dx upload ${reads_fn}_tophat.bam.bai --brief)
     dx-jobutil-add-output genome_bam "$genome_bam" --class=file
-    dx-jobutil-add-output genome_bai "$genome_bai" --class=file
+    #dx-jobutil-add-output genome_bai "$genome_bai" --class=file
     echo "* Finished."
 }

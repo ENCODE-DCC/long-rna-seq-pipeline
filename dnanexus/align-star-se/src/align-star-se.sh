@@ -1,5 +1,5 @@
 #!/bin/bash
-# align-star-se 0.0.2
+# align-star-se 1.0.0
 
 main() {
     # Now in resources/usr/bin
@@ -10,7 +10,7 @@ main() {
     #wget https://github.com/samtools/samtools/archive/0.1.19.tar.gz
 
     echo "*****"
-    echo "* Running: align-star-se.sh"
+    echo "* Running: align-star-se.sh [v1.0.0]"
     echo "* STAR version: "`STAR --version | awk '{print $1}' | cut -d _ -f 2-`
     echo "* samtools version: "`samtools 2>&1 | grep Version | awk '{print $2}'`
     echo "*****"
@@ -50,9 +50,10 @@ main() {
         --outSAMstrandField intronMotif --outSAMtype BAM SortedByCoordinate                \
         --quantMode TranscriptomeSAM
 
-    echo "* Index genome bam..."
+    #echo "* Index genome bam..."
+    # Note: no longer making unused index
     mv Aligned.sortedByCoord.out.bam ${reads_fn}_star_genome.bam
-    samtools index ${reads_fn}_star_genome.bam
+    #samtools index ${reads_fn}_star_genome.bam
 
     echo "* Sorting annotation bam..."
     cat <( samtools view -H Aligned.toTranscriptome.out.bam ) \
@@ -64,16 +65,16 @@ main() {
     mv Log.out ${reads_fn}_star_Log.out
 
     echo "* Upload results..."
-    detail_log=$(dx upload ${reads_fn}_star_Log.out --brief)
+    #detail_log=$(dx upload ${reads_fn}_star_Log.out --brief)
     star_log=$(dx upload ${reads_fn}_star_Log.final.out --brief)
     genome_bam=$(dx upload ${reads_fn}_star_genome.bam --brief)
-    genome_bai=$(dx upload ${reads_fn}_star_genome.bam.bai --brief)
+    #genome_bai=$(dx upload ${reads_fn}_star_genome.bam.bai --brief)
     annotation_bam=$(dx upload ${reads_fn}_star_anno.bam --brief)
 
-    dx-jobutil-add-output detail_log "$detail_log" --class=file
+    #dx-jobutil-add-output detail_log "$detail_log" --class=file
     dx-jobutil-add-output star_log "$star_log" --class=file
     dx-jobutil-add-output genome_bam "$genome_bam" --class=file
-    dx-jobutil-add-output genome_bai "$genome_bai" --class=file
+    #dx-jobutil-add-output genome_bai "$genome_bai" --class=file
     dx-jobutil-add-output annotation_bam "$annotation_bam" --class=file
     echo "* Finished."
 }

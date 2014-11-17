@@ -3,16 +3,15 @@
   "title": "Long-RNA-Seq-BAM-to-BW-unstranded",
   "summary": "Converts BAMs from alignments from unstranded libraries to bigwig format",
   "dxapi": "1.0.0",
-  "version": "0.0.2",
-  "categories": [
-    "ENCODE"
-  ],
+  "version": "1.0.0",
+  "authorizedUsers": [],
   "inputSpec": [
     {
       "name": "bam_file",
       "label": "Input BAM file for all mapped reads",
       "class": "file",
-      "optional": false
+      "optional": false,
+      "patterns": ["*.bam"]
     },
     {
       "name": "chrom_sizes",
@@ -30,16 +29,6 @@
     {
       "name": "unique_unstranded_bw",
       "label": "BigWig file of uniquely mapped unstranded reads",
-      "class": "file"
-    },
-    {
-      "name": "all_bg",
-      "label": "Temporary bedGraph file",
-      "class": "file"
-    },
-    {
-      "name": "uniq_bg",
-      "label": "Temporary bedGraph file",
       "class": "file"
     }
   ],
@@ -60,5 +49,7 @@
       "*"
     ]
   },
-  "authorizedUsers": []
+  "categories": [
+    "ENCODE"
+  ]
 }

@@ -1,5 +1,5 @@
 #!/bin/bash
-# bam-to-bigwig 0.0.2
+# bam-to-bigwig 1.0.0
 
 main() {
     # Now in resources/usr/bin
@@ -7,16 +7,13 @@ main() {
     #git clone https://github.com/alexdobin/STAR
     #(cd STAR; git checkout tags/STAR_2.4.0d)
     #(cd STAR; make)
-    #wget https://github.com/ENCODE-DCC/kentUtils/archive/v302.0.0.tar.gz
+    #wget https://github.com/ENCODE-DCC/kentUtils/archive/v302.1.0.tar.gz
 
     echo "*****"
-    echo "* Running: bam-to-bigwig-stranded.sh"
+    echo "* Running: bam-to-bigwig-stranded.sh [v1.0.0]"
     echo "* STAR version:     ["`STAR --version | awk '{print $1}' | cut -d _ -f 2-`"]"
     echo "* bedGraphToBigWig version: "`bedGraphToBigWig 2>&1 | grep "bedGraphToBigWig v" | awk '{print $2$3}'`
     echo "*****"
-
-    # TODO: Currently this script uploads bedGrphs and bigWigs, in order to facilitate comparisons.
-    #       In production this script should only upload the bigWigs.
 
     echo "Value of bam_file: '$bam_file'"
     echo "Value of chrom_sizes: '$chrom_sizes'"
@@ -53,19 +50,19 @@ main() {
     dx-jobutil-add-output unique_minus_bw "$unique_minus_bw" --class=file
     dx-jobutil-add-output unique_plus_bw "$unique_plus_bw" --class=file
 
-    echo "* Temporary uploads..."
+    #echo "* Temporary uploads..."
     # temprary for comparison only!
-    mv Signal.UniqueMultiple.str1.out.bg ${bam_fn}_minusAll.bg
-    mv Signal.Unique.str1.out.bg         ${bam_fn}_minusUniq.bg
-    mv Signal.UniqueMultiple.str2.out.bg ${bam_fn}_plusAll.bg
-    mv Signal.Unique.str2.out.bg         ${bam_fn}_plusUniq.bg
-    minusAll_bg=$(dx upload ${bam_fn}_minusAll.bg --brief)
-    plusAll_bg=$(dx upload ${bam_fn}_plusAll.bg --brief)
-    minusUniq_bg=$(dx upload ${bam_fn}_minusUniq.bg --brief)
-    plusUniq_bg=$(dx upload ${bam_fn}_plusUniq.bg --brief)
-    dx-jobutil-add-output minusAll_bg "$minusAll_bg" --class=file
-    dx-jobutil-add-output plusAll_bg "$plusAll_bg" --class=file
-    dx-jobutil-add-output minusUniq_bg "$minusUniq_bg" --class=file
-    dx-jobutil-add-output plusUniq_bg "$plusUniq_bg" --class=file
+    #mv Signal.UniqueMultiple.str1.out.bg ${bam_fn}_minusAll.bg
+    #mv Signal.Unique.str1.out.bg         ${bam_fn}_minusUniq.bg
+    #mv Signal.UniqueMultiple.str2.out.bg ${bam_fn}_plusAll.bg
+    #mv Signal.Unique.str2.out.bg         ${bam_fn}_plusUniq.bg
+    #minusAll_bg=$(dx upload ${bam_fn}_minusAll.bg --brief)
+    #plusAll_bg=$(dx upload ${bam_fn}_plusAll.bg --brief)
+    #minusUniq_bg=$(dx upload ${bam_fn}_minusUniq.bg --brief)
+    #plusUniq_bg=$(dx upload ${bam_fn}_plusUniq.bg --brief)
+    #dx-jobutil-add-output minusAll_bg "$minusAll_bg" --class=file
+    #dx-jobutil-add-output plusAll_bg "$plusAll_bg" --class=file
+    #dx-jobutil-add-output minusUniq_bg "$minusUniq_bg" --class=file
+    #dx-jobutil-add-output plusUniq_bg "$plusUniq_bg" --class=file
     echo "* Finished."
 }

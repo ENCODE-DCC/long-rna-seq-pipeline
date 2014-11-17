@@ -1,7 +1,33 @@
 {
   "name": "merge-annotation",
-  "authorizedUsers": [],
   "title": "Long-RNA-seq-merge-gtf-annotation",
+  "summary": "Takes GENCODE and spike-ins and creates a single GTF file for quantitation (prep step)",
+  "dxapi": "1.0.0",
+  "version": "1.0.0",
+  "authorizedUsers": [],
+  "inputSpec": [
+    {
+      "optional": false,
+      "class": "file",
+      "name": "gene_annotation",
+      "label": "Gene/Transcript annotation file (GTF)",
+      "patterns": ["*.gtf"]
+    },
+    {
+      "optional": false,
+      "class": "file",
+      "name": "trna_annotation",
+      "label": "tRNA annotation file (GTF)",
+      "patterns": ["*.gtf"]
+    },
+    {
+      "optional": false,
+      "class": "file",
+      "name": "spike_in",
+      "label": "RNA Seq Spike-in file (fasta or GTF)",
+      "patterns": ["*.fastq.gz", "*.fq.gz", "*.gtf"]
+    }
+  ],
   "outputSpec": [
     {
       "class": "file",
@@ -16,28 +42,7 @@
       {"name":"gawk"}
     ]
   },
-  "summary": "Takes GENCODE and spike-ins and creates a single GTF file for quantitation",
-  "version": "0.0.2",
-  "inputSpec": [
-    {
-      "optional": false,
-      "class": "file",
-      "name": "gene_annotation",
-      "label": "Gene/Transcript annotation file (GTF)"
-    },
-    {
-      "optional": false,
-      "class": "file",
-      "name": "trna_annotation",
-      "label": "tRNA annotation file (GTF)"
-    },
-    {
-      "optional": false,
-      "class": "file",
-      "name": "spike_in",
-      "label": "RNA Seq Spike-in file (fasta or GTF)"
-    }
-  ],
-  "dxapi": "1.0.0",
-  "categories": []
+  "categories": [
+    "ENCODE"
+  ]
 }

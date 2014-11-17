@@ -1,24 +1,24 @@
 {
   "name": "align-tophat-se",
   "title": "Long-RNA-Seq-align-tophat-se",
-  "summary": "Align Single-ended reads to genome and transcriptome using tophat for the ENCODE long-rna-seq pipeline",
+  "summary": "Align single-end (unstranded) reads to genome and transcriptome using tophat for the ENCODE long-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "0.0.2",
-  "categories": [
-    "ENCODE"
-  ],
+  "version": "1.0.0",
+  "authorizedUsers": [],
   "inputSpec": [
     {
       "name": "reads",
       "label": "Reads to align (fastq.gz)",
       "class": "file",
-      "optional": false
+      "optional": false,
+      "patterns": ["*.fastq.gz", "*.fq.gz"]
     },
     {
       "name": "tophat_index",
       "label": "Genome and transcriptome indexed for tophat",
       "class": "file",
-      "optional": false
+      "optional": false,
+      "patterns": ["*.tgz"]
     },
     {
       "name": "library_id",
@@ -38,11 +38,6 @@
     {
       "name": "genome_bam",
       "label": "BAM file of alignment to whole genome",
-      "class": "file"
-    },
-    {
-      "name": "genome_bai",
-      "label": "BAM index (bai) of alignment to whole genome",
       "class": "file"
     }
   ],
@@ -66,5 +61,7 @@
       "*"
     ]
   },
-  "authorizedUsers": []
+  "categories": [
+    "ENCODE"
+  ]
 }

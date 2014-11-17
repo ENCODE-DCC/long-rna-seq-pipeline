@@ -1,9 +1,9 @@
 #!/bin/bash
-# concat-fastqs 0.0.2
+# concat-fastqs 1.0.0
 
 main() {
     echo "*****"
-    echo "* Running: concat-fastqs"
+    echo "* Running: concat-fastqs [v1.0.0]"
     echo "*****"
 
     echo "* Expected name of ouutput file: '${outfile_root}.fastq.gz'"

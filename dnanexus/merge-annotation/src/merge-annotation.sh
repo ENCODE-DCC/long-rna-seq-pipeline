@@ -1,12 +1,12 @@
 #!/bin/bash
-# merge-annotation 0.0.2
+# merge-annotation 1.0.0
 
 main() {
     # Now in resources/usr/bin
     #wget https://github.com/ENCODE-DCC/long-rna-seq-pipeline/tree/master/DAC/GTF.awk
 
     echo "*****"
-    echo "* Running: merge_annotation.sh"
+    echo "* Running: merge_annotation.sh [v1.0.0]"
     echo "* GTF.awk version: unversioned"
     echo "*****"
 

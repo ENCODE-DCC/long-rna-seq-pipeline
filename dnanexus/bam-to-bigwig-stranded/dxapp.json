@@ -3,16 +3,15 @@
   "title": "Long-RNA-Seq-BAM-to-BW-stranded",
   "summary": "Converts BAMs from alignments from stranded libraries to bigwig format",
   "dxapi": "1.0.0",
-  "version": "0.0.2",
-  "categories": [
-    "ENCODE"
-  ],
+  "version": "1.0.0",
+  "authorizedUsers": [],
   "inputSpec": [
     {
       "name": "bam_file",
       "label": "Input BAM file for all mapped reads",
       "class": "file",
-      "optional": false
+      "optional": false,
+      "patterns": ["*.bam"]
     },
     {
       "name": "chrom_sizes",
@@ -41,26 +40,6 @@
       "name": "unique_minus_bw",
       "label": "BigWig file of uniquely mapped minus-stranded reads",
       "class": "file"
-    },
-    {
-      "name": "minusAll_bg",
-      "label": "Temporary bedGraph file",
-      "class": "file"
-    },
-    {
-      "name": "plusAll_bg",
-      "label": "Temporary bedGraph file",
-      "class": "file"
-    },
-    {
-      "name": "minusUniq_bg",
-      "label": "Temporary bedGraph file",
-      "class": "file"
-    },
-    {
-      "name": "plusUniq_bg",
-      "label": "Temporary bedGraph file",
-      "class": "file"
     }
   ],
   "runSpec": {
@@ -80,5 +59,7 @@
       "*"
     ]
   },
-  "authorizedUsers": []
+  "categories": [
+    "ENCODE"
+  ]
 }
