@@ -8,7 +8,7 @@ from datetime import datetime
 import dxpy
 
 # NOTES: This command-line utility will run the long RNA-seq pipeline for a single replicate
-#      - All results will bw written to a folder /runs/<expId>/rep<#>.
+#      - All results will be written to a folder /runs/<expId>/rep<#>.
 #      - If any results are already in that directory, then the steps that created those results 
 #        will not be rerun.  
 #      - If any jobs for the experiment and replicate are already running, nothing new will be 
@@ -48,6 +48,7 @@ STEP_ORDER = {
 
 STEPS = {
     # for each step: app, list of any params, inputs and results (both as fileToken: app_obj_name)
+    # TODO: Any results files not listed here would not be 'deprecated' on reruns.
     'concatR1': {
                 'app':     'concat-fastqs',
                 'params':  { 'rootR1': 'outfile_root' },
@@ -156,8 +157,14 @@ GENOME_REFERENCES = {
                                         }
                             },
                     'mm10': {
-                            'female':   { 'M3':         'mm10_female_M3_tophatIndex.tgz' },
-                            'male':     { 'M3':         'mm10_male_M3_tophatIndex.tgz'   }
+                            'female':   { 
+                                        'M2':         'mm10/mm10_female_M2_tophatIndex.tgz',
+                                        'M3':         'mm10/mm10_female_M3_tophatIndex.tgz' 
+                                        },
+                            'male':     { 
+                                        'M2':         'mm10/mm10_male_M2_tophatIndex.tgz',
+                                        'M3':         'mm10/mm10_male_M3_tophatIndex.tgz'
+                                        }
                             }
                     },
     'starIndex':    {
@@ -172,8 +179,14 @@ GENOME_REFERENCES = {
                                         }
                             },
                     'mm10': {
-                            'female':   { 'M3':         'mm10_female_M3_starIndex.tgz' },
-                            'male':     { 'M3':         'mm10_male_M3_starIndex.tgz'   }
+                            'female':   { 
+                                        'M2':         'mm10/mm10_female_M2_starIndex.tgz',
+                                        'M3':         'mm10/mm10_female_M3_starIndex.tgz'
+                                        },
+                            'male':     { 
+                                        'M2':         'mm10/mm10_male_M2_starIndex.tgz',
+                                        'M3':         'mm10/mm10_male_M3_starIndex.tgz'
+                                        }
                             }
                     },
     'rsemIndex':    {
@@ -181,7 +194,10 @@ GENOME_REFERENCES = {
                             'v19':          'male_hg19_v19_combined_rsemIndex.tgz',
                             'v19_annoOnly': 'male_hg19_v19_annoOnly_rsemIndex.tgz'
                             },
-                    'mm10': { 'M3':         'mm10_male_M3_rsemIndex.tgz' }
+                    'mm10': { 
+                            'M2':         'mm10/mm10_male_M2_rsemIndex.tgz',
+                            'M3':         'mm10/mm10_male_M3_rsemIndex.tgz'
+                            }
                     },
     'chromSizes':   {
                     'hg19': {
@@ -214,6 +230,7 @@ def get_args():
                     required=True)
 
     ap.add_argument('-r', '--replicate',
+    # TODO: can't assume only 2 replicates
                     help="Replicate number (default: 1)",
                     choices=['1', '2'],
                     default='1',
@@ -252,7 +269,7 @@ def get_args():
     # TODO: should remove annotation if only one per genome
     ap.add_argument('-a', '--annotation',
                     help="Label of annotation (default: '" + ANNO_DEFAULT + "')",
-                    choices=[ANNO_DEFAULT, 'v19_annoOnly','M3'],
+                    choices=[ANNO_DEFAULT, 'v19_annoOnly','M2','M3'],
                     default=ANNO_DEFAULT,
                     required=False)
     ### LRNA specific
@@ -266,18 +283,16 @@ def get_args():
     ap.add_argument('--refLoc',
                     help="The location to find reference files (default: '" + \
                                             REF_PROJECT_DEFAULT + ":" + REF_FOLDER_DEFAULT + "')",
-                    action='store_true',
                     default=REF_FOLDER_DEFAULT,
                     required=False)
 
     ap.add_argument('--resultsLoc',
                     help="The location to to place results folders (default: '<project>:" + \
                                                                     RESULT_FOLDER_DEFAULT + "')",
-                    action='store_true',
                     default=RESULT_FOLDER_DEFAULT,
                     required=False)
 
-    ap.add_argument('-t', '--test',
+    ap.add_argument('--test',
                     help='Test run only, do not launch anything.',
                     action='store_true',
                     required=False)
@@ -304,7 +319,7 @@ def pipelineSpecificExtras(organism, gender, annotation, experiment, replicate, 
     if organism == 'hg19' and annotation not in [ANNO_DEFAULT, 'v19_annoOnly']:
         print organism+" has no "+annotation+" annotation."
         sys.exit(1)
-    if organism == 'mm10' and annotation not in ['M3']:
+    if organism == 'mm10' and annotation not in ['M2','M3']:
         print organism+" has no '"+annotation+"' annotation."
         sys.exit(1)
     extras['experiment'] = experiment
@@ -443,7 +458,7 @@ def copyFiles(fids, projectId, folder, overwrite=False):
 def findFileSet(fileSet,projectId=None):
     '''Find all files in a set, and prints error(s) and exits if any are missing.'''
     fids = []
-    if len(fileSet): 
+    if len(fileSet) > 0: 
         for oneFile in fileSet:
             fid = findFile(oneFile,projectId,verbose=True)
             if fid != None:
@@ -758,6 +773,8 @@ def main():
 
     print "Checking for read files..."
     # Find all reads files and move into place
+    # TODO: files could be in: dx (usual), remote (url e.g.https://www.encodeproject.org/...
+    #       or possibly local, Currently only DX locations are supported.
     reads1 = findAndCopyReadFiles(priors, args.reads1, args.test, 'reads1', resultsFolder, projectId)
     reads2 = findAndCopyReadFiles(priors, args.reads2, args.test, 'reads2', resultsFolder, projectId)
 
