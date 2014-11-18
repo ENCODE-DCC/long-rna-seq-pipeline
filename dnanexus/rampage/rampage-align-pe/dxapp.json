@@ -1,0 +1,76 @@
+{
+  "name": "rampage-align-pe",
+  "title": "RNA-Seq-rampage-align-pe",
+  "summary": "Align paired-end reads to genome and transcriptome using STAR for the ENCODE rampage-rna-peq pipeline",
+  "dxapi": "1.0.0",
+  "version": "0.0.1",
+  "authorizedUsers": [],
+  "inputSpec": [
+    {
+      "name": "reads_1",
+      "label": "Pair 1 Reads to align (fastq.gz)",
+      "class": "file",
+      "optional": false,
+      "patterns": ["*.fastq.gz", "*.fq.gz"]
+    },
+    {
+      "name": "reads_2",
+      "label": "Pair 2 Reads to align (fastq.gz)",
+      "class": "file",
+      "optional": false,
+      "patterns": ["*.fastq.gz", "*.fq.gz"]
+    },
+    {
+      "name": "star_index",
+      "label": "Genome indexed for STAR",
+      "class": "file",
+      "optional": false,
+      "patterns": ["*.tgz"]
+    },
+    {
+      "name": "library_id",
+      "label": "Identifier for biosample library",
+      "class": "string",
+      "optional": false
+    },
+    {
+      "name": "nthreads",
+      "label": "Number of threads to use",
+      "class": "int",
+      "optional": true,
+      "default": 8
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "star_log",
+      "label": "Log file for STAR, contains QC metrics",
+      "class": "file"
+    },
+    {
+      "name": "marked_bam",
+      "label": "BAM file of alignment to whole genome, dups marked for rampage",
+      "class": "file"
+    }
+  ],
+  "runSpec": {
+    "interpreter": "bash",
+    "file": "src/rampage-align-pe.sh",
+    "systemRequirements": {
+      "main": {
+        "instanceType": "mem3_hdd2_x8"
+      },
+      "myEntryPoint": {
+        "instanceType": "mem3_hdd2_x8"
+      }
+    }
+  },
+  "access": {
+    "network": [
+      "*"
+    ]
+  },
+  "categories": [
+    "ENCODE"
+  ]
+}

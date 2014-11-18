@@ -1,0 +1,65 @@
+{
+  "name": "rampage-peaks",
+  "title": "Rampage-RNA-Seq-peak-calling",
+  "summary": "Uses genome BAM marked for Rampage to calls peaks and produce 5' signals",
+  "dxapi": "1.0.0",
+  "version": "0.0.1",
+  "authorizedUsers": [],
+  "inputSpec": [
+    {
+      "name": "marked_bam",
+      "label": "Input BAM file marked for Rampage",
+      "class": "file",
+      "optional": false,
+      "patterns": ["*.bam"]
+    },
+    {
+      "name": "chrom_sizes",
+      "label": "chomosome/name length file",
+      "class": "file",
+      "optional": false
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "reads1_5p_bw",
+      "label": "BigWig file for all read1 5p reads",
+      "class": "file"
+    },
+    {
+      "name": "reads2_bw",
+      "label": "BigWig file of downstream read2 reads",
+      "class": "file"
+    },
+    {
+      "name": "rampage_peaks",
+      "label": "Bed 6 file of rampage called peaks",
+      "class": "file"
+    },
+    {
+      "name": "rampage_peaks_bb",
+      "label": "BigBed file of rampage called peaks",
+      "class": "file"
+    }
+  ],
+  "runSpec": {
+    "interpreter": "bash",
+    "file": "src/rampage-peaks.sh",
+    "systemRequirements": {
+      "main": {
+        "instanceType": "mem3_hdd2_x8"
+      },
+      "myEntryPoint": {
+        "instanceType": "mem3_hdd2_x8"
+      }
+    }
+  },
+  "access": {
+    "network": [
+      "*"
+    ]
+  },
+  "categories": [
+    "ENCODE"
+  ]
+}
