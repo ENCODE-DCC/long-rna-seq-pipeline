@@ -1,5 +1,5 @@
 #!/bin/bash
-# rampage-align-pe 1.0.0
+# rampage-align-pe 0.0.1
 
 main() {
     # Now in resources/usr/bin
