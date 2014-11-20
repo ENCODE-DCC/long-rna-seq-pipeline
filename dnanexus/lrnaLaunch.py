@@ -9,9 +9,9 @@ import dxpy
 
 # NOTES: This command-line utility will run the long RNA-seq pipeline for a single replicate
 #      - All results will be written to a folder /runs/<expId>/rep<#>.
-#      - If any results are already in that directory, then the steps that created those results 
-#        will not be rerun.  
-#      - If any jobs for the experiment and replicate are already running, nothing new will be 
+#      - If any results are already in that directory, then the steps that created those results
+#        will not be rerun.
+#      - If any jobs for the experiment and replicate are already running, nothing new will be
 #        launched.
 #      - Most (BUT NOT ALL) of the code is generic, relying on the hard-coded JSON below and
 #        relying on hard-coded tokens for step, file and parameter names:
@@ -29,7 +29,7 @@ ANNO_DEFAULT = 'v19'
 PROJECT_DEFAULT = 'scratchPad'
 ''' This the default DNA Nexus project to use for the long RNA-seq pipeline.'''
 
-REF_PROJECT_DEFAULT = 'scratchPad'
+REF_PROJECT_DEFAULT = 'ENCODE Reference Files'
 ''' This the default DNA Nexus project to find reference files in.'''
 
 REF_FOLDER_DEFAULT = '/ref'
@@ -81,21 +81,21 @@ STEPS = {
     'topBwPe':  {
                 'app':     'bam-to-bigwig-stranded',
                 'inputs':  { 'topBam': 'bam_file', 'chromSizes': 'chrom_sizes' },
-                'results': { 'topBwMinusAll': 'all_minus_bw', 'topBwMinusUniq': 'uniq_minus_bw', 
+                'results': { 'topBwMinusAll': 'all_minus_bw', 'topBwMinusUniq': 'uniq_minus_bw',
                               'topBwPlusAll': 'all_plus_bw',   'topBwPlusUniq': 'all_plus_bw' }
                 },
     'starSe':   {
                 'app':     'align-star-se',
                 'params':  { 'library': 'library_id' }, #, 'nthreads'
                 'inputs':  { 'reads1': 'reads', 'starIndex': 'star_index' },
-                'results': { 'starGenoBam': 'genome_bam', 'starAnnoBam': 'annotation_bam', 
+                'results': { 'starGenoBam': 'genome_bam', 'starAnnoBam': 'annotation_bam',
                                                                 'starLog': 'star_log' }
                 },
     'starPe':   {
                 'app':     'align-star-pe',
                 'params':  { 'library': 'library_id' }, #, 'nthreads'
                 'inputs':  { 'reads1': 'reads_1', 'reads2': 'reads_2', 'starIndex': 'star_index' },
-                'results': { 'starGenoBam': 'genome_bam', 'starAnnoBam': 'annotation_bam', 
+                'results': { 'starGenoBam': 'genome_bam', 'starAnnoBam': 'annotation_bam',
                                                                 'starLog': 'star_log' }
                 },
     'starBwSe': {
@@ -106,7 +106,7 @@ STEPS = {
     'starBwPe': {
                 'app':     'bam-to-bigwig-stranded',
                 'inputs':  { 'starGenoBam': 'bam_file', 'chromSizes': 'chrom_sizes' },
-                'results': { 'starBwMinusAll': 'all_minus_bw','starBwMinusUniq': 'uniq_minus_bw', 
+                'results': { 'starBwMinusAll': 'all_minus_bw','starBwMinusUniq': 'uniq_minus_bw',
                               'starBwPlusAll': 'all_plus_bw',  'starBwPlusUniq': 'uniq_plus_bw' }
                 },
     'rsem':     {
@@ -157,11 +157,11 @@ GENOME_REFERENCES = {
                                         }
                             },
                     'mm10': {
-                            'female':   { 
+                            'female':   {
                                         'M2':         'mm10/mm10_female_M2_tophatIndex.tgz',
-                                        'M3':         'mm10/mm10_female_M3_tophatIndex.tgz' 
+                                        'M3':         'mm10/mm10_female_M3_tophatIndex.tgz'
                                         },
-                            'male':     { 
+                            'male':     {
                                         'M2':         'mm10/mm10_male_M2_tophatIndex.tgz',
                                         'M3':         'mm10/mm10_male_M3_tophatIndex.tgz'
                                         }
@@ -179,11 +179,11 @@ GENOME_REFERENCES = {
                                         }
                             },
                     'mm10': {
-                            'female':   { 
+                            'female':   {
                                         'M2':         'mm10/mm10_female_M2_starIndex.tgz',
                                         'M3':         'mm10/mm10_female_M3_starIndex.tgz'
                                         },
-                            'male':     { 
+                            'male':     {
                                         'M2':         'mm10/mm10_male_M2_starIndex.tgz',
                                         'M3':         'mm10/mm10_male_M3_starIndex.tgz'
                                         }
@@ -194,7 +194,7 @@ GENOME_REFERENCES = {
                             'v19':          'male_hg19_v19_combined_rsemIndex.tgz',
                             'v19_annoOnly': 'male_hg19_v19_annoOnly_rsemIndex.tgz'
                             },
-                    'mm10': { 
+                    'mm10': {
                             'M2':         'mm10/mm10_male_M2_rsemIndex.tgz',
                             'M3':         'mm10/mm10_male_M3_rsemIndex.tgz'
                             }
@@ -219,9 +219,9 @@ FILES = {}
 def get_args():
     '''Parse the input arguments.'''
     ### LRNA specific
-    ap = argparse.ArgumentParser(description="Launches long RNA-seq pipeline analysis for " + 
-                "one replicate on single or paired-end reads. Can be run repeatedly and will " + 
-                "launch only the steps that are needed to finished the pipeline. All results " + 
+    ap = argparse.ArgumentParser(description="Launches long RNA-seq pipeline analysis for " +
+                "one replicate on single or paired-end reads. Can be run repeatedly and will " +
+                "launch only the steps that are needed to finished the pipeline. All results " +
                 "will be placed in the folder /<resultsLoc>/<experiment>/<replicate>.")
     ### LRNA specific
 
@@ -276,7 +276,6 @@ def get_args():
 
     ap.add_argument('--project',
                     help="Project to run analysis in (default: '" + PROJECT_DEFAULT + "')",
-                    action='store_true',
                     default=PROJECT_DEFAULT,
                     required=False)
 
@@ -325,7 +324,7 @@ def pipelineSpecificExtras(organism, gender, annotation, experiment, replicate, 
     extras['experiment'] = experiment
     extras['replicate']  = replicate
     extras['library']    = library
-    extras['pairedEnd']  = pairedEnd 
+    extras['pairedEnd']  = pairedEnd
     # workflow labeling
     genderToken = "XY"
     if gender == 'female':
@@ -372,7 +371,7 @@ def findFile(filePath,project=None,verbose=False,multiple=False):
         path, fileName = path.rsplit('/', 1)
     else:
         fileName = path
-        path = ''
+        path = '/'
     if proj == None:
         if verbose:
             print "ERROR: Don't know what project to use for '" + path + "'."
@@ -384,7 +383,7 @@ def findFile(filePath,project=None,verbose=False,multiple=False):
     mode = 'exact'
     if filePath.find('*') or filePath.find('?'):
         mode = 'glob'
-    fileDicts = list(dxpy.find_data_objects(classname='file', folder=path, name=fileName, 
+    fileDicts = list(dxpy.find_data_objects(classname='file', folder=path, name=fileName,
                                             name_mode=mode, project=projId, return_handler=False))
 
     if fileDicts == None or len(fileDicts) == 0:
@@ -458,7 +457,7 @@ def copyFiles(fids, projectId, folder, overwrite=False):
 def findFileSet(fileSet,projectId=None):
     '''Find all files in a set, and prints error(s) and exits if any are missing.'''
     fids = []
-    if len(fileSet) > 0: 
+    if len(fileSet) > 0:
         for oneFile in fileSet:
             fid = findFile(oneFile,projectId,verbose=True)
             if fid != None:
@@ -505,7 +504,7 @@ def findAndCopyReadFiles(priors, readSet, testOnly, readToken, resultsFolder, pr
             priors[readToken+'_set'] = readFiles
         else:                         # otherwise, the 1 file is same as 'concat' result.
             priors[readToken] = readFiles[0]
-    return readFiles 
+    return readFiles
 
 def findPriorResults(pairedEnd,resultsFolder,projectId):
     '''Looks for all result files in the results folder.'''
@@ -518,7 +517,7 @@ def findPriorResults(pairedEnd,resultsFolder,projectId):
     for step in steps:
         for fileToken in STEPS[step]['results'].keys():
             fid = findFile(resultsFolder + FILE_GLOBS[fileToken],projectId)
-            if fid != None: 
+            if fid != None:
                 priors[fileToken] = fid
     return priors
 
@@ -532,7 +531,7 @@ def findReferenceFiles(priors,refLoc,extras):
         sys.exit("ERROR: Unable to locate TopHat index file '" + topIx + "'")
     else:
         priors['tophatIndex'] = topIxFid
-   
+
     starIx = refLoc+'/'+GENOME_REFERENCES['starIndex'][extras['organism']][extras['gender']][extras['annotation']]
     starIxFid = findFile(starIx,REF_PROJECT_DEFAULT)
     if starIxFid == None:
@@ -567,7 +566,7 @@ def determineStepsToDo(pairedEnd, priors, deprecate, projectId, force=False):
     for step in steps:
         # Force will include the first step with all its inputs
         # This should avoid forcing concat if it isn't needed
-        # 
+        #
         if force:
             inputs = STEPS[step]['inputs'].keys()
             count = 0
@@ -600,21 +599,21 @@ def determineStepsToDo(pairedEnd, priors, deprecate, projectId, force=False):
                 willCreate += [ result ]
                 if result in priors:
                     deprecate += [ priors[result] ]
-                    del priors[result] 
+                    del priors[result]
                     # if results are in folder, then duplicate files cause a problem!
-                    # So add to 'deprecate' to move or remove before launching 
+                    # So add to 'deprecate' to move or remove before launching
 
     # Now make sure the steps can be found, and error out if not.
     for step in stepsToDo:
         app = STEPS[step]['app']
-        dxApp = dxpy.find_data_objects(classname='file', name=app, name_mode='exact', 
+        dxApp = dxpy.find_data_objects(classname='file', name=app, name_mode='exact',
                                                          project=projectId, return_handler=False)
         if dxApp == None:
             print "ERROR: failure to locate app '"+app+"'!"
             sys.exit(1)
 
     return stepsToDo
- 
+
 def checkRunsPreviouslyLaunched(resultsFolder,projectId):
     '''Checks for currently running jobs and will exit if found.'''
     launchFilePath = resultsFolder + '/' + RUNS_LAUNCHED_FILE
@@ -699,7 +698,7 @@ def createWorkflow(stepsToDo, priors, extras, resultsFolder, projectId, appProje
         appProjectId = projectId
 
     # create a workflow object
-    wf = dxpy.new_dxworkflow(title=extras['name'],name=extras['name'],folder=resultsFolder, 
+    wf = dxpy.new_dxworkflow(title=extras['name'],name=extras['name'],folder=resultsFolder,
                                             project=projectId,description=extras['description'])
 
     # NOTE: prevStepResults dict contains links to result files to be generated by previous steps
@@ -734,14 +733,14 @@ def createWorkflow(stepsToDo, priors, extras, resultsFolder, projectId, appProje
                     sys.exit(1)
         # Add wf stage
         stageId = wf.add_stage(app, stage_input=appInputs, folder=resultsFolder)
-        # outputs, which we will need to link to 
+        # outputs, which we will need to link to
         for fileToken in STEPS[step]['results'].keys():
             appOut = STEPS[step]['results'][fileToken]
             prevStepResults[ fileToken ] = dxpy.dxlink({ 'stage': stageId,'outputField': appOut })
     wfRun = wf.run({})
     return wfRun.describe()
 
-####################### 
+#######################
 def main():
 
     args = get_args()
@@ -752,7 +751,7 @@ def main():
     pairedEnd = False
     if len(args.reads2) != 0:
         pairedEnd = True
-    extras = pipelineSpecificExtras(args.organism,args.gender,args.annotation, 
+    extras = pipelineSpecificExtras(args.organism,args.gender,args.annotation,
                                     args.experiment, args.replicate, args.library, pairedEnd)
     project = getProject(args.project)
     projectId = project.get_id()
