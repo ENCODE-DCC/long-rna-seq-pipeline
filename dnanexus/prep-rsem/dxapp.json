@@ -11,7 +11,7 @@
       "label": "transcript and other annotations (GTF)",
       "class": "file",
       "optional": false,
-      "patterns": ["*.gtf"]
+      "patterns": ["*.gtf.gz"]
     },
     {
       "name": "genome",
