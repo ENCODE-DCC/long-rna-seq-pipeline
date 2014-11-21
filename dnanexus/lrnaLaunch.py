@@ -29,7 +29,7 @@ ANNO_DEFAULT = 'v19'
 PROJECT_DEFAULT = 'scratchPad'
 ''' This the default DNA Nexus project to use for the long RNA-seq pipeline.'''
 
-REF_PROJECT_DEFAULT = 'ENCODE Reference Files'
+REF_PROJECT_DEFAULT = 'long-rna-seq-pipeline'
 ''' This the default DNA Nexus project to find reference files in.'''
 
 REF_FOLDER_DEFAULT = '/ref'
@@ -158,12 +158,12 @@ GENOME_REFERENCES = {
                             },
                     'mm10': {
                             'female':   {
-                                        'M2':         'mm10/mm10_female_M2_tophatIndex.tgz',
-                                        'M3':         'mm10/mm10_female_M3_tophatIndex.tgz'
+                                        'M2':         'female.mm10.chrom_gencode.vM2-tRNAs-ERCC_tophatIndex.tgz',
+                                        'M3':         'female.mm10.chrom_gencode.vM3-tRNAs-ERCC_tophatIndex.tgz'
                                         },
                             'male':     {
-                                        'M2':         'mm10/mm10_male_M2_tophatIndex.tgz',
-                                        'M3':         'mm10/mm10_male_M3_tophatIndex.tgz'
+                                        'M2':         'male.mm10.chrom_gencode.vM2-tRNAs-ERCC_tophatIndex.tgz',
+                                        'M3':         'male.mm10.chrom_gencode.vM2-tRNAs-ERCC_tophatIndex.tgz'
                                         }
                             }
                     },
@@ -180,12 +180,12 @@ GENOME_REFERENCES = {
                             },
                     'mm10': {
                             'female':   {
-                                        'M2':         'mm10/mm10_female_M2_starIndex.tgz',
-                                        'M3':         'mm10/mm10_female_M3_starIndex.tgz'
+                                        'M2':         'female.mm10.chrom_gencode.vM2-tRNAs-ERCC_starIndex.tgz',
+                                        'M3':         'female.mm10.chrom_gencode.vM3-tRNAs-ERCC_starIndex.tgz'
                                         },
                             'male':     {
-                                        'M2':         'mm10/mm10_male_M2_starIndex.tgz',
-                                        'M3':         'mm10/mm10_male_M3_starIndex.tgz'
+                                        'M2':         'male.mm10.chrom_gencode.vM2-tRNAs-ERCC_starIndex.tgz',
+                                        'M3':         'male.mm10.chrom_gencode.vM3-tRNAs-ERCC_starIndex.tgz'
                                         }
                             }
                     },
@@ -195,8 +195,8 @@ GENOME_REFERENCES = {
                             'v19_annoOnly': 'male_hg19_v19_annoOnly_rsemIndex.tgz'
                             },
                     'mm10': {
-                            'M2':         'mm10/mm10_male_M2_rsemIndex.tgz',
-                            'M3':         'mm10/mm10_male_M3_rsemIndex.tgz'
+                            'M2':         'male.mm10.chrom_gencode.vM2-tRNAs-ERCC_rsemIndex.tgz',
+                            'M3':         'male.mm10.chrom_gencode.vM2-tRNAs-ERCC_rsemIndex.tgz'
                             }
                     },
     'chromSizes':   {
@@ -205,8 +205,8 @@ GENOME_REFERENCES = {
                             'male':     'male_hg19.chrom.sizes'
                             },
                     'mm10': {
-                            'female':   'mm10/mm10_female.chrom.sizes',
-                            'male':     'mm10/mm10_male.chrom.sizes'
+                            'female':   'female.mm10.chrom.sizes',
+                            'male':     'male.mm10.chrom.sizes'
                             }
                     }
     }
@@ -525,6 +525,7 @@ def findReferenceFiles(priors,refLoc,extras):
     '''Locates all reference files based upon gender, organism and annotation.'''
     refFiles = {}
     ### LRNA specific
+    refLoc=refLoc+'/'+extras['organism']
     topIx = refLoc+'/'+GENOME_REFERENCES['tophatIndex'][extras['organism']][extras['gender']][extras['annotation']]
     topIxFid = findFile(topIx,REF_PROJECT_DEFAULT)
     if topIxFid == None:
