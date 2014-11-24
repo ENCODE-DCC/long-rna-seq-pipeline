@@ -196,7 +196,7 @@ GENOME_REFERENCES = {
                             },
                     'mm10': {
                             'M2':         'male.mm10.chrom_gencode.vM2-tRNAs-ERCC_rsemIndex.tgz',
-                            'M3':         'male.mm10.chrom_gencode.vM2-tRNAs-ERCC_rsemIndex.tgz'
+                            'M3':         'male.mm10.chrom_gencode.vM3-tRNAs-ERCC_rsemIndex.tgz'
                             }
                     },
     'chromSizes':   {
