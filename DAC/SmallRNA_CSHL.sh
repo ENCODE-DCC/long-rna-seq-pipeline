@@ -2,7 +2,7 @@
 
 # CSHL small RNA pipeline: STAR mapping to the genome, bigWig generation
 # usage: from an empty working directory, run
-# ./STAR_RSEM.sh (read1) (read2 or "") (STARgenomeDir) (RSEMrefDir) (dataType) (nThreadsSTAR)
+# ./STAR_RSEM.sh (read1) (STARgenomeDir) (nThreadsSTAR)
 
 # input: gzipped fastq file read1 [read2 for paired-end] 
 #        STAR genome directory, RSEM reference directory - prepared with STAR_RSEM_prep.sh script
