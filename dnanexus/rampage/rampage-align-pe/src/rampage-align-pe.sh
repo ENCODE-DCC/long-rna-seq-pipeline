@@ -47,32 +47,30 @@ main() {
     echo "* Map reads..."
     STAR --genomeDir out --readFilesIn ${reads1_fn}.fastq.gz ${reads2_fn}.fastq.gz \
         --readFilesCommand zcat --runThreadN ${nthreads} --genomeLoad NoSharedMemory \
-        --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1     \
+        --outFilterMultimapNmax 500 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1     \
         --outFilterMismatchNmax 999 --outFilterMismatchNoverReadLmax 0.04                \
         --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000            \
         --outSAMheaderCommentFile COfile.txt --outSAMheaderHD @HD VN:1.4 SO:coordinate       \
         --outSAMunmapped Within --outFilterType BySJout --outSAMattributes NH HI AS NM MD      \
         --outFilterScoreMinOverLread 0.85 --outFilterIntronMotifs RemoveNoncanonicalUnannotated  \
-        --clip5pNbases 6 15 --seedSearchStartLmax 30 --limitBAMsortRAM 30000000000 \
+        --clip5pNbases 6 15 --seedSearchStartLmax 30 \
         --outSAMtype BAM SortedByCoordinate
 
-    #echo "* Marking PCR duplicates..."
+    echo "* Marking PCR duplicates..."
     STAR --inputBAMfile Aligned.sortedByCoord.out.bam --bamRemoveDuplicatesType UniqueIdentical \
         --runMode inputAlignmentsFromBAM --bamRemoveDuplicatesMate2basesN 15 \
-        --limitBAMsortRAM 30000000000 --outFileNamePrefix markdup.
+        --outFileNamePrefix markdup.
 
     echo "* Upload results..."
-    #echo "* Index genome bam..."
+    mv markdup.Processed.out.bam ${reads1_fn}-${reads2_fn}_rampage_star_marked.bam
+    mv Log.final.out ${reads1_fn}-${reads2_fn}_rampage_star_Log.final.out
     # Note: No longer making unused index
-    mv markdup.Processed.out.bam ${reads1_fn}-${reads2_fn}_star_marked.bam
-    #samtools index ${reads1_fn}-${reads2_fn}_star_marked.bam
-    #mv Aligned.toTranscriptome.out.bam ${reads1_fn}-${reads2_fn}_star_anno.bam
-    mv Log.final.out ${reads1_fn}-${reads2_fn}_star_Log.final.out
+    #samtools index ${reads1_fn}-${reads2_fn}_rampage_star_marked.bam
 
-    star_log=$(dx upload ${reads1_fn}-${reads2_fn}_star_Log.final.out --brief)
-    marked_bam=$(dx upload ${reads1_fn}-${reads2_fn}_star_marked.bam --brief)
+    star_log=$(dx upload ${reads1_fn}-${reads2_fn}_rampage_star_Log.final.out --brief)
+    marked_bam=$(dx upload ${reads1_fn}-${reads2_fn}_rampage_star_marked.bam --brief)
 
     dx-jobutil-add-output star_log "$star_log" --class=file
-    dx-jobutil-add-output genome_bam "$marked_bam" --class=file
+    dx-jobutil-add-output marked_bam "$marked_bam" --class=file
     echo "* Finished."
 }
