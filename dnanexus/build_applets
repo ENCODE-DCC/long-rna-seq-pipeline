@@ -3,6 +3,30 @@
 applet_dest='long-rna-seq-pipeline'
 applets='merge-annotation prep-star prep-rsem prep-tophat concat-fastqs align-star-se align-star-pe align-tophat-pe align-tophat-se quant-rsem bam-to-bigwig-stranded bam-to-bigwig-unstranded'
 
+if [ $# -gt 0 ]; then
+    if [ $1 == "?" ] || [ $1 == "-h" ] || [ $1 == "--help" ]; then
+        echo "Usage: $0 [{project}] [{app}] [{app}]..."
+        echo "    Build applets in dx project"
+        echo "       project: Name pf project to build in. Default: $applet_dest"
+        echo "       app:     One or more apps to build. Default: $applets"
+        echo "                $applets"
+        exit 1
+    fi
+fi
+if [ $# -gt 0 ]; then
+    applet_dest=$1
+    if [ $# -gt 1 ]; then
+        shift
+        applets=''
+        while (( "$#" )); do
+            applets="$applets $1"
+            shift
+        done
+    fi
+fi
+echo "Project: $applet_dest"
+echo "Apps:    $applets"
+
 project=$(dx find projects --name "$applet_dest")
 if [ -z "$project" ]
   then

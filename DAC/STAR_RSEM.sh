@@ -2,7 +2,7 @@
 
 # STAR mapping / RSEM quantification pipeline
 # usage: from an empty working directory, run
-# ./STAR_RSEM.sh (read1) (read2 or "") (STARgenomeDir) (RSEMrefDir) (dataType) 
+# ./STAR_RSEM.sh (read1) (read2 or "") (STARgenomeDir) (RSEMrefDir) (dataType) (nThreadsSTAR) (nThreadsRSEM)
 
 # input: gzipped fastq file read1 [read2 for paired-end] 
 #        STAR genome directory, RSEM reference directory - prepared with STAR_RSEM_prep.sh script
@@ -21,7 +21,7 @@ nThreadsRSEM=$7 # number of threads for RSEM
 # Quant.isoforms.results                        # RSEM transcript quantifications, tab separated text, RSEM formatting
 # Quant.pdf                                     # RSEM diagnostic plots
 # Signal.{Unique,UniqueMultiple}.strand{+,-}.bw # 4 bigWig files for stranded data
-# Signal.{Unique,UniqueMultiple}.unstranded.bw  # 4 bigWig files for stranded data
+# Signal.{Unique,UniqueMultiple}.unstranded.bw  # 2 bigWig files for unstranded data
 
 # executables
 STAR=STAR                             

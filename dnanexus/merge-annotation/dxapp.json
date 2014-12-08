@@ -11,21 +11,21 @@
       "class": "file",
       "name": "gene_annotation",
       "label": "Gene/Transcript annotation file (GTF)",
-      "patterns": ["*.gtf"]
+      "patterns": ["*.gtf.gz"]
     },
     {
       "optional": false,
       "class": "file",
       "name": "trna_annotation",
       "label": "tRNA annotation file (GTF)",
-      "patterns": ["*.gtf"]
+      "patterns": ["*.gtf.gz"]
     },
     {
       "optional": false,
       "class": "file",
       "name": "spike_in",
       "label": "RNA Seq Spike-in file (fasta or GTF)",
-      "patterns": ["*.fastq.gz", "*.fq.gz", "*.gtf"]
+      "patterns": ["*.fasta.gz", "*.fa.gz"]
     }
   ],
   "outputSpec": [

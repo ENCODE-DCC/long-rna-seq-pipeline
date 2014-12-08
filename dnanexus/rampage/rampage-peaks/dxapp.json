@@ -14,26 +14,37 @@
       "patterns": ["*.bam"]
     },
     {
+      "name": "control_bam",
+      "label": "Control BAM file for Rampage",
+      "class": "file",
+      "optional": false,
+      "patterns": ["*.bam"]
+    },
+    {
+      "optional": false,
+      "class": "file",
+      "name": "gene_annotation",
+      "label": "Gene/Transcript annotation file (GTF)",
+      "patterns": ["*.gtf.gz"]
+    },
+    {
       "name": "chrom_sizes",
       "label": "chomosome/name length file",
       "class": "file",
       "optional": false
+    },
+    {
+      "name": "nthreads",
+      "label": "Number of threads to use",
+      "class": "int",
+      "optional": true,
+      "default": 8
     }
   ],
   "outputSpec": [
     {
-      "name": "reads1_5p_bw",
-      "label": "BigWig file for all read1 5p reads",
-      "class": "file"
-    },
-    {
-      "name": "reads2_bw",
-      "label": "BigWig file of downstream read2 reads",
-      "class": "file"
-    },
-    {
       "name": "rampage_peaks",
-      "label": "Bed 6 file of rampage called peaks",
+      "label": "Bed file of rampage called peaks",
       "class": "file"
     },
     {
