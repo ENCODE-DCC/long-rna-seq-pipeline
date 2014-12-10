@@ -4,7 +4,10 @@
 main() {
     # Now in resources/usr/bin
     #echo "* Download and install STAR..."
-    #git clone https://github.com/alexdobin/STAR
+    #git clone https://github.com/nboley/grit.git
+    #cd grit
+    #sudo apt-get install python-support python-numpy libamd2.2.0 libumfpack5.4.0 python-scipy python-networkx
+    
     #(cd STAR; git checkout tags/STAR_2.4.0d)
     #(cd STAR; make)
     #wget https://github.com/ENCODE-DCC/kentUtils/archive/v302.1.0.tar.gz
@@ -12,10 +15,9 @@ main() {
     echo "*****"
     echo "* Running: rampage-peaks.sh [v0.0.1]"
     echo "* STAR version:     ["`STAR --version | awk '{print $1}' | cut -d _ -f 2-`"]"
-    #echo "* bedGraphToBigWig version: "`bedGraphToBigWig 2>&1 | grep "bedGraphToBigWig v" | awk '{print $2$3}'`
-    echo "* wigToBigWig version: "`wigToBigWig 2>&1 | grep "wigToBigWig v" | awk '{print $2$3}'`
     echo "* bedToBigBed version: "`bedToBigBed 2>&1 | grep "bedToBigBed v" | awk '{printf "v%s", $3}'`
     # TODO: rampagePeakCaller.py version?
+    echo "* samtools version: "`samtools 2>&1 | grep Version | awk '{print $2}'`
     echo "*****"
 
     echo "Value of marked_bam:  '$marked_bam'"
@@ -44,6 +46,10 @@ main() {
     dx download "$chrom_sizes" -o chromSizes.txt
 
     ################ This step needs to be rewritten using call_peaks.py
+    
+    echo "* Inndexing bams..."
+    samtools index ${bam_fn}.bam 
+    samtools index ${control_fn}.bam 
 
     echo "* Calling peaks..."
     python2.7 /usr/bin/call_peaks.py --rampage-reads ${bam_fn}.bam --threads ${nthreads} \
@@ -52,7 +58,7 @@ main() {
                                      --trim-fraction 0.01 --out-fname ${bam_fn}_rampage_peaks.bed 
 
     echo "* Converting narrowPeak bed to bigBed..."
-    bedToBigBed ${bam_fn}_rampage_peaks.bed chromSizes.txt ${bam_fn}_rampage_peaks.bb
+    bedToBigBed ${bam_fn}_rampage_peaks.bed -type=bed12 chromSizes.txt ${bam_fn}_rampage_peaks.bb
 
     echo "* Upload results..."
     rampage_peaks=$(dx upload ${bam_fn}_rampage_peaks.bed --brief)
