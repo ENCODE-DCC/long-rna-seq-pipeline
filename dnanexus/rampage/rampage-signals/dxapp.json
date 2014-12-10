@@ -1,0 +1,85 @@
+{
+  "name": "rampage-signals",
+  "title": "RNA-Seq-rampage-signals",
+  "summary": "Converts 'Marked' BAMs 5' reads to bigwig format for rampage-rna-seq pipeline.",
+  "dxapi": "1.0.0",
+  "version": "1.0.0",
+  "authorizedUsers": [],
+  "inputSpec": [
+    {
+      "name": "bam_file",
+      "label": "Input 'Marked' BAM file of mapped reads",
+      "class": "file",
+      "optional": false,
+      "patterns": ["*.bam"]
+    },
+    {
+      "name": "chrom_sizes",
+      "label": "chomosome/name length file",
+      "class": "file",
+      "optional": false
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "all_plus_bw",
+      "label": "BigWig file for all 5' plus-stranded reads",
+      "class": "file"
+    },
+    {
+      "name": "unique_plus_bw",
+      "label": "BigWig file of uniquely mapped 5' plus-stranded reads",
+      "class": "file"
+    },
+    {
+      "name": "all_minus_bw",
+      "label": "BigWig file for all 5' minus-stranded reads",
+      "class": "file"
+    },
+    {
+      "name": "unique_minus_bw",
+      "label": "BigWig file of uniquely mapped 5' minus-stranded reads",
+      "class": "file"
+    },
+    {
+      "name": "all_plus_bg",
+      "label": "BedGraph file for all 5' plus-stranded reads (temporary)",
+      "class": "file"
+    },
+    {
+      "name": "unique_plus_bg",
+      "label": "BedGraph file of uniquely mapped 5' plus-stranded reads (temporary)",
+      "class": "file"
+    },
+    {
+      "name": "all_minus_bg",
+      "label": "BedGraph file for all 5' minus-stranded reads (temporary)",
+      "class": "file"
+    },
+    {
+      "name": "unique_minus_bg",
+      "label": "BedGraph file of uniquely mapped 5' minus-stranded reads (temporary)",
+      "class": "file"
+    }
+  ],
+  "runSpec": {
+    "interpreter": "bash",
+    "file": "src/rampage-signals.sh",
+    "systemRequirements": {
+      "main": {
+        "instanceType": "mem3_hdd2_x8"
+      },
+      "myEntryPoint": {
+        "instanceType": "mem3_hdd2_x8"
+      }
+    }
+  },
+  "access": {
+    "network": [
+      "*"
+    ]
+  },
+  "categories": [
+    "ENCODE"
+  ]
+}

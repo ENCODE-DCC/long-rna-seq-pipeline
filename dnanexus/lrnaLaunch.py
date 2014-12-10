@@ -31,10 +31,10 @@ ANNO_DEFAULT = 'v19'
 PROJECT_DEFAULT = 'scratchPad'
 ''' This the default DNA Nexus project to use for the long RNA-seq pipeline.'''
 
-REF_PROJECT_DEFAULT = 'long-rna-seq-pipeline'
+REF_PROJECT_DEFAULT = 'ENCODE Reference Files'
 ''' This the default DNA Nexus project to find reference files in.'''
 
-REF_FOLDER_DEFAULT = '/ref'
+REF_FOLDER_DEFAULT = '/'
 ''' This the default folder that reference files are found in.'''
 
 RESULT_FOLDER_DEFAULT = '/lrna'
@@ -54,14 +54,14 @@ STEPS = {
     'concatR1': {
                 'app':     'concat-fastqs',
                 'params':  { 'rootR1': 'outfile_root' },
-                'inputs':  { 'reads1_set': 'fastq_files' },
-                'results': { 'reads1': 'combined_fastq' }
+                'inputs':  { 'reads1_set': 'reads_set' },
+                'results': { 'reads1': 'reads' }
                 },
     'concatR2': {
                 'app':     'concat-fastqs',
                 'params':  { 'rootR2': 'outfile_root' },
-                'inputs':  { 'reads2_set': 'fastq_files' },
-                'results': { 'reads2': 'combined_fastq' }
+                'inputs':  { 'reads2_set': 'reads_set' },
+                'results': { 'reads2': 'reads' }
                 },
     'tophatSe': {
                 'app':     'align-tophat-se',
@@ -139,8 +139,8 @@ FILE_GLOBS = {
     'starBwPlusUniq':  "/*_star_genome_plusUniq.bw",
     'starBwAll':       "/*_star_genome_all.bw",
     'starBwUniq':      "/*_star_genome_uniq.bw",
-    'rsemIso':         "/*isoforms.results",
-    'rsemGene':        "/*genes.results"
+    'rsemIso':         "/*_rsem.isoforms.results",
+    'rsemGene':        "/*_rsem.genes.results"
     }
 
 GENOME_REFERENCES = {
@@ -150,61 +150,61 @@ GENOME_REFERENCES = {
     'tophatIndex':  {
                     'hg19': {
                             'female':   {
-                                        'v19': 'female_hg19_v19_ERCC_tophatIndex.tgz'
+                                        'v19': 'hg19_female_v19_ERCC_tophatIndex.tgz'
                                         },
                             'male':     {
-                                        'v19': 'male_hg19_v19_ERCC_tophatIndex.tgz'
+                                        'v19': 'hg19_male_v19_ERCC_tophatIndex.tgz'
                                         }
                             },
                     'mm10': {
                             'female':   {
-                                        'M2':  'female.mm10.chrom_gencode.vM2-tRNAs-ERCC_tophatIndex.tgz',
-                                        'M3':  'female.mm10.chrom_gencode.vM3-tRNAs-ERCC_tophatIndex.tgz',
-                                        'M4':  'female.mm10.chrom_gencode.vM4-tRNAs-ERCC_tophatIndex.tgz'
+                                        'M2':  'mm10_female_M2_ERCC_tophatIndex.tgz',
+                                        'M3':  'mm10_female_M3_ERCC_tophatIndex.tgz',
+                                        'M4':  'mm10_female_M4_ERCC_tophatIndex.tgz'
                                         },
                             'male':     {
-                                        'M2':  'male.mm10.chrom_gencode.vM2-tRNAs-ERCC_tophatIndex.tgz',
-                                        'M3':  'male.mm10.chrom_gencode.vM3-tRNAs-ERCC_tophatIndex.tgz',
-                                        'M4':  'male.mm10.chrom_gencode.vM4-tRNAs-ERCC_tophatIndex.tgz'
+                                        'M2':  'mm10_male_M2_ERCC_tophatIndex.tgz',
+                                        'M3':  'mm10_male_M3_ERCC_tophatIndex.tgz',
+                                        'M4':  'mm10_male_M4_ERCC_tophatIndex.tgz'
                                         }
                             }
                     },
     'starIndex':    {
                     'hg19': {
                             'female':   {
-                                        'v19': 'female_hg19_v19_ERCC_starIndex.tgz'
+                                        'v19': 'hg19_female_v19_ERCC_starIndex.tgz'
                                         },
                             'male':     {
-                                        'v19': 'male_hg19_v19_ERCC_starIndex.tgz'
+                                        'v19': 'hg19_male_v19_ERCC_starIndex.tgz'
                                         }
                             },
                     'mm10': {
                             'female':   {
-                                        'M2':  'female.mm10.chrom_gencode.vM2-tRNAs-ERCC_starIndex.tgz',
-                                        'M3':  'female.mm10.chrom_gencode.vM3-tRNAs-ERCC_starIndex.tgz',
-                                        'M4':  'female.mm10.chrom_gencode.vM4-tRNAs-ERCC_starIndex.tgz'
+                                        'M2':  'mm10_female_M2_ERCC_starIndex.tgz',
+                                        'M3':  'mm10_female_M3_ERCC_starIndex.tgz',
+                                        'M4':  'mm10_female_M4_ERCC_starIndex.tgz'
                                         },
                             'male':     {
-                                        'M2':  'male.mm10.chrom_gencode.vM2-tRNAs-ERCC_starIndex.tgz',
-                                        'M3':  'male.mm10.chrom_gencode.vM3-tRNAs-ERCC_starIndex.tgz',
-                                        'M4':  'male.mm10.chrom_gencode.vM4-tRNAs-ERCC_starIndex.tgz'
+                                        'M2':  'mm10_male_M2_ERCC_starIndex.tgz',
+                                        'M3':  'mm10_male_M3_ERCC_starIndex.tgz',
+                                        'M4':  'mm10_male_M4_ERCC_starIndex.tgz'
                                         }
                             }
                     },
     'rsemIndex':    {
                     'hg19': {
-                            'v19': 'male_hg19_v19_ERCC_rsemIndex.tgz'
+                            'v19': 'hg19_male_v19_ERCC_rsemIndex.tgz'
                             },
                     'mm10': {
-                            'M2':  'male.mm10.chrom_gencode.vM2-tRNAs-ERCC_rsemIndex.tgz',
-                            'M3':  'male.mm10.chrom_gencode.vM3-tRNAs-ERCC_rsemIndex.tgz',
-                            'M4':  'male.mm10.chrom_gencode.vM4-tRNAs-ERCC_rsemIndex.tgz'
+                            'M2':  'mm10_male_M2_ERCC_rsemIndex.tgz',
+                            'M3':  'mm10_male_M3_ERCC_rsemIndex.tgz',
+                            'M4':  'mm10_male_M4_ERCC_rsemIndex.tgz'
                             }
                     },
     'chromSizes':   {
                     'hg19': {
-                            'female':   'female_hg19.chrom.sizes',
-                            'male':     'male_hg19.chrom.sizes'
+                            'female':   'female.hg19.chrom.sizes',
+                            'male':     'male.hg19.chrom.sizes'
                             },
                     'mm10': {
                             'female':   'female.mm10.chrom.sizes',
@@ -236,6 +236,12 @@ def get_args():
                     type=int,
                     default='1',
                     required=True)
+
+    ap.add_argument('-tr', '--techrep',
+                    help="Technical replicate number (default: 1)",
+                    type=int,
+                    default='1',
+                    required=False)
 
     ap.add_argument('-1', '--reads1',
                     help='Only reads fastq file or first of pair-end reads.',
@@ -321,12 +327,13 @@ def pipeline_specific_vars(args, pairedEnd):
     # - 'resultFolder' - full dx path (without project) to the results folder of the specific run
     # - 'name' - A short name used for specific workflow run. 
     # - 'description' - generic description of the pipeline.
-    # - 'title'/'subtitle' for command line output announcing what will be done 
+    # - 'title'/['subtitle'] for command line output announcing what will be done 
     # - Should also contain such things as:
     # - 'organism', 'gender', 'experiment', 'replicate' (if appropriate), 
     # - 'pairedEnd' (boolean, if appropriate)
 
     psv = {}
+    psv['project']    = args.project
     psv['organism']   = args.organism
     psv['gender']     = args.gender
     psv['annotation'] = args.annotation
@@ -338,34 +345,45 @@ def pipeline_specific_vars(args, pairedEnd):
         sys.exit(1)
     psv['experiment'] = args.experiment
     psv['replicate']  = str(args.replicate)
+    psv['rep_tech']   = 'rep' + str(args.replicate) + '_' + str(args.techrep)
     psv['library']    = args.library
     psv['pairedEnd']  = pairedEnd
+
     # workflow labeling
-    genderToken = "XY"
-    if psv['gender'] == 'female':
-        genderToken = "XX"
     psv['description'] = "The ENCODE RNA Seq pipeline for long RNAs"
-    psv['title'] = "long RNA-seq single-end "
-    psv['name'] = "lrna_"+psv['organism']+genderToken+"SE_"
+    psv['name'] = "lrna_"+psv['organism']
+    if psv['organism'] == 'mm10':
+        psv['name'] += psv['annotation']
+    if psv['gender'] == 'female':
+        psv['name'] += "XX"
+    else:
+        psv['name'] += "XY"
     if pairedEnd:
         psv['title'] = "long RNA-seq paired-end "
-        psv['name'] = "lrna_"+psv['organism']+genderToken+"PE_"
-    psv['title'] += psv['experiment']+" - rep"+psv['replicate'] + " (library '"+psv['library']+"')"
-    psv['name']  += psv['experiment']+"_rep"+psv['replicate']
+        psv['name'] += "PE"
+    else:
+        psv['title'] = "long RNA-seq single-end "
+        psv['name'] += "SE"
+    psv['title']   += psv['experiment']+" - "+psv['rep_tech'] + " (library '"+psv['library']+"')"
     psv['subTitle'] = psv['organism']+", "+psv['gender']+" and annotation '"+psv['annotation']+"'."
+    psv['name']    += "_"+psv['experiment']+"_"+psv['rep_tech']
 
     # Non-file app inputs
-    psv['rootR1'] = psv['experiment'] + 'rep' + psv['replicate'] + '_concatR1'
-    psv['rootR2'] = psv['experiment'] + 'rep' + psv['replicate'] + '_concatR2'
+    psv['rootR1'] = psv['experiment'] + psv['rep_tech'] + '_concatR1'
+    psv['rootR2'] = psv['experiment'] + psv['rep_tech'] + '_concatR2'
 
     # Default locations (with adjustments)
     psv['refLoc'] = args.refLoc
     if psv['refLoc'] == REF_FOLDER_DEFAULT:
         psv['refLoc'] = REF_FOLDER_DEFAULT + '/' + psv['organism']
     psv['resultsLoc'] = args.resultsLoc
-    if psv['resultsLoc'] == RESULT_FOLDER_DEFAULT and psv['organism'] == 'mm10':
-        psv['resultsLoc'] = RESULT_FOLDER_DEFAULT + '/' + psv['organism']
-    psv['resultsFolder'] = psv['resultsLoc'] + '/' + psv['experiment'] + '/rep' + psv['replicate']
+    if psv['resultsLoc'] == RESULT_FOLDER_DEFAULT:
+        if psv['organism'] == 'mm10':
+            psv['resultsLoc'] = RESULT_FOLDER_DEFAULT + '/' + psv['organism'] + '/' + psv['annotation']
+        else:
+            psv['resultsLoc'] = RESULT_FOLDER_DEFAULT + '/' + psv['organism']
+    psv['resultsFolder'] = psv['resultsLoc'] + '/' + psv['experiment'] + '/' + psv['rep_tech']
+
     return psv
 
 
@@ -400,6 +418,7 @@ def find_ref_files(priors,psv):
     else:
         priors['chromSizes'] = chromSizesFid
 
+
 #######################
 def main():
 
@@ -422,7 +441,7 @@ def main():
     #       and fill in inputs to workflow steps
     pipePath = STEP_ORDER['se']
     if pairedEnd:
-        pipePath = STEP_ORDER['se']
+        pipePath = STEP_ORDER['pe']
     if not args.test:
         if not dxencode.project_has_folder(project, psv['resultsFolder']):
             project.new_folder(psv['resultsFolder'],parents=True)
@@ -447,6 +466,8 @@ def main():
                                                                                 force=args.force)
 
     # Report the plans
+    dxencode.report_plans(psv, reads1, reads2, GENOME_REFERENCES.keys(), deprecateFiles, priors, \
+                                                                pipePath, stepsToDo, STEPS)
     print "Running '"+psv['title']+"'"
     print "     on "+psv['subTitle']
     if pairedEnd:
@@ -470,12 +491,7 @@ def main():
         sys.exit(0)
     else:
         print "- Steps to run:"
-        steps = []
-        if pairedEnd:
-            steps = STEP_ORDER['pe']
-        else:
-            steps = STEP_ORDER['se']
-        for step in steps:
+        for step in pipePath:
             if step in stepsToDo:
                 print "  * "+STEPS[step]['app']+" will be run"
             else:
@@ -505,24 +521,9 @@ def main():
     if args.test:
         print "TEST ONLY - exiting."
         sys.exit(0)
-    elif wf == None:
-        print "ERROR: failure assemble workflow!"
-        sys.exit(1)
-
-    if args.run:
-        print "Launch sequence initiating..."
-        wf_run = wf.run({})
-        if wf_run == None:
-            print "ERROR: failure to lift off!"
-            sys.exit(1)
-        else:
-            print "  We have liftoff!"
-            wf_dict = wf_run.describe()
-            dxencode.log_this_run(wf_dict['id'],psv['resultsFolder'],projectId)
-            print "  Launched " + wf_dict['id']
-    else:
-        print "Workflow '" + wf.name + "' has been assembled in "+psv['resultsFolder'] + \
-                                                                    ". Manual launch required."
+        
+    # Roll out to pad and possibly launch
+    dxencode.launchPad(wf,projectId,psv,args.run)        
             
     print "(success)"
 
