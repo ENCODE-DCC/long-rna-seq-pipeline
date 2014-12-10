@@ -1,0 +1,93 @@
+{
+  "name": "small-rna-signals",
+  "title": "Small-RNA-Seq-signals",
+  "summary": "Converts BAMs of alignments from stranded libraries to bigwig format",
+  "dxapi": "1.0.0",
+  "version": "0.0.1",
+  "authorizedUsers": [],
+  "inputSpec": [
+    {
+      "name": "genome_bam",
+      "label": "Input BAM file for all mapped reads",
+      "class": "file",
+      "optional": false,
+      "patterns": ["*.bam"]
+    },
+    {
+      "name": "chrom_sizes",
+      "label": "chomosome/name length file",
+      "class": "file",
+      "optional": false
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "all_plus_bw",
+      "label": "BigWig file for all plus-stranded reads",
+      "class": "file",
+      "patterns": ["*_small_plusAll.bw"]
+    },
+    {
+      "name": "unique_plus_bw",
+      "label": "BigWig file of uniquely mapped plus-stranded reads",
+      "class": "file",
+      "patterns": ["*_small_plusUniq.bw"]
+    },
+    {
+      "name": "all_minus_bw",
+      "label": "BigWig file for all minus-stranded reads",
+      "class": "file",
+      "patterns": ["*_small_minusAll.bw"]
+    },
+    {
+      "name": "unique_minus_bw",
+      "label": "BigWig file of uniquely mapped minus-stranded reads",
+      "class": "file",
+      "patterns": ["*_small_minusUniq.bw"]
+    },
+    {
+      "name": "all_plus_bg",
+      "label": "BedGraph file for all plus-stranded reads (temporary)",
+      "class": "file",
+      "patterns": ["*_small_plusAll.bg"]
+    },
+    {
+      "name": "unique_plus_bg",
+      "label": "BedGraph file of uniquely mapped plus-stranded reads (temporary)",
+      "class": "file",
+      "patterns": ["*_small_plusUniq.bg"]
+    },
+    {
+      "name": "all_minus_bg",
+      "label": "BedGraph file for all minus-stranded reads (temporary)",
+      "class": "file",
+      "patterns": ["*_small_minusAll.bg"]
+    },
+    {
+      "name": "unique_minus_bg",
+      "label": "BedGraph file of uniquely mapped minus-stranded reads (temporary)",
+      "class": "file",
+      "patterns": ["*_small_minusAll.bg"]
+    }
+  ],
+  "runSpec": {
+    "interpreter": "bash",
+    "file": "src/small-rna-signals.sh",
+    "systemRequirements": {
+      "main": {
+        "instanceType": "mem3_hdd2_x8"
+      },
+      "myEntryPoint": {
+        "instanceType": "mem3_hdd2_x8"
+      }
+    }
+  },
+  "access": {
+    "network": [
+      "*"
+    ]
+  },
+  "categories": [
+    "ENCODE"
+  ]
+}
