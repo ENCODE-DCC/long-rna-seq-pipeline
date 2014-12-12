@@ -67,14 +67,14 @@ main() {
     echo "* Upload results..."
     #detail_log=$(dx upload ${reads_fn}_star_Log.out --brief)
     star_log=$(dx upload ${reads_fn}_star_Log.final.out --brief)
-    genome_bam=$(dx upload ${reads_fn}_star_genome.bam --brief)
-    #genome_bai=$(dx upload ${reads_fn}_star_genome.bam.bai --brief)
-    annotation_bam=$(dx upload ${reads_fn}_star_anno.bam --brief)
+    star_genome_bam=$(dx upload ${reads_fn}_star_genome.bam --brief)
+    #star_genome_bai=$(dx upload ${reads_fn}_star_genome.bam.bai --brief)
+    star_anno_bam=$(dx upload ${reads_fn}_star_anno.bam --brief)
 
     #dx-jobutil-add-output detail_log "$detail_log" --class=file
     dx-jobutil-add-output star_log "$star_log" --class=file
-    dx-jobutil-add-output genome_bam "$genome_bam" --class=file
-    #dx-jobutil-add-output genome_bai "$genome_bai" --class=file
-    dx-jobutil-add-output annotation_bam "$annotation_bam" --class=file
+    dx-jobutil-add-output star_genome_bam "$star_genome_bam" --class=file
+    #dx-jobutil-add-output star_genome_bai "$star_genome_bai" --class=file
+    dx-jobutil-add-output star_anno_bam "$star_anno_bam" --class=file
     echo "* Finished."
 }

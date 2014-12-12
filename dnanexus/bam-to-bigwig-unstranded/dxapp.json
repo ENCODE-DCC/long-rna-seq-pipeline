@@ -22,14 +22,16 @@
   ],
   "outputSpec": [
     {
-      "name": "all_unstranded_bw",
+      "name": "all_bw",
       "label": "BigWig file for all unstranded reads",
-      "class": "file"
+      "class": "file",
+      "patterns": ["*_all.bw"]
     },
     {
-      "name": "unique_unstranded_bw",
+      "name": "uniq_bw",
       "label": "BigWig file of uniquely mapped unstranded reads",
-      "class": "file"
+      "class": "file",
+      "patterns": ["*_uniq.bw"]
     }
   ],
   "runSpec": {

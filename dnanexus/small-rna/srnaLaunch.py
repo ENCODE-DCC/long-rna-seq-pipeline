@@ -38,29 +38,30 @@ REF_FOLDER_DEFAULT = '/'
 RESULT_FOLDER_DEFAULT = '/srna'
 ''' This the default location to place results folders for each experiment.'''
 
-STEP_ORDER = [ 'concat-fastqs', 'small-rna-align', 'small-rna-signals' ]
+STEP_ORDER = [ "concat-fastqs", "small-rna-align", "small-rna-signals" ]
+'''The (artifically) linear order of all pipeline steps.'''
 
 GENOME_REFERENCES = {
     # For looking up reference file names.
     # TODO: should use ACCESSION based fileNames
-    'star_index':   {
-                    'hg19': {
-                            'female':   'hg19_female_sRNA_starIndex.tgz',
-                            'male':     'hg19_male_sRNA_starIndex.tgz'
+    "star_index":   {
+                    "hg19": {
+                            "female":   "hg19_female_sRNA_starIndex.tgz",
+                            "male":     "hg19_male_sRNA_starIndex.tgz"
                             },
-                    'mm10': {
-                            'female':   'mm10_female_sRNA_starIndex.tgz',
-                            'male':     'mm10_male_sRNA_starIndex.tgz'
+                    "mm10": {
+                            "female":   "mm10_female_sRNA_starIndex.tgz",
+                            "male":     "mm10_male_sRNA_starIndex.tgz"
                             }
                     },
-    'chrom_sizes':  {
-                    'hg19': {
-                            'female':   'female.hg19.chrom.sizes',
-                            'male':     'male.hg19.chrom.sizes'
+    "chrom_sizes":  {
+                    "hg19": {
+                            "female":   "female.hg19.chrom.sizes",
+                            "male":     "male.hg19.chrom.sizes"
                             },
-                    'mm10': {
-                            'female':   'female.mm10.chrom.sizes',
-                            'male':     'male.mm10.chrom.sizes'
+                    "mm10": {
+                            "female":   "female.mm10.chrom.sizes",
+                            "male":     "male.mm10.chrom.sizes"
                             }
                     }
     }
@@ -178,7 +179,9 @@ def pipeline_specific_vars(args):
     psv['replicate']  = str(args.replicate)
     psv['rep_tech']   = 'rep' + str(args.replicate) + '_' + str(args.techrep)
     psv['library_id'] = args.library
-    psv['nthreads'] = 8
+    psv['nthreads']   = 8
+    psv['pairedEnd']  = True
+
     # workflow labeling
     genderToken = "XY"
     if psv['gender'] == 'female':
@@ -225,14 +228,12 @@ def main():
 
     args = get_args()
     if len(args.reads) < 1:
-        sys.exit('Need to have at least 1 replicate file.')
+        sys.exit('Need to have at at least 1 reads fastq file.')
     psv = pipeline_specific_vars(args)
     project = dxencode.get_project(args.project)
     projectId = project.get_id()
 
     print "Building apps dictionary..."
-    #pipeSteps = STEPS
-    #file_globs = FILE_GLOBS
     pipeSteps, file_globs = dxencode.build_simple_steps(STEP_ORDER,projectId)
     
 
@@ -250,7 +251,8 @@ def main():
     # Find all reads files and move into place
     # TODO: files could be in: dx (usual), remote (url e.g.https://www.encodeproject.org/...
     #       or possibly local, Currently only DX locations are supported.
-    reads = dxencode.find_and_copy_read_files(priors, args.reads, args.test, 'reads', \
+    inputs = {}
+    inputs['Reads'] = dxencode.find_and_copy_read_files(priors, args.reads, args.test, 'reads', \
                                                             psv['resultsFolder'], False, projectId)
 
     print "Looking for reference files..."
@@ -262,7 +264,7 @@ def main():
     stepsToDo = dxencode.determine_steps_to_run(STEP_ORDER, pipeSteps, priors, deprecateFiles, \
                                                                     projectId, force=args.force)
     # Report the plans
-    dxencode.report_plans(psv, reads, None, GENOME_REFERENCES.keys(), deprecateFiles, priors, \
+    dxencode.report_plans(psv, inputs, GENOME_REFERENCES.keys(), deprecateFiles, priors, \
                                                                 STEP_ORDER, stepsToDo, pipeSteps)
     print "Checking for currently running analyses..."
     dxencode.check_run_log(psv['resultsFolder'],projectId,verbose=True)
@@ -270,7 +272,7 @@ def main():
     if len(deprecateFiles) > 0 and not args.test:
         oldFolder = psv['resultsFolder']+"/deprecated"
         print "Moving "+str(len(deprecateFiles))+" prior result file(s) to '"+oldFolder+"/'..."
-        exencode.move_files(deprecateFiles,oldFolder,projectId)
+        dxencode.move_files(deprecateFiles,oldFolder,projectId)
 
     if args.test:
         print "Testing workflow assembly..."

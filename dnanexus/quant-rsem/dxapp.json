@@ -7,7 +7,7 @@
   "authorizedUsers": [],
   "inputSpec": [
     {
-      "name": "annotation_bam",
+      "name": "star_anno_bam",
       "label": "BAM file for reads aligned to annotation (transcriptome)",
       "class": "file",
       "optional": false,
@@ -43,14 +43,16 @@
   ],
   "outputSpec": [
     {
-      "name": "genomic_quant",
+      "name": "rsem_gene_results",
       "label": "Genomic quantification",
-      "class": "file"
+      "class": "file",
+      "patterns": ["*_rsem.genes.results"]
     },
     {
-      "name": "transcript_quant",
+      "name": "rsem_iso_results",
       "label": "Transcript quantification",
-      "class": "file"
+      "class": "file",
+      "patterns": ["*_rsem.isoforms.results"]
     }
   ],
   "runSpec": {

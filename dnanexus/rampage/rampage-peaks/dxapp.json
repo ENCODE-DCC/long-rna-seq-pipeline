@@ -7,7 +7,7 @@
   "authorizedUsers": [],
   "inputSpec": [
     {
-      "name": "marked_bam",
+      "name": "rampage_marked_bam",
       "label": "Input BAM file marked for Rampage",
       "class": "file",
       "optional": false,
@@ -21,17 +21,25 @@
       "patterns": ["*.bam"]
     },
     {
-      "optional": false,
-      "class": "file",
       "name": "gene_annotation",
       "label": "Gene/Transcript annotation file (GTF)",
+      "optional": false,
+      "class": "file",
       "patterns": ["*.gtf.gz"]
     },
     {
       "name": "chrom_sizes",
       "label": "chomosome/name length file",
       "class": "file",
-      "optional": false
+      "optional": false,
+      "patterns": ["*chrom.sizes","*.txt"]
+    },
+    {
+      "name": "bed12_as_file",
+      "label": "Bed 12 'as' file definition",
+      "class": "file",
+      "optional": false,
+      "patterns": ["*.as"]
     },
     {
       "name": "nthreads",
@@ -43,14 +51,22 @@
   ],
   "outputSpec": [
     {
-      "name": "rampage_peaks",
+      "name": "rampage_peaks_bed",
       "label": "Bed file of rampage called peaks",
-      "class": "file"
+      "class": "file",
+      "patterns": ["*_rampage_peaks.bed"]
     },
     {
       "name": "rampage_peaks_bb",
       "label": "BigBed file of rampage called peaks",
-      "class": "file"
+      "class": "file",
+      "patterns": ["*_rampage_peaks.bb"]
+    },
+    {
+      "name": "rampage_peaks_gtf",
+      "label": "GHTF file of rampage called peaks",
+      "class": "file",
+      "patterns": ["*_rampage_peaks.gtf"]
     }
   ],
   "runSpec": {

@@ -22,24 +22,28 @@
   ],
   "outputSpec": [
     {
-      "name": "all_plus_bw",
-      "label": "BigWig file for all plus-stranded reads",
-      "class": "file"
-    },
-    {
-      "name": "unique_plus_bw",
-      "label": "BigWig file of uniquely mapped plus-stranded reads",
-      "class": "file"
-    },
-    {
-      "name": "all_minus_bw",
+      "name": "minus_all_bw",
       "label": "BigWig file for all minus-stranded reads",
-      "class": "file"
+      "class": "file",
+      "patterns": ["*_minusAll.bw"]
     },
     {
-      "name": "unique_minus_bw",
+      "name": "minus_uniq_bw",
       "label": "BigWig file of uniquely mapped minus-stranded reads",
-      "class": "file"
+      "class": "file",
+      "patterns": ["*_minusUniq.bw"]
+    },
+    {
+      "name": "plus_all_bw",
+      "label": "BigWig file for all plus-stranded reads",
+      "class": "file",
+      "patterns": ["*_plusAll.bw"]
+    },
+    {
+      "name": "plus_uniq_bw",
+      "label": "BigWig file of uniquely mapped plus-stranded reads",
+      "class": "file",
+      "patterns": ["*_plusUniq.bw"]
     }
   ],
   "runSpec": {

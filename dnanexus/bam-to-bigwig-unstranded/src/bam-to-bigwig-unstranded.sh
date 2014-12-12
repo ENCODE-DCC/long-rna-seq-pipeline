@@ -43,11 +43,11 @@ main() {
     bedGraphToBigWig Signal.Unique.str1.out.bg         chromSizes.txt ${bam_fn}_uniq.bw
 
     echo "* Upload results..."
-    all_unstranded_bw=$(dx upload ${bam_fn}_all.bw --brief)
-    unique_unstranded_bw=$(dx upload ${bam_fn}_uniq.bw --brief)
+    all_bw=$(dx upload ${bam_fn}_all.bw --brief)
+    uniq_bw=$(dx upload ${bam_fn}_uniq.bw --brief)
 
-    dx-jobutil-add-output all_unstranded_bw "$all_unstranded_bw" --class=file
-    dx-jobutil-add-output unique_unstranded_bw "$unique_unstranded_bw" --class=file
+    dx-jobutil-add-output all_bw "$all_bw" --class=file
+    dx-jobutil-add-output uniq_bw "$uniq_bw" --class=file
 
     #echo "* Temporary uploads..."
     ## temprary for comparison only!

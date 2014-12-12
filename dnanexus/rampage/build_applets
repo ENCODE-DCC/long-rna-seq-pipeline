@@ -2,7 +2,7 @@
 
 #applet_dest='long-rna-seq-pipeline'
 applet_dest='scratchPad'
-applets='rampage-align-pe rampage-signals rampage-peaks'
+applets='rampage-align-pe rampage-signals rampage-peaks rampage-idr'
 
 if [ $# -gt 0 ]; then
     if [ $1 == "?" ] || [ $1 == "-h" ] || [ $1 == "--help" ]; then
