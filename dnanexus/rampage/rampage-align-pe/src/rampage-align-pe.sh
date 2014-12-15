@@ -71,7 +71,7 @@ main() {
     #samtools index ${reads1_fn}-${reads2_fn}_rampage_star_marked.bam
 
     rampage_star_log=$(dx upload ${aligned_root}_Log.final.out --brief)
-    rampage_marked_bam=$(dx upload ${aligned_root}.bam --brief)
+    rampage_marked_bam=$(dx upload ${aligned_root}_marked.bam --brief)
 
     dx-jobutil-add-output rampage_star_log "$rampage_star_log" --class=file
     dx-jobutil-add-output rampage_marked_bam "$rampage_marked_bam" --class=file

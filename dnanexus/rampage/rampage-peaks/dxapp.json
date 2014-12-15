@@ -63,10 +63,16 @@
       "patterns": ["*_rampage_peaks.bb"]
     },
     {
-      "name": "rampage_peaks_gtf",
-      "label": "GHTF file of rampage called peaks",
+      "name": "rampage_regions_bed",
+      "label": "Bed file of rampage called peaks",
       "class": "file",
-      "patterns": ["*_rampage_peaks.gtf"]
+      "patterns": ["*_rampage_peaks.bed"]
+    },
+    {
+      "name": "rampage_peaks_gff",
+      "label": "GFF2 file of rampage called peaks",
+      "class": "file",
+      "patterns": ["*_rampage_peaks.gff"]
     }
   ],
   "runSpec": {
