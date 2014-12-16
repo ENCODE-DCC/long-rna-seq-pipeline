@@ -7,8 +7,8 @@ import sys
 #import json
 
 import dxpy
-import dxencode as dxencode
-#from dxencode import dxencode as dxencode
+#import dxencode as dxencode
+from dxencode import dxencode as dxencode
 
 # NOTES: This command-line utility will run the long RNA-seq pipeline for a single replicate
 #      - All results will be written to a folder /lrna/<expId>/rep<#>.
