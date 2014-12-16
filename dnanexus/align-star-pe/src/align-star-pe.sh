@@ -1,16 +1,16 @@
 #!/bin/bash
-# align-star-pe 1.0.0
+# align-star-pe 1.0.1
 
 main() {
     # Now in resources/usr/bin
     #echo "* Download and install STAR..."
     #git clone https://github.com/alexdobin/STAR
-    #(cd STAR; git checkout tags/STAR_2.4.0d)
+    #(cd STAR; git checkout tags/STAR_2.4.0h)
     #(cd STAR; make)
     #wget https://github.com/samtools/samtools/archive/0.1.19.tar.gz
 
     echo "*****"
-    echo "* Running: align-star-pe.sh [v1.0.0]"
+    echo "* Running: align-star-pe.sh [v1.0.1]"
     echo "* STAR version: "`STAR --version | awk '{print $1}' | cut -d _ -f 2-`
     echo "* samtools version: "`samtools 2>&1 | grep Version | awk '{print $2}'`
     echo "*****"
@@ -52,7 +52,7 @@ main() {
         --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000             \
         --outSAMheaderCommentFile COfile.txt --outSAMheaderHD @HD VN:1.4 SO:coordinate       \
         --outSAMunmapped Within --outFilterType BySJout --outSAMattributes NH HI AS NM MD     \
-        --outSAMtype BAM SortedByCoordinate --quantMode TranscriptomeSAM
+        --outSAMtype BAM SortedByCoordinate --quantMode TranscriptomeSAM --sjdbScore 1
 
     #echo "* Index genome bam..."
     # Note: no longer making unused index
@@ -73,14 +73,14 @@ main() {
     echo "* Upload results..."
     #detail_log=$(dx upload ${reads1_fn}-${reads2_fn}_star_Log.out --brief)
     star_log=$(dx upload ${reads1_fn}-${reads2_fn}_star_Log.final.out --brief)
-    genome_bam=$(dx upload ${reads1_fn}-${reads2_fn}_star_genome.bam --brief)
-    #genome_bai=$(dx upload ${reads1_fn}-${reads2_fn}_star_genome.bam.bai --brief)
-    annotation_bam=$(dx upload ${reads1_fn}-${reads2_fn}_star_anno.bam --brief)
+    star_genome_bam=$(dx upload ${reads1_fn}-${reads2_fn}_star_genome.bam --brief)
+    #star_genome_bai=$(dx upload ${reads1_fn}-${reads2_fn}_star_genome.bam.bai --brief)
+    star_anno_bam=$(dx upload ${reads1_fn}-${reads2_fn}_star_anno.bam --brief)
 
     #dx-jobutil-add-output detail_log "$detail_log" --class=file
     dx-jobutil-add-output star_log "$star_log" --class=file
-    dx-jobutil-add-output genome_bam "$genome_bam" --class=file
-    #dx-jobutil-add-output genome_bai "$genome_bai" --class=file
-    dx-jobutil-add-output annotation_bam "$annotation_bam" --class=file
+    dx-jobutil-add-output star_genome_bam "$star_genome_bam" --class=file
+    #dx-jobutil-add-output star_genome_bai "$star_genome_bai" --class=file
+    dx-jobutil-add-output star_anno_bam "$star_anno_bam" --class=file
     echo "* Finished."
 }

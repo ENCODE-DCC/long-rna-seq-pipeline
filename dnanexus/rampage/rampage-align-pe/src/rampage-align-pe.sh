@@ -35,6 +35,9 @@ main() {
     dx download "$star_index" -o star_index.tgz
     tar zxvf star_index.tgz
     # unzips into "out/"
+    
+    aligned_root=${reads1_fn}-${reads2_fn}_rampage_star
+    echo "* Rampage Aligned file root:'${aligned_root}'"
 
     # Fill in your application code here.
 
@@ -62,15 +65,15 @@ main() {
         --outFileNamePrefix markdup.
 
     echo "* Upload results..."
-    mv markdup.Processed.out.bam ${reads1_fn}-${reads2_fn}_rampage_star_marked.bam
-    mv Log.final.out ${reads1_fn}-${reads2_fn}_rampage_star_Log.final.out
+    mv markdup.Processed.out.bam ${aligned_root}_marked.bam
+    mv Log.final.out ${aligned_root}_Log.final.out
     # Note: No longer making unused index
     #samtools index ${reads1_fn}-${reads2_fn}_rampage_star_marked.bam
 
-    star_log=$(dx upload ${reads1_fn}-${reads2_fn}_rampage_star_Log.final.out --brief)
-    marked_bam=$(dx upload ${reads1_fn}-${reads2_fn}_rampage_star_marked.bam --brief)
+    rampage_star_log=$(dx upload ${aligned_root}_Log.final.out --brief)
+    rampage_marked_bam=$(dx upload ${aligned_root}_marked.bam --brief)
 
-    dx-jobutil-add-output star_log "$star_log" --class=file
-    dx-jobutil-add-output marked_bam "$marked_bam" --class=file
+    dx-jobutil-add-output rampage_star_log "$rampage_star_log" --class=file
+    dx-jobutil-add-output rampage_marked_bam "$rampage_marked_bam" --class=file
     echo "* Finished."
 }

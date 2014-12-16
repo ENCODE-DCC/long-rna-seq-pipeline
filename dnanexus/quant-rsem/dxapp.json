@@ -3,11 +3,11 @@
   "title": "Long-RNA-Seq-quantitate-RSEM",
   "summary": "Do genome and transcription quantitations with RSEM from STAR alignments",
   "dxapi": "1.0.0",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "authorizedUsers": [],
   "inputSpec": [
     {
-      "name": "annotation_bam",
+      "name": "star_anno_bam",
       "label": "BAM file for reads aligned to annotation (transcriptome)",
       "class": "file",
       "optional": false,
@@ -43,14 +43,16 @@
   ],
   "outputSpec": [
     {
-      "name": "genomic_quant",
+      "name": "rsem_gene_results",
       "label": "Genomic quantification",
-      "class": "file"
+      "class": "file",
+      "patterns": ["*_rsem.genes.results"]
     },
     {
-      "name": "transcript_quant",
+      "name": "rsem_iso_results",
       "label": "Transcript quantification",
-      "class": "file"
+      "class": "file",
+      "patterns": ["*_rsem.isoforms.results"]
     }
   ],
   "runSpec": {

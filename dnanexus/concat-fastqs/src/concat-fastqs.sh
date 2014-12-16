@@ -1,30 +1,36 @@
 #!/bin/bash
-# concat-fastqs 1.0.0
+# concat-fastqs 1.0.1
 
 main() {
     echo "*****"
-    echo "* Running: concat-fastqs [v1.0.0]"
+    echo "* Running: concat-fastqs [v1.0.1]"
     echo "*****"
 
-    echo "* Expected name of ouutput file: '${outfile_root}.fastq.gz'"
+    echo "* Expected name of output file: '${outfile_root}.fastq.gz'"
     #echo "* Value of trna_annoation: '$trna_annotation'"
     #echo "* Value of spike_in: '$spike_in'"
 
     echo "* Download files..."
-    for ix in ${!fastq_files[@]}
+    for ix in ${!reads_set[@]}
     do
-        filename=`dx describe "${fastq_files[$ix]}" --name | cut -d'.' -f1`
-        dx download "${fastq_files[$ix]}" -o - | gunzip > "$filename".fq
+        filename=`dx describe "${reads_set[$ix]}" --name | cut -d'.' -f1`
+        dx download "${reads_set[$ix]}" -o - | gunzip > ${filename}.fastq
     done
 
     echo "* Concatenating files..."
-    cat *.fq > ${outfile_root}.fq
-
+    # Note: must maintain order so that paired reads maintain order.
+    rm -f ${outfile_root}.fq
+    for ix in ${!reads_set[@]}
+    do
+        filename=`dx describe "${reads_set[$ix]}" --name | cut -d'.' -f1`
+        cat ${filename}.fastq >> ${outfile_root}.fq
+    done
+    
     echo "* Gzipping file..."
     gzip ${outfile_root}.fq
 
     echo "* Upload results..."
-    combined_fastq=$(dx upload ${outfile_root}.fq.gz --brief)
-    dx-jobutil-add-output combined_fastq "$combined_fastq" --class=file
+    reads=$(dx upload ${outfile_root}.fq.gz --brief)
+    dx-jobutil-add-output reads "$reads" --class=file
     echo "* Finished."
 }

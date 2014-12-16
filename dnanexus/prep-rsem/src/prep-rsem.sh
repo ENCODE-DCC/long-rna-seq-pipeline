@@ -1,16 +1,16 @@
 #!/bin/bash
-# prep-rsem 1.0.0
+# prep-rsem 1.0.1
 
 main() {
     # Now in resources/usr/bin
     #echo "* Dowload and install RSEM..."
     #git clone https://github.com/bli25wisc/RSEM.git
-    #(cd RSEM; git checkout 92b24279a3ecc72946e7e7c23149ad0d181f373a)
+    # (cd RSEM; git checkout tags/v1.2.19)
     ### get correct commit bit from submodule
     #(cd RSEM; make)
 
     echo "*****"
-    echo "* Running: prep-rsem.sh [v1.0.0]"
+    echo "* Running: prep-rsem.sh [v1.0.1]"
     echo "* RSEM version: "`rsem-calculate-expression --version | awk '{print $5}'`
     echo "*****"
 

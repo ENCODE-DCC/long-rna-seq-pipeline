@@ -1,20 +1,20 @@
 #!/bin/bash
-# quant-rsem 1.0.0
+# quant-rsem 1.0.1
 
 main() {
     # Now in resources/usr/bin
     # echo "* Dowload and install RSEM..."
     # git clone https://github.com/bli25wisc/RSEM.git
-    # (cd RSEM; git checkout 92b24279a3ecc72946e7e7c23149ad0d181f373a)
+    # (cd RSEM; git checkout tags/v1.2.19)
     # #### get correct commit bit from submodule
     # (cd RSEM; make)
 
     echo "*****"
-    echo "* Running: quant_rsem.sh [v1.0.0]"
+    echo "* Running: quant_rsem.sh [v1.0.1]"
     echo "* RSEM version: "`rsem-calculate-expression --version | awk '{print $5}'`
     echo "*****"
 
-    echo "* Value of annotation_bam: '$annotation_bam'"
+    echo "* Value of annotation_bam: '$star_anno_bam'"
     echo "* Value of rsem_index: '$rsem_index'"
     echo "* Value of paired: '$paired'"
     #echo "* Value of stranded: '$stranded'"
@@ -22,9 +22,10 @@ main() {
     echo "* Value of nthreads: '$nthreads'"
 
     echo "* Download files..."
-    bam_fn=`dx describe "$annotation_bam" --name`
+    bam_fn=`dx describe "$star_anno_bam" --name`
+    bam_fn=${bam_fn%_star_anno.bam}
     bam_fn=${bam_fn%.bam}
-    dx download "$annotation_bam" -o ${bam_fn}.bam
+    dx download "$star_anno_bam" -o ${bam_fn}.bam
     dx download "$rsem_index" -o rsem_index.tgz
     tar zxvf rsem_index.tgz
 
@@ -56,10 +57,10 @@ main() {
     echo `ls ${bam_fn}*`
 
     echo "* Upload results..."
-    genomic_quant=$(dx upload ${bam_fn}_rsem.genes.results --brief)
-    transcript_quant=$(dx upload ${bam_fn}_rsem.isoforms.results --brief)
+    rsem_gene_results=$(dx upload ${bam_fn}_rsem.genes.results --brief)
+    rsem_iso_results=$(dx upload ${bam_fn}_rsem.isoforms.results --brief)
 
-    dx-jobutil-add-output genomic_quant "$genomic_quant" --class=file
-    dx-jobutil-add-output transcript_quant "$transcript_quant" --class=file
+    dx-jobutil-add-output rsem_gene_results "$rsem_gene_results" --class=file
+    dx-jobutil-add-output rsem_iso_results "$rsem_iso_results" --class=file
     echo "* Finished."
 }

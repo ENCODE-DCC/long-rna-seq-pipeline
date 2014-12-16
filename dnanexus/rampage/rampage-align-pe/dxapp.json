@@ -43,14 +43,16 @@
   ],
   "outputSpec": [
     {
-      "name": "star_log",
+      "name": "rampage_star_log",
       "label": "Log file for STAR, contains QC metrics",
-      "class": "file"
+      "class": "file",
+      "patterns": ["*_rampage_star_Log.final.out"]
     },
     {
-      "name": "marked_bam",
+      "name": "rampage_marked_bam",
       "label": "BAM file of alignment to whole genome, dups marked for rampage",
-      "class": "file"
+      "class": "file",
+      "patterns": ["*_rampage_star_marked.bam"]
     }
   ],
   "runSpec": {
