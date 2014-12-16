@@ -167,6 +167,30 @@ FILE_GLOBS = {
     "rsem_gene_results":    "/*_rsem.genes.results"
     }
 
+
+POST_TEMPLATES = {
+    # For looking up previous result files, use wild-cards
+    "tophat_bam":           "/*_tophat.bam",
+    "tophat_minus_all_bw":  "/*_tophat_minusAll.bw",
+    "tophat_minus_uniq_bw": "/*_tophat_minusUniq.bw",
+    "tophat_plus_all_bw":   "/*_tophat_plusAll.bw",
+    "tophat_plus_uniq_bw":  "/*_tophat_plusUniq.bw",
+    "tophat_all_bw":        "/*_tophat_all.bw",
+    "tophat_uniq_bw":       "/*_tophat_uniq.bw",
+    "star_genome_bam":      "/*_star_genome.bam",
+    "star_anno_bam":        "/*_star_anno.bam",
+    "star_minus_all_bw":    "/*_star_genome_minusAll.bw",
+    "star_minus_uniq_bw":   "/*_star_genome_minusUniq.bw",
+    "star_plus_all_bw":     "/*_star_genome_plusAll.bw",
+    "star_plus_uniq_bw":    "/*_star_genome_plusUniq.bw",
+    "star_all_bw":          "/*_star_genome_all.bw",
+    "star_uniq_bw":         "/*_star_genome_uniq.bw",
+    "rsem_iso_results":     "/*_rsem.isoforms.results",
+    "rsem_gene_results":    "/*_rsem.genes.results"
+}
+
+
+
 GENOME_REFERENCES = {
     # For looking up reference file names.
     # TODO: should remove annotation if only one per genome
@@ -260,13 +284,13 @@ def get_args():
                     help='ENCODED experiment accession',
                     required=True)
 
-    ap.add_argument('-br', '--biorep',
+    ap.add_argument('--br', '--biorep',
                     help="Biological Replicate number (default: 1)",
                     type=int,
                     default='1',
                     required=False)
 
-    ap.add_argument('-tr', '--techrep',
+    ap.add_argument('--tr', '--techrep',
                     help="Technical replicate number (default: 1)",
                     type=int,
                     default='1',
@@ -430,36 +454,54 @@ def main():
 
 
     #print "Building apps dictionary..."
-    pipePath = STEP_ORDER['se']
     if pairedEnd:
+        paired_fqs = {
+            '1': [],
+            '2': []
+        }
+        for (p1, p2) in mapping['paired']:
+            paired_fqs[p1['paired_end']].append(p1['accession']+".fastq.gz")
+            paired_fqs[p2['paired_end']].append(p2['accession']+".fastq.gz")
         pipePath = STEP_ORDER['pe']
+        print "Generating workflow steps (paired-end)..."
+    else:
+        unpaired_fqs = [ f['accession']+".fastq.gz" for f in mapping['unpaired'] ]
+        pipePath = STEP_ORDER['se']
+
     pipeSteps = STEPS
     file_globs = FILE_GLOBS
 
     print "Checking for prior results..."
-    # Check if there are previous results
-    # Perhaps reads files are already there?
-    # NOTE: priors is a dictionary of fileIds that will be used to determine stepsToDo
-    #       and fill in inputs to workflow steps
 
     priors = dxencode.find_prior_results(pipePath,pipeSteps,psv['resultsFolder'],file_globs, projectId)
 
-    print priors
-    sys.exit(0)
-    print "Looking for reference files..."
-    find_ref_files(priors,psv)
+    if pairedEnd:
+        priors['reads1'] = dxencode.find_file_set(paired_fqs["1"], projectId)
+        priors['reads2'] = dxencode.find_file_set(paired_fqs["2"], projectId)
+    else:
+        priors['reads1'] = dxencode.find_file_set(unpaired_fqs, projectId)
+
 
     print "Determining steps to run..."
+    #print priors
+    #sys.exit(1)
     # NOTE: stepsToDo is an ordered list of steps that need to be run
     deprecateFiles = [] # old results will need to be moved/removed if step is rerun
-    stepsToDo = dxencode.determine_steps_to_run(pipePath,pipeSteps, priors, deprecateFiles, projectId, \
-                                                                                force=args.force)
+    stepsToDo = dxencode.determine_steps_to_run(pipePath,pipeSteps, priors, deprecateFiles, projectId, verbose=True)
 
-    # Report the plans
-    dxencode.report_plans(psv, inputs, GENOME_REFERENCES.keys(), deprecateFiles, priors, \
-                                                                pipePath, stepsToDo, pipeSteps)
     print "Checking for currently running analyses..."
     dxencode.check_run_log(psv['resultsFolder'],projectId, verbose=True)
+
+    if len(stepsToDo):
+        print "Pipeline incomplete, please resubmit jobs: %s" % stepsToDo
+        sys.exit(0)
+
+    for token in priors.keys():
+        print "%s %s" % (token, priors[token])
+        if token.find('read') < 0:
+            dxFile = dxpy.DXFile(dxid=priors[token])
+            print dxFile.describe()
+
 
     # Exit if test only
     if args.test:
