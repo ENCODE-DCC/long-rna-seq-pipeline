@@ -7,8 +7,8 @@ import sys
 #import json
 
 import dxpy
-import dxencode as dxencode
-#from dxencode import dxencode as dxencode
+#import dxencode as dxencode
+from dxencode import dxencode as dxencode
 
 # NOTES: This command-line utility will run the long RNA-seq pipeline for a single replicate
 #      - All results will be written to a folder /lrna/<expId>/rep<#>.
@@ -422,13 +422,13 @@ def main():
     #       and fill in inputs to workflow steps
     pipePath = STEP_ORDER['se']
     if pairedEnd:
-        pipePath = STEP_ORDER['se']
+        pipePath = STEP_ORDER['pe']
     if not args.test:
         if not dxencode.project_has_folder(project, psv['resultsFolder']):
             project.new_folder(psv['resultsFolder'],parents=True)
     priors = dxencode.find_prior_results(pipePath,STEPS,psv['resultsFolder'],FILE_GLOBS, projectId)
 
-    print "Checking for read files..."
+    print "Checking for read files... in: %s (%s)" % (psv['resultsFolder'], projectId)
     # Find all reads files and move into place
     # TODO: files could be in: dx (usual), remote (url e.g.https://www.encodeproject.org/...
     #       or possibly local, Currently only DX locations are supported.
@@ -444,7 +444,7 @@ def main():
     # NOTE: stepsToDo is an ordered list of steps that need to be run
     deprecateFiles = [] # old results will need to be moved/removed if step is rerun
     stepsToDo = dxencode.determine_steps_to_run(pipePath,STEPS, priors, deprecateFiles, projectId, \
-                                                                                force=args.force)
+                                                                                force=args.force, verbose=True)
 
     # Report the plans
     print "Running '"+psv['title']+"'"
