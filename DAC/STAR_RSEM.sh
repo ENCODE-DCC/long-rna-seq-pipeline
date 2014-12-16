@@ -33,10 +33,10 @@ bedGraphToBigWig=bedGraphToBigWig
 STARparCommon=" --genomeDir $STARgenomeDir  --readFilesIn $read1 $read2   --outSAMunmapped Within --outFilterType BySJout \
  --outSAMattributes NH HI AS NM MD    --outFilterMultimapNmax 20   --outFilterMismatchNmax 999   \
  --outFilterMismatchNoverReadLmax 0.04   --alignIntronMin 20   --alignIntronMax 1000000   --alignMatesGapMax 1000000   \
- --alignSJoverhangMin 8   --alignSJDBoverhangMin 1 --readFilesCommand zcat "
+ --alignSJoverhangMin 8   --alignSJDBoverhangMin 1 --sjdbScore 1 --readFilesCommand zcat"
 
 # STAR parameters: run-time, controlled by DCC
-STARparRun=" --runThreadN $nThreadsSTAR --genomeLoad LoadAndKeep"
+STARparRun=" --runThreadN $nThreadsSTAR --genomeLoad LoadAndKeep  --limitBAMsortRAM 10000000000"
 
 # STAR parameters: type of BAM output: quantification or sorted BAM or both
 #     OPTION: sorted BAM output

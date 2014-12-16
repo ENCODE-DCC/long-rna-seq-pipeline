@@ -1,15 +1,15 @@
 #!/bin/bash
-# prep-star 1.0.0
+# prep-star 1.0.1
 
 main() {
     # Now in resources/usr/bin
     #echo "* Download and install STAR..."
     #git clone https://github.com/alexdobin/STAR
-    #(cd STAR; git checkout tags/STAR_2.4.0d)
+    #(cd STAR; git checkout tags/STAR_2.4.0h)
     #(cd STAR; make)
 
     echo "*****"
-    echo "* Running: prep-star.sh [v1.0.0]"
+    echo "* Running: prep-star.sh [v1.0.1]"
     echo "* STAR version: "`STAR --version | awk '{print $1}' | cut -d _ -f 2-`
     echo "*****"
 

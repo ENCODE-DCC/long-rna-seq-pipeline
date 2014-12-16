@@ -1,16 +1,16 @@
 #!/bin/bash
-# bam-to-bigwig 1.0.0
+# bam-to-bigwig 1.0.1
 
 main() {
     # Now in resources/usr/bin
     #echo "* Download and install STAR..."
     #git clone https://github.com/alexdobin/STAR
-    #(cd STAR; git checkout tags/STAR_2.4.0d)
+    #(cd STAR; git checkout tags/STAR_2.4.0h)
     #(cd STAR; make)
     #wget https://github.com/ENCODE-DCC/kentUtils/archive/v302.1.0.tar.gz
 
     echo "*****"
-    echo "* Running: bam-to-bigwig-unstranded.sh [v1.0.0]"
+    echo "* Running: bam-to-bigwig-unstranded.sh [v1.0.1]"
     echo "* STAR version:     ["`STAR --version | awk '{print $1}' | cut -d _ -f 2-`"]"
     echo "* bedGraphToBigWig version: "`bedGraphToBigWig 2>&1 | grep "bedGraphToBigWig v" | awk '{print $2$3}'`
     echo "*****"
@@ -43,11 +43,11 @@ main() {
     bedGraphToBigWig Signal.Unique.str1.out.bg         chromSizes.txt ${bam_fn}_uniq.bw
 
     echo "* Upload results..."
-    all_unstranded_bw=$(dx upload ${bam_fn}_all.bw --brief)
-    unique_unstranded_bw=$(dx upload ${bam_fn}_uniq.bw --brief)
+    all_bw=$(dx upload ${bam_fn}_all.bw --brief)
+    uniq_bw=$(dx upload ${bam_fn}_uniq.bw --brief)
 
-    dx-jobutil-add-output all_unstranded_bw "$all_unstranded_bw" --class=file
-    dx-jobutil-add-output unique_unstranded_bw "$unique_unstranded_bw" --class=file
+    dx-jobutil-add-output all_bw "$all_bw" --class=file
+    dx-jobutil-add-output uniq_bw "$uniq_bw" --class=file
 
     #echo "* Temporary uploads..."
     ## temprary for comparison only!

@@ -1,0 +1,94 @@
+{
+  "name": "rampage-signals",
+  "title": "RNA-Seq-rampage-signals",
+  "summary": "Converts 'Marked' BAMs 5' reads to bigwig format for rampage-rna-seq pipeline",
+  "dxapi": "1.0.0",
+  "version": "1.0.0",
+  "authorizedUsers": [],
+  "inputSpec": [
+    {
+      "name": "rampage_marked_bam",
+      "label": "Input 'Marked' BAM file of mapped reads",
+      "class": "file",
+      "optional": false,
+      "patterns": ["*.bam"]
+    },
+    {
+      "name": "chrom_sizes",
+      "label": "chomosome/name length file",
+      "class": "file",
+      "optional": false,
+      "patterns": ["*chrom.sizes","*.txt"]
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "all_plus_bw",
+      "label": "BigWig file for all 5' plus-stranded reads",
+      "class": "file",
+      "patterns": ["*_rampage_5p_plusAll.bw"]
+    },
+    {
+      "name": "unique_plus_bw",
+      "label": "BigWig file of uniquely mapped 5' plus-stranded reads",
+      "class": "file",
+      "patterns": ["*_rampage_5p_plusUniq.bw"]
+    },
+    {
+      "name": "all_minus_bw",
+      "label": "BigWig file for all 5' minus-stranded reads",
+      "class": "file",
+      "patterns": ["*_rampage_5p_minusAll.bw"]
+    },
+    {
+      "name": "unique_minus_bw",
+      "label": "BigWig file of uniquely mapped 5' minus-stranded reads",
+      "class": "file",
+      "patterns": ["*_rampage_5p_minusUniq.bw"]
+    },
+    {
+      "name": "all_plus_bg",
+      "label": "BedGraph file for all 5' plus-stranded reads (temporary)",
+      "class": "file",
+      "patterns": ["*_rampage_5p_plusAll.bg"]
+    },
+    {
+      "name": "unique_plus_bg",
+      "label": "BedGraph file of uniquely mapped 5' plus-stranded reads (temporary)",
+      "class": "file",
+      "patterns": ["*_rampage_5p_plusUniq.bg"]
+    },
+    {
+      "name": "all_minus_bg",
+      "label": "BedGraph file for all 5' minus-stranded reads (temporary)",
+      "class": "file",
+      "patterns": ["*_rampage_5p_minusAll.bg"]
+    },
+    {
+      "name": "unique_minus_bg",
+      "label": "BedGraph file of uniquely mapped 5' minus-stranded reads (temporary)",
+      "class": "file",
+      "patterns": ["*_rampage_5p_minusUniq.bg"]
+    }
+  ],
+  "runSpec": {
+    "interpreter": "bash",
+    "file": "src/rampage-signals.sh",
+    "systemRequirements": {
+      "main": {
+        "instanceType": "mem3_hdd2_x8"
+      },
+      "myEntryPoint": {
+        "instanceType": "mem3_hdd2_x8"
+      }
+    }
+  },
+  "access": {
+    "network": [
+      "*"
+    ]
+  },
+  "categories": [
+    "ENCODE"
+  ]
+}

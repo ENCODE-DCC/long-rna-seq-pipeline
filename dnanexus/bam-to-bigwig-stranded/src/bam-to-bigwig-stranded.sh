@@ -1,16 +1,16 @@
 #!/bin/bash
-# bam-to-bigwig 1.0.0
+# bam-to-bigwig 1.0.1
 
 main() {
     # Now in resources/usr/bin
     #echo "* Download and install STAR..."
     #git clone https://github.com/alexdobin/STAR
-    #(cd STAR; git checkout tags/STAR_2.4.0d)
+    #(cd STAR; git checkout tags/STAR_2.4.0h)
     #(cd STAR; make)
     #wget https://github.com/ENCODE-DCC/kentUtils/archive/v302.1.0.tar.gz
 
     echo "*****"
-    echo "* Running: bam-to-bigwig-stranded.sh [v1.0.0]"
+    echo "* Running: bam-to-bigwig-stranded.sh [v1.0.1]"
     echo "* STAR version:     ["`STAR --version | awk '{print $1}' | cut -d _ -f 2-`"]"
     echo "* bedGraphToBigWig version: "`bedGraphToBigWig 2>&1 | grep "bedGraphToBigWig v" | awk '{print $2$3}'`
     echo "*****"
@@ -40,15 +40,15 @@ main() {
     echo `ls`
 
     echo "* Upload results..."
-    all_minus_bw=$(dx upload ${bam_fn}_minusAll.bw --brief)
-    all_plus_bw=$(dx upload ${bam_fn}_plusAll.bw --brief)
-    unique_minus_bw=$(dx upload ${bam_fn}_minusUniq.bw --brief)
-    unique_plus_bw=$(dx upload ${bam_fn}_plusUniq.bw --brief)
+    minus_all_bw=$(dx upload ${bam_fn}_minusAll.bw --brief)
+    minus_uniq_bw=$(dx upload ${bam_fn}_minusUniq.bw --brief)
+    plus_all_bw=$(dx upload ${bam_fn}_plusAll.bw --brief)
+    plus_uniq_bw=$(dx upload ${bam_fn}_plusUniq.bw --brief)
 
-    dx-jobutil-add-output all_minus_bw "$all_minus_bw" --class=file
-    dx-jobutil-add-output all_plus_bw "$all_plus_bw" --class=file
-    dx-jobutil-add-output unique_minus_bw "$unique_minus_bw" --class=file
-    dx-jobutil-add-output unique_plus_bw "$unique_plus_bw" --class=file
+    dx-jobutil-add-output minus_all_bw "$minus_all_bw" --class=file
+    dx-jobutil-add-output minus_uniq_bw "$minus_uniq_bw" --class=file
+    dx-jobutil-add-output plus_all_bw "$plus_all_bw" --class=file
+    dx-jobutil-add-output plus_uniq_bw "$plus_uniq_bw" --class=file
 
     #echo "* Temporary uploads..."
     # temprary for comparison only!
