@@ -1,2 +1,8 @@
 **/.DS_Store
 1
+keypairs.json
+*.bam
+*.out
+*.results
+*.diff
+*_diff
