@@ -2,9 +2,7 @@
 import argparse
 import os
 import sys
-#import subprocess
-#from datetime import datetime
-#import json
+import json
 
 import dxpy
 #import dxencode as dxencode
@@ -170,23 +168,91 @@ FILE_GLOBS = {
 
 POST_TEMPLATES = {
     # For looking up previous result files, use wild-cards
-    "tophat_bam":           "/*_tophat.bam",
-    "tophat_minus_all_bw":  "/*_tophat_minusAll.bw",
-    "tophat_minus_uniq_bw": "/*_tophat_minusUniq.bw",
-    "tophat_plus_all_bw":   "/*_tophat_plusAll.bw",
-    "tophat_plus_uniq_bw":  "/*_tophat_plusUniq.bw",
-    "tophat_all_bw":        "/*_tophat_all.bw",
-    "tophat_uniq_bw":       "/*_tophat_uniq.bw",
-    "star_genome_bam":      "/*_star_genome.bam",
-    "star_anno_bam":        "/*_star_anno.bam",
-    "star_minus_all_bw":    "/*_star_genome_minusAll.bw",
-    "star_minus_uniq_bw":   "/*_star_genome_minusUniq.bw",
-    "star_plus_all_bw":     "/*_star_genome_plusAll.bw",
-    "star_plus_uniq_bw":    "/*_star_genome_plusUniq.bw",
-    "star_all_bw":          "/*_star_genome_all.bw",
-    "star_uniq_bw":         "/*_star_genome_uniq.bw",
-    "rsem_iso_results":     "/*_rsem.isoforms.results",
-    "rsem_gene_results":    "/*_rsem.genes.results"
+    "tophat_bam":   {
+        "file_format": "bam",
+        "output_type": "alignments",
+        "derived_from": ["reads1", "reads2"]
+    },
+    "tophat_minus_all_bw":  {
+        "file_format": "bigWig",
+        "output_type": "multi-read minus signal",
+        "derived_from": ["tophat_bam"]
+    },
+    "tophat_minus_uniq_bw":{
+        "file_format": "bigWig",
+        "output_type": "unique read minus signal",
+        "derived_from": ["tophat_bam"]
+    },
+    "tophat_plus_all_bw":   {
+        "file_format": "bigWig",
+        "output_type": "multi-read plus signal",
+        "derived_from": ["tophat_bam"]
+    },
+    "tophat_plus_uniq_bw":  {
+        "file_format": "bigWig",
+        "output_type": "unique read minus signal",
+        "derived_from": ["tophat_bam"]
+    },
+    "tophat_all_bw":        {
+        "file_format": "bigWig",
+        "output_type": "multi-read signal",
+        "derived_from": ["tophat_bam"]
+    },
+    "tophat_uniq_bw":       {
+        "file_format": "bigWig",
+        "output_type": "unique signal",
+        "derived_from": ["tophat_bam"]
+    },
+    "star_genome_bam":      {
+        "file_format": "bam",
+        "output_type": "alignments",
+        "derived_from": ["reads1", "reads2"]
+    },
+    "star_anno_bam":        {
+        "file_format": "bam",
+        "output_type": "alignments",
+        "derived_from": ["reads1", "reads2"]
+    },
+    "star_minus_all_bw":    {
+        "file_format": "bigWig",
+        "output_type": "multi-read minus signal",
+        "derived_from": ["star_genome_bam"]
+    },
+    "star_minus_uniq_bw":   {
+        "file_format": "bigWig",
+        "output_type": "unique minus signal",
+        "derived_from": ["star_genome_bam"]
+    },
+    "star_plus_all_bw":     {
+        "file_format": "bigWig",
+        "output_type": "multi-read plus signal",
+        "derived_from": ["star_genome_bam"]
+    },
+    "star_plus_uniq_bw":    {
+        "file_format": "bigWig",
+        "output_type": "unique plus signal",
+        "derived_from": ["star_genome_bam"]
+    },
+    "star_all_bw":          {
+        "file_format": "bigWig",
+        "output_type": "multi-read signal",
+        "derived_from": ["star_genome_bam"]
+    },
+    "star_uniq_bw":         {
+        "file_format": "bigWig",
+        "output_type": "unique signal",
+        "derived_from": ["star_genome_bam"]
+    },
+    "rsem_iso_results":     {
+        "file_format": "tsv",
+        "output_type": "raw data",
+        "derived_from": ["star_anno_bam"]
+    },
+    "rsem_gene_results":    {
+        "file_format": "tsv",
+        "output_type": "raw data",
+        "derived_from": ["star_anno_bam"]
+    }
 }
 
 
@@ -478,8 +544,15 @@ def main():
     if pairedEnd:
         priors['reads1'] = dxencode.find_file_set(paired_fqs["1"], projectId)
         priors['reads2'] = dxencode.find_file_set(paired_fqs["2"], projectId)
+        submitted = {
+            'reads1': paired_fqs["1"],
+            'reads2': paired_fqs["2"]
+        }
     else:
         priors['reads1'] = dxencode.find_file_set(unpaired_fqs, projectId)
+        submitted = {
+            'reads1': unpaired_fqs["1"],
+        }
 
 
     print "Determining steps to run..."
@@ -496,12 +569,26 @@ def main():
         print "Pipeline incomplete, please resubmit jobs: %s" % stepsToDo
         sys.exit(0)
 
-    for token in priors.keys():
+    to_submit = [ k for k in priors.keys() if k.find('read') < 0 ] # skip reads
+    while(to_submit):
+        token = to_submit.pop(0)
         print "%s %s" % (token, priors[token])
-        if token.find('read') < 0:
-            dxFile = dxpy.DXFile(dxid=priors[token])
-            print dxFile.describe()
-
+        f_ob = POST_TEMPLATES[token]
+        derive_check = f_ob.get('derived_from', [])
+        if derive_check:
+            derived = [ submitted[f] for f in derive_check if submitted.get(f) ]
+            if not derived:
+                to_submit.append(token)
+                next
+            else:
+                f_ob['derived_from'] = derived
+        dxFile = dxpy.DXFile(dxid=priors[token])
+        f_ob['dataset'] = args.experiment
+        f_ob['lab'] = exp['lab']
+        f_ob['award'] = exp['award']
+        f_ob['assembly'] = mapping['genome']
+        f_ob['annotation'] = args.annotation
+        f_ob['notes'] = json.dumps(dxencode.create_notes(dxFile)
 
     # Exit if test only
     if args.test:
