@@ -3,6 +3,7 @@ import argparse
 import os
 import sys
 import json
+import itertools
 
 import dxpy
 #import dxencode as dxencode
@@ -210,7 +211,7 @@ POST_TEMPLATES = {
     },
     "star_anno_bam":        {
         "file_format": "bam",
-        "output_type": "alignments",
+        "output_type": "transcriptome alignments",
         "derived_from": ["reads1", "reads2"]
     },
     "star_minus_all_bw":    {
@@ -245,17 +246,15 @@ POST_TEMPLATES = {
     },
     "rsem_iso_results":     {
         "file_format": "tsv",
-        "output_type": "raw data",
+        "output_type": "transcript quantifications",
         "derived_from": ["star_anno_bam"]
     },
     "rsem_gene_results":    {
         "file_format": "tsv",
-        "output_type": "raw data",
+        "output_type": "genome quantifications",
         "derived_from": ["star_anno_bam"]
     }
 }
-
-
 
 GENOME_REFERENCES = {
     # For looking up reference file names.
@@ -519,15 +518,19 @@ def main():
     projectId = project.get_id()
 
 
-    #print "Building apps dictionary..."
+    ## TODO this is a bunch of ugly
     if pairedEnd:
         paired_fqs = {
             '1': [],
             '2': []
         }
+        read1s = []
+        read2s = []
         for (p1, p2) in mapping['paired']:
             paired_fqs[p1['paired_end']].append(p1['accession']+".fastq.gz")
             paired_fqs[p2['paired_end']].append(p2['accession']+".fastq.gz")
+            read1s.append(p1['accession'])
+            read2s.append(p2['accession'])
         pipePath = STEP_ORDER['pe']
         print "Generating workflow steps (paired-end)..."
     else:
@@ -545,13 +548,13 @@ def main():
         priors['reads1'] = dxencode.find_file_set(paired_fqs["1"], projectId)
         priors['reads2'] = dxencode.find_file_set(paired_fqs["2"], projectId)
         submitted = {
-            'reads1': paired_fqs["1"],
-            'reads2': paired_fqs["2"]
+            'reads1': read1s,
+            'reads2': read2s
         }
     else:
         priors['reads1'] = dxencode.find_file_set(unpaired_fqs, projectId)
         submitted = {
-            'reads1': unpaired_fqs["1"],
+            'reads1': mapping['unpaired'],
         }
 
 
@@ -569,36 +572,46 @@ def main():
         print "Pipeline incomplete, please resubmit jobs: %s" % stepsToDo
         sys.exit(0)
 
-    to_submit = [ k for k in priors.keys() if k.find('read') < 0 ] # skip reads
+    to_submit = [ k for k in priors.keys() if k.find('read') < 0 and POST_TEMPLATES.get(k) ]
+    n = 0 # skip reads
+    print "Attempting to submit %s files to args.experiment" % len(to_submit)
     while(to_submit):
+        if n > len(priors) * len(priors):
+            print "Too many itereations: %s" % priors
+            break
         token = to_submit.pop(0)
         print "%s %s" % (token, priors[token])
-        f_ob = POST_TEMPLATES[token]
-        derive_check = f_ob.get('derived_from', [])
-        if derive_check:
-            derived = [ submitted[f] for f in derive_check if submitted.get(f) ]
-            if not derived:
-                to_submit.append(token)
-                next
-            else:
-                f_ob['derived_from'] = derived
-        dxFile = dxpy.DXFile(dxid=priors[token])
-        f_ob['dataset'] = args.experiment
-        f_ob['lab'] = exp['lab']
-        f_ob['award'] = exp['award']
-        f_ob['assembly'] = mapping['genome']
-        f_ob['annotation'] = args.annotation
-        f_ob['notes'] = json.dumps(dxencode.create_notes(dxFile)
+        f_ob = POST_TEMPLATES.get(token, None)
+        if f_ob:
+            derive_check = f_ob.get('derived_from', [])
+            if derive_check:
+                derived = [ submitted[f] for f in derive_check if submitted.get(f) ]
+                if not derived:
+                    to_submit.append(token)
+                    continue
+                else:
+                    f_ob['derived_from'] = list(itertools.chain(*derived))
+            dxFile = dxpy.DXFile(dxid=priors[token])
+            print "Post File: %s %s" % (token, dxFile.name)
+            f_ob['dataset'] = args.experiment
+            f_ob['lab'] = exp['lab']['@id']
+            f_ob['award'] = exp['award']['@id']
+            f_ob['assembly'] = mapping['genome']
+            f_ob['annotation'] = args.annotation
+            f_ob['notes'] = json.dumps(dxencode.create_notes(dxFile, dxencode.get_sw_from_log(dxFile, '\* (\S+)\s+version:\s+(\S+)')))
+            print json.dumps(f_ob, sort_keys=True, indent=4, separators=(',',': '))
+            if args.test:
+                fake_acc = 'ENCFF%03dAAA' % n
+                print "Fake submission: %s" % fake_acc
+                submitted[token] = [ fake_acc ]
+            n += 1
 
     # Exit if test only
     if args.test:
-        print "TEST ONLY - exiting."
+        print "Fake submitted %s files." % n
     if args.test:
         sys.exit(0)
 
-    # get applet and run
-
-    print "(success)"
 
 if __name__ == '__main__':
     main()
