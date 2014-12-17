@@ -604,6 +604,20 @@ def main():
                 fake_acc = 'ENCFF%03dAAA' % n
                 print "Fake submission: %s" % fake_acc
                 submitted[token] = [ fake_acc ]
+            else:
+                applet = dxencode.find_applet_by_name('validate-post', projectId )
+                print "Submitting..."
+                job = applet.run({
+                    "pipe_file": dxpy.dxlink(dxFile),
+                    "file_meta": f_ob,
+                    "key": "test",
+                    "debug": True
+                    })
+                job.wait_on_done(interval=1)
+                accession = job.get_output_ref('accession')
+                error = job.get_output_ref('error')
+                print "Posted (%s): %s" % (error, accession)
+                submitted[token] = [ accession ]
             n += 1
 
     # Exit if test only
