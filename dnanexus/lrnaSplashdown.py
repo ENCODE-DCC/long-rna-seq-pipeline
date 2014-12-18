@@ -619,10 +619,10 @@ def main():
                     })
                 print "Submitting %s" % job.id
                 job.wait_on_done(interval=1)
-                accession = job.get_output_ref('accession')
-                error = job.get_output_ref('error')
+                accession = job.describe()['output']['accession']
+                error = job.describe()['error']['accession']
                 submitted[token] = [ accession ]
-                print "Posted (%s): %s" % (error, submitted[token])
+                print "Posted (%s): %s" % (error, accession)
 
     # Exit if test only
     if args.test:
