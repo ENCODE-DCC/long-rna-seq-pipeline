@@ -181,7 +181,7 @@ POST_TEMPLATES = {
     },
     "tophat_minus_uniq_bw":{
         "file_format": "bigWig",
-        "output_type": "unique read minus signal",
+        "output_type": "unique minus signal",
         "derived_from": ["tophat_bam"]
     },
     "tophat_plus_all_bw":   {
@@ -191,7 +191,7 @@ POST_TEMPLATES = {
     },
     "tophat_plus_uniq_bw":  {
         "file_format": "bigWig",
-        "output_type": "unique read minus signal",
+        "output_type": "unique minus signal",
         "derived_from": ["tophat_bam"]
     },
     "tophat_all_bw":        {
@@ -207,11 +207,6 @@ POST_TEMPLATES = {
     "star_genome_bam":      {
         "file_format": "bam",
         "output_type": "alignments",
-        "derived_from": ["reads1", "reads2"]
-    },
-    "star_anno_bam":        {
-        "file_format": "bam",
-        "output_type": "transcriptome alignments",
         "derived_from": ["reads1", "reads2"]
     },
     "star_minus_all_bw":    {
@@ -244,14 +239,23 @@ POST_TEMPLATES = {
         "output_type": "unique signal",
         "derived_from": ["star_genome_bam"]
     },
-    "rsem_iso_results":     {
-        "file_format": "tsv",
-        "output_type": "transcript quantifications",
-        "derived_from": ["star_anno_bam"]
-    },
     "rsem_gene_results":    {
         "file_format": "tsv",
         "output_type": "genome quantifications",
+        "derived_from": []
+        # note should be derived from star_anno_bam
+    }
+}
+
+TNX_TEMPLATES = {
+    "star_anno_bam":        {
+        "file_format": "bam",
+        "output_type": "transcriptome alignments",
+        "derived_from": ["reads1", "reads2"]
+    },
+    "rsem_iso_results":     {
+        "file_format": "tsv",
+        "output_type": "transcript quantifications",
         "derived_from": ["star_anno_bam"]
     }
 }
@@ -554,7 +558,7 @@ def main():
     else:
         priors['reads1'] = dxencode.find_file_set(unpaired_fqs, projectId)
         submitted = {
-            'reads1': mapping['unpaired'],
+            'reads1': [ f['accession'] for f in mapping['unpaired'] ],
         }
 
 
@@ -572,7 +576,7 @@ def main():
         print "Pipeline incomplete, please resubmit jobs: %s" % stepsToDo
         sys.exit(0)
 
-    to_submit = [ k for k in priors.keys() if k.find('read') < 0 and POST_TEMPLATES.get(k) ]
+    to_submit = [ k for k in priors.keys() if POST_TEMPLATES.get(k) ]
     n = 0 # skip reads
     print "Attempting to submit %s files to args.experiment" % len(to_submit)
     while(to_submit):
@@ -582,6 +586,7 @@ def main():
         token = to_submit.pop(0)
         print "%s %s" % (token, priors[token])
         f_ob = POST_TEMPLATES.get(token, None)
+        n += 1
         if f_ob:
             derive_check = f_ob.get('derived_from', [])
             if derive_check:
@@ -606,19 +611,18 @@ def main():
                 submitted[token] = [ fake_acc ]
             else:
                 applet = dxencode.find_applet_by_name('validate-post', projectId )
-                print "Submitting..."
                 job = applet.run({
                     "pipe_file": dxpy.dxlink(dxFile),
                     "file_meta": f_ob,
                     "key": "test",
                     "debug": True
                     })
+                print "Submitting %s" % job.id
                 job.wait_on_done(interval=1)
                 accession = job.get_output_ref('accession')
                 error = job.get_output_ref('error')
-                print "Posted (%s): %s" % (error, accession)
                 submitted[token] = [ accession ]
-            n += 1
+                print "Posted (%s): %s" % (error, submitted[token])
 
     # Exit if test only
     if args.test:
