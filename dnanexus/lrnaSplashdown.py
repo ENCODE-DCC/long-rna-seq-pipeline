@@ -25,7 +25,7 @@ from dxencode import dxencode as dxencode
 GENOME_DEFAULT = 'hg19'
 ''' This the default Genome that long RNA-seq experiments are mapped to.'''
 
-ANNO_DEFAULT = 'v19'
+ANNO_DEFAULT = 'V19'
 
 PROJECT_DEFAULT = 'scratchPad'
 ''' This the default DNA Nexus project to use for the long RNA-seq pipeline.'''
@@ -267,10 +267,10 @@ GENOME_REFERENCES = {
     "tophat_index":  {
                     "hg19": {
                             "female":   {
-                                        "v19": "hg19_female_v19_ERCC_tophatIndex.tgz"
+                                        "V19": "hg19_female_v19_ERCC_tophatIndex.tgz"
                                         },
                             "male":     {
-                                        "v19": "hg19_male_v19_ERCC_tophatIndex.tgz"
+                                        "V19": "hg19_male_v19_ERCC_tophatIndex.tgz"
                                         }
                             },
                     "mm10": {
@@ -289,10 +289,10 @@ GENOME_REFERENCES = {
     "star_index":    {
                     "hg19": {
                             "female":   {
-                                        "v19": "hg19_female_v19_ERCC_starIndex.tgz"
+                                        "V19": "hg19_female_v19_ERCC_starIndex.tgz"
                                         },
                             "male":     {
-                                        "v19": "hg19_male_v19_ERCC_starIndex.tgz"
+                                        "V19": "hg19_male_v19_ERCC_starIndex.tgz"
                                         }
                             },
                     "mm10": {
@@ -310,7 +310,7 @@ GENOME_REFERENCES = {
                     },
     "rsem_index":    {
                     "hg19": {
-                            "v19": "hg19_male_v19_ERCC_rsemIndex.tgz"
+                            "V19": "hg19_male_v19_ERCC_rsemIndex.tgz"
                             },
                     "mm10": {
                             "M2":  "mm10_male_M2_ERCC_rsemIndex.tgz",
@@ -620,7 +620,7 @@ def main():
                 print "Submitting %s" % job.id
                 job.wait_on_done(interval=1)
                 accession = job.describe()['output']['accession']
-                error = job.describe()['error']['accession']
+                error = job.describe()['output']['error']
                 submitted[token] = [ accession ]
                 print "Posted (%s): %s" % (error, accession)
 
