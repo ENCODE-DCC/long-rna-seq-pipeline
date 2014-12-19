@@ -603,6 +603,8 @@ def main():
             f_ob['award'] = exp['award']['@id']
             f_ob['assembly'] = mapping['genome']
             f_ob['genome_annotation'] = args.annotation
+            ## temporary haxors until file display works
+            f_ob['replicate'] = mapping['replicate_id']
             f_ob['notes'] = json.dumps(dxencode.create_notes(dxFile, dxencode.get_sw_from_log(dxFile, '\* (\S+)\s+version:\s+(\S+)')))
             print json.dumps(f_ob, sort_keys=True, indent=4, separators=(',',': '))
             if args.test:
