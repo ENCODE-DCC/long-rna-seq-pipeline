@@ -619,8 +619,8 @@ def main():
                     })
                 print "Submitting %s" % job.id
                 job.wait_on_done(interval=1)
-                accession = job.describe()['output']['accession']
-                error = job.describe()['output']['error']
+                accession = job.describe()['output'].get('accession', "Unknown Acc")
+                error = job.describe()['output'].get('error', "Unknown Error")
                 submitted[token] = [ accession ]
                 print "Posted (%s): %s" % (error, accession)
 
