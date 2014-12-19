@@ -52,8 +52,7 @@ def main():
                     print "Skipping %s as single-cell (%s %s)" % (acc, exp['replicates'][0]['library'].get('nucleic_acid_starting_quantity_units', ""), ncells)
                     #print json.dumps(exp['replicates'][0]['library'], sort_keys=True, indent=4, separators=(',',': '))
                     continue
-            #run = applet.run({ "accession": acc}, project=pid)
-            run = "test"
+            run = applet.run({ "accession": acc}, project=pid)
             print "Running: %s for %s" % (run, acc)
             n = n + 1
             if n > cmnd.number:
