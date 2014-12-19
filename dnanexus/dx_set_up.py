@@ -19,6 +19,7 @@ def get_args():
 
     ap.add_argument('-n', '--number',
                     help='stop after this number of jobs',
+                    default='9999999',
                     required=False)
 
     return ap.parse_args()
@@ -33,18 +34,24 @@ def main():
 
     applet = dxencode.find_applet_by_name('fastqc-exp', pid )
     (AUTHID, AUTHPW, SERVER) = dxencode.processkey('www')
-    query = '/search/?type=experiment&assay_term_id=%s&award.rfa=ENCODE3&limit=all&frame=embedded&replicates.library.size_range=>200&replicates.library.biosample.donor.organism.name=mouse&files.file_format=fastq' % ASSAY_TERM_ID
+    query = '/search/?type=experiment&assay_term_id=%s&award.rfa=ENCODE3&limit=all&frame=embedded&replicates.library.biosample.donor.organism.name=mouse&files.file_format=fastq' % ASSAY_TERM_ID
     res = dxencode.encoded_get(SERVER+query, AUTHID=AUTHID, AUTHPW=AUTHPW)
     exps = res.json()['@graph']
 
-    import pdb;pdb.set_trace()
     n = 0
     for exp in exps:
         acc = exp['accession']
         if len(exp['replicates']) > 0:
+            if exp['replicates'][0]['library'].get('size_range', "") != '>200':
+                print "Skipping %s with wrong library size (%s)" % (acc, exp['replicates'][0]['library'].get('size_range', ""))
+                #print json.dumps(exp['replicates'][0]['library'], sort_keys=True, indent=4, separators=(',',': '))
+                continue
             if exp['replicates'][0]['library'].get('nucleic_acid_starting_quantity_units', "") == "cells":
-                print "Skipping %s as single-cell" % acc
-                print json.dumps(exp['replicates'][0]['library'], sort_keys=True, indent=4, separators=(',',': '))
+                ncells = float(exp['replicates'][0]['library'].get('nucleic_acid_starting_quantity', 0.0))
+                if ncells < 20:
+                    print "Skipping %s as single-cell (%s %s)" % (acc, exp['replicates'][0]['library'].get('nucleic_acid_starting_quantity_units', ""), ncells)
+                    #print json.dumps(exp['replicates'][0]['library'], sort_keys=True, indent=4, separators=(',',': '))
+                    continue
             #run = applet.run({ "accession": acc}, project=pid)
             run = "test"
             print "Running: %s for %s" % (run, acc)
