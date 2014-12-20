@@ -616,7 +616,7 @@ def main():
                 job = applet.run({
                     "pipe_file": dxpy.dxlink(dxFile),
                     "file_meta": f_ob,
-                    "key": "test",
+                    "key": "www",
                     "debug": True
                     })
                 print "Submitting %s" % job.id
