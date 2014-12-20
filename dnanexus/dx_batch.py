@@ -65,8 +65,8 @@ def main():
                 mapping = exp_mapping[(br,tr)]
                 o = GENOME_MAPPING[mapping['organism']]
                 args = "-o %s" % o
-                args += " -l" % mapping['library']
-                args += " -g" % mapping['sex']
+                args += " -l %s" % mapping['library']
+                args += " -g %s" % mapping['sex']
                 if mapping['paired']:
                     paired_fqs = {
                         '1': [],
@@ -80,9 +80,10 @@ def main():
                 else:
                     args += " -1 " + " ".join([ f['accession']+".fastq.gz" for f in mapping['unpaired'] ])
 
-                runcmd = "./lrnaLaunch.py -e %s -r %s -tr %s %s -a M4 --project %s --resultLoc /runs --run > runs/launch%s-%s-%s-M4.out" % (acc, br, tr, args, acc, br, tr, PROJECT_NAME)
+                runcmd = "./lrnaLaunch.py -e %s -r %s -tr %s %s -a M4 --project %s --resultsLoc /runs --run > runs/launch%s-%s-%s-M4.%s.out" % (acc, br, tr, args, PROJECT_NAME, acc, br, tr, os.getpid())
                 print runcmd
                 if not cmnd.test:
+                    # probably should be subprocess.Popen()
                     os.system(runcmd)
                 n+=1
             except KeyError, e:
