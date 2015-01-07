@@ -29,6 +29,10 @@ def get_args():
                     type=int,
                     required=False)
 
+    ap.add_argument('-o', '--only',
+                    help='Only run this experiment',
+                    required=False)
+
 
     return ap.parse_args()
 
@@ -43,6 +47,9 @@ def main():
     n = 0
     for exp in exps:
         acc = exp['accession']
+        if cmnd.only and acc != cmnd.only:
+            print "skipping %s" % acc
+            continue
         if len(exp['replicates']) > 0:
             if exp['replicates'][0]['library'].get('size_range', "") != '>200':
                 print "Skipping %s with wrong library size (%s)" % (acc, exp['replicates'][0]['library'].get('size_range', ""))
