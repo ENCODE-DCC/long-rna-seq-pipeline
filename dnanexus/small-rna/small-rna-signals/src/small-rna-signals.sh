@@ -1,5 +1,5 @@
 #!/bin/bash
-# small-rna-signals 0.0.1
+# small-rna-signals 1.0.0
 
 main() {
     # Now in resources/usr/bin
@@ -10,7 +10,7 @@ main() {
     #wget https://github.com/ENCODE-DCC/kentUtils/archive/v302.1.0.tar.gz
 
     echo "*****"
-    echo "* Running: small-rna-signals.sh [v0.0.1]"
+    echo "* Running: small-rna-signals.sh [v1.0.0]"
     echo "* STAR version:     ["`STAR --version | awk '{print $1}' | cut -d _ -f 2-`"]"
     echo "* bedGraphToBigWig version: "`bedGraphToBigWig 2>&1 | grep "bedGraphToBigWig v" | awk '{print $2$3}'`
     echo "*****"

@@ -48,21 +48,21 @@ main() {
     echo `cat COfile.txt`
 
     echo "* Map reads..."
-    STAR --genomeDir out --readFilesIn ${reads1_fn}.fastq.gz ${reads2_fn}.fastq.gz \
-        --readFilesCommand zcat --runThreadN ${nthreads} --genomeLoad NoSharedMemory \
-        --outFilterMultimapNmax 500 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1     \
-        --outFilterMismatchNmax 999 --outFilterMismatchNoverReadLmax 0.04                \
-        --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000            \
-        --outSAMheaderCommentFile COfile.txt --outSAMheaderHD @HD VN:1.4 SO:coordinate       \
+    STAR --genomeDir out --readFilesIn ${reads1_fn}.fastq.gz ${reads2_fn}.fastq.gz       \
+        --readFilesCommand zcat --runThreadN ${nthreads} --genomeLoad NoSharedMemory      \
+        --outFilterMultimapNmax 500 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1        \
+        --outFilterMismatchNmax 999 --outFilterMismatchNoverReadLmax 0.04                   \
+        --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000              \
+        --outSAMheaderCommentFile COfile.txt --outSAMheaderHD @HD VN:1.4 SO:coordinate        \
         --outSAMunmapped Within --outFilterType BySJout --outSAMattributes NH HI AS NM MD      \
-        --outFilterScoreMinOverLread 0.85 --outFilterIntronMotifs RemoveNoncanonicalUnannotated  \
-        --clip5pNbases 6 15 --seedSearchStartLmax 30 \
-        --outSAMtype BAM SortedByCoordinate
+        --outFilterScoreMinOverLread 0.85 --outFilterIntronMotifs RemoveNoncanonicalUnannotated \
+        --clip5pNbases 6 15 --seedSearchStartLmax 30 --outSAMtype BAM SortedByCoordinate         \
+        --limitBAMsortRAM 60000000000
 
     echo "* Marking PCR duplicates..."
     STAR --inputBAMfile Aligned.sortedByCoord.out.bam --bamRemoveDuplicatesType UniqueIdentical \
         --runMode inputAlignmentsFromBAM --bamRemoveDuplicatesMate2basesN 15 \
-        --outFileNamePrefix markdup.
+        --outFileNamePrefix markdup. --limitBAMsortRAM 60000000000
 
     echo "* Upload results..."
     mv markdup.Processed.out.bam ${aligned_root}_marked.bam

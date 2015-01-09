@@ -1,5 +1,5 @@
 #!/bin/bash
-# small-rna-align 0.0.1
+# small-rna-align 1.0.0
 
 main() {
     # Now in resources/usr/bin
@@ -10,7 +10,7 @@ main() {
     #wget https://github.com/samtools/samtools/archive/0.1.19.tar.gz
 
     echo "*****"
-    echo "* Running: small-rna-align.sh [v0.0.1]"
+    echo "* Running: small-rna-align.sh [v1.0.0]"
     echo "* STAR version: "`STAR --version | awk '{print $1}' | cut -d _ -f 2-`
     #echo "* samtools version: "`samtools 2>&1 | grep Version | awk '{print $2}'`
     echo "*****"
@@ -40,12 +40,13 @@ main() {
     echo `cat COfile.txt`
 
     echo "* Map reads..."
-    STAR --genomeDir out --readFilesIn ${reads_fn}.fastq.gz --readFilesCommand zcat \
-        --runThreadN ${nthreads} --outFilterMultimapNmax 20 --alignIntronMax 1 \
-        --clip3pAdapterSeq TGGAATTCTC --clip3pAdapterMMp 0.1 --outFilterMismatchNoverLmax 0.05 \
-        --outFilterScoreMinOverLread 0 --outFilterMatchNminOverLread 0 --outFilterMatchNmin 16 \
-        --outSAMheaderCommentFile COfile.txt --outSAMheaderHD @HD VN:1.4 SO:coordinate   \
-        --genomeLoad NoSharedMemory --outSAMunmapped Within --outSAMtype BAM SortedByCoordinate
+    STAR --genomeDir out --readFilesIn ${reads_fn}.fastq.gz --readFilesCommand zcat             \
+        --runThreadN ${nthreads} --outFilterMultimapNmax 20 --alignIntronMax 1                  \
+        --clip3pAdapterSeq TGGAATTCTC --clip3pAdapterMMp 0.1 --outFilterMismatchNoverLmax 0.05  \
+        --outFilterScoreMinOverLread 0 --outFilterMatchNminOverLread 0 --outFilterMatchNmin 16  \
+        --outSAMheaderCommentFile COfile.txt --outSAMheaderHD @HD VN:1.4 SO:coordinate          \
+        --genomeLoad NoSharedMemory --outSAMunmapped Within --outSAMtype BAM SortedByCoordinate \
+        --limitBAMsortRAM 60000000000
         
     #echo "* Index genome bam..."
     # Note: no longer making unused index

@@ -1,5 +1,5 @@
 #!/bin/bash
-# align-star-pe 1.0.1
+# align-star-pe 1.0.2
 
 main() {
     # Now in resources/usr/bin
@@ -10,7 +10,7 @@ main() {
     #wget https://github.com/samtools/samtools/archive/0.1.19.tar.gz
 
     echo "*****"
-    echo "* Running: align-star-pe.sh [v1.0.1]"
+    echo "* Running: align-star-pe.sh [v1.0.2]"
     echo "* STAR version: "`STAR --version | awk '{print $1}' | cut -d _ -f 2-`
     echo "* samtools version: "`samtools 2>&1 | grep Version | awk '{print $2}'`
     echo "*****"
@@ -45,14 +45,15 @@ main() {
     echo `cat COfile.txt`
 
     echo "* Map reads..."
-    STAR --genomeDir out --readFilesIn ${reads1_fn}.fastq.gz ${reads2_fn}.fastq.gz \
-        --readFilesCommand zcat --runThreadN ${nthreads} --genomeLoad NoSharedMemory     \
-        --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1        \
-        --outFilterMismatchNmax 999 --outFilterMismatchNoverReadLmax 0.04                  \
-        --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000             \
-        --outSAMheaderCommentFile COfile.txt --outSAMheaderHD @HD VN:1.4 SO:coordinate       \
-        --outSAMunmapped Within --outFilterType BySJout --outSAMattributes NH HI AS NM MD     \
-        --outSAMtype BAM SortedByCoordinate --quantMode TranscriptomeSAM --sjdbScore 1
+    STAR --genomeDir out --readFilesIn ${reads1_fn}.fastq.gz ${reads2_fn}.fastq.gz  \
+        --readFilesCommand zcat --runThreadN ${nthreads} --genomeLoad NoSharedMemory \
+        --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1    \
+        --outFilterMismatchNmax 999 --outFilterMismatchNoverReadLmax 0.04              \
+        --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000         \
+        --outSAMheaderCommentFile COfile.txt --outSAMheaderHD @HD VN:1.4 SO:coordinate   \
+        --outSAMunmapped Within --outFilterType BySJout --outSAMattributes NH HI AS NM MD \
+        --outSAMtype BAM SortedByCoordinate --quantMode TranscriptomeSAM --sjdbScore 1     \
+        --limitBAMsortRAM 60000000000
 
     #echo "* Index genome bam..."
     # Note: no longer making unused index

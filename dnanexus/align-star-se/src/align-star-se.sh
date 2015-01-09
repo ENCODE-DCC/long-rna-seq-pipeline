@@ -1,5 +1,5 @@
 #!/bin/bash
-# align-star-se 1.0.1
+# align-star-se 1.0.2
 
 main() {
     # Now in resources/usr/bin
@@ -10,7 +10,7 @@ main() {
     #wget https://github.com/samtools/samtools/archive/0.1.19.tar.gz
 
     echo "*****"
-    echo "* Running: align-star-se.sh [v1.0.1]"
+    echo "* Running: align-star-se.sh [v1.0.2]"
     echo "* STAR version: "`STAR --version | awk '{print $1}' | cut -d _ -f 2-`
     echo "* samtools version: "`samtools 2>&1 | grep Version | awk '{print $2}'`
     echo "*****"
@@ -48,7 +48,7 @@ main() {
         --outSAMheaderCommentFile COfile.txt --outSAMheaderHD @HD VN:1.4 SO:coordinate   \
         --outSAMunmapped Within --outFilterType BySJout --outSAMattributes NH HI AS NM MD \
         --outSAMstrandField intronMotif --outSAMtype BAM SortedByCoordinate                \
-        --quantMode TranscriptomeSAM --sjdbScore 1
+        --quantMode TranscriptomeSAM --sjdbScore 1 --limitBAMsortRAM 60000000000
 
     #echo "* Index genome bam..."
     # Note: no longer making unused index
