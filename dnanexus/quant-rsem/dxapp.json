@@ -3,7 +3,7 @@
   "title": "Long-RNA-Seq-quantitate-RSEM",
   "summary": "Do genome and transcription quantitations with RSEM from STAR alignments",
   "dxapi": "1.0.0",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -28,7 +28,7 @@
       "optional": true
     },
     {
-      "name": "paired",
+      "name": "paired_end",
       "label": "Library was paired ended",
       "class": "boolean",
       "optional": false

@@ -1,5 +1,5 @@
 #!/bin/bash
-# quant-rsem 1.0.1
+# quant-rsem 1.0.2
 
 main() {
     # Now in resources/usr/bin
@@ -10,13 +10,13 @@ main() {
     # (cd RSEM; make)
 
     echo "*****"
-    echo "* Running: quant_rsem.sh [v1.0.1]"
+    echo "* Running: quant_rsem.sh [v1.0.2]"
     echo "* RSEM version: "`rsem-calculate-expression --version | awk '{print $5}'`
     echo "*****"
 
     echo "* Value of annotation_bam: '$star_anno_bam'"
     echo "* Value of rsem_index: '$rsem_index'"
-    echo "* Value of paired: '$paired'"
+    echo "* Value of paired: '$paired_end'"
     #echo "* Value of stranded: '$stranded'"
     echo "* Random number seed: '$rnd_seed'"
     echo "* Value of nthreads: '$nthreads'"
@@ -35,7 +35,7 @@ main() {
     echo "* Found index_prefix: '$index_prefix'"
 
     extraFlags=""
-    if [ "$paired" == "true" ]; then
+    if [ "$paired_end" == "true" ]; then
         echo '* Running for paired-end, stranded'
         extraFlags="--paired-end --forward-prob 0"
     else

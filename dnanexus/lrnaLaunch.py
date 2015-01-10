@@ -9,6 +9,7 @@ import sys
 import dxpy
 import dxencode as dxencode
 #from dxencode import dxencode as dxencode
+import json
 
 # NOTES: This command-line utility will run the long RNA-seq pipeline for a single replicate
 #      - All results will be written to a folder /lrna/<expId>/rep<#>.
@@ -23,10 +24,16 @@ import dxencode as dxencode
 #          to result file tokens of earlier steps.
 #        - FILE_GLOBS is needed for locating result files from prior runs.
 
+GENOMES_SUPPORTED = ['hg19', 'mm10']
+GENOME_DEFAULTS = { 'human': 'hg19', 'mouse':'mm10' }
 GENOME_DEFAULT = 'hg19'
 ''' This the default Genome that long RNA-seq experiments are mapped to.'''
 
-ANNO_DEFAULT = 'v19'
+ANNO_DEFAULTS = {'hg19': 'v19', 'mm10': 'M4' }
+ANNO_ALLOWED = { 'hg19': [ ANNO_DEFAULTS['hg19'] ],
+                 'mm10': [ ANNO_DEFAULTS['mm10'], 'M2', 'M3' ] }
+ANNO_DEFAULT = ANNO_DEFAULTS['hg19']
+''' Multiple annotations might be supported for each genome.'''
 
 PROJECT_DEFAULT = 'scratchPad'
 ''' This the default DNA Nexus project to use for the long RNA-seq pipeline.'''
@@ -37,7 +44,7 @@ REF_PROJECT_DEFAULT = 'ENCODE Reference Files'
 REF_FOLDER_DEFAULT = '/'
 ''' This the default folder that reference files are found in.'''
 
-RESULT_FOLDER_DEFAULT = '/lrna'
+RESULT_FOLDER_DEFAULT = '/lrna/'
 ''' This the default location to place results folders for each experiment.'''
 
 RUNS_LAUNCHED_FILE = "launchedRuns.txt"
@@ -135,7 +142,7 @@ STEPS = {
     },
     "quant-rsem":     {
                 "app":     "quant-rsem",
-                "params":  { "paired":            "paired" },  #, "nthreads", "rnd_seed"
+                "params":  { "paired_end":        "paired_end" },  #, "nthreads", "rnd_seed"
                 "inputs":  { "star_anno_bam":     "star_anno_bam",
                              "rsem_index":        "rsem_index" },
                 "results": { "rsem_iso_results":  "rsem_iso_results",
@@ -255,45 +262,16 @@ def get_args():
                     help='ENCODED experiment accession',
                     required=True)
 
-    ap.add_argument('-r', '--replicate',
-                    help="Replicate number (default: 1)",
+    ap.add_argument('--br', '--biological-replicate',
+                    help="Biological replicate number (default: 1)",
                     type=int,
                     default='1',
                     required=True)
 
-    ap.add_argument('-tr', '--techrep',
+    ap.add_argument('--tr', '--technical-replicate',
                     help="Technical replicate number (default: 1)",
                     type=int,
                     default='1',
-                    required=False)
-
-    ap.add_argument('-1', '--reads1',
-                    help='Only reads fastq file or first of pair-end reads.',
-                    nargs='+',
-                    required=True)
-
-    ap.add_argument('-2', '--reads2',
-                    help='The second of paired-end reads files.',
-                    nargs='+',
-                    required=False)
-
-    ### PIPELINE SPECIFIC
-    ap.add_argument('-l', '--library',
-                    help='ENCODE accession of biosample library (for BAM header)',
-                    required=True)
-    ### PIPELINE SPECIFIC
-
-    ap.add_argument('-o', '--organism',
-                    help="Organism to map to (default: '" + GENOME_DEFAULT + "')",
-                    #choices=['hg19', 'hg38', 'mm10'],
-                    choices=['hg19','mm10'],
-                    default=GENOME_DEFAULT,
-                    required=False)
-
-    ap.add_argument('-g', '--gender',
-                    help="Gender of sample (default: 'male')",
-                    choices=['male', 'female'],
-                    default='male',
                     required=False)
 
     ### PIPELINE SPECIFIC
@@ -344,7 +322,7 @@ def get_args():
 
     return ap.parse_args()
 
-def pipeline_specific_vars(args, pairedEnd):
+def pipeline_specific_vars(args,verbose=False):
     '''Adds pipeline specific variables to a dict, for use building the workflow.'''
     # psv can contain any variables, but it must contain these at a minimum:
     # - Any non-file input param needed to launch the workflow
@@ -357,87 +335,107 @@ def pipeline_specific_vars(args, pairedEnd):
     # - 'pairedEnd' (boolean, if appropriate)
 
     psv = {}
-    psv['project']    = args.project
-    psv['organism']   = args.organism
-    psv['gender']     = args.gender
-    psv['annotation'] = args.annotation
-    if psv['organism'] == 'hg19' and psv['annotation'] not in [ANNO_DEFAULT]:
-        print psv['organism']+" has no "+psv['annotation']+" annotation."
-        sys.exit(1)
-    if psv['organism'] == 'mm10' and psv['annotation'] not in ['M2','M3','M4']:
-        print psv['organism']+" has no '"+psv['annotation']+"' annotation."
-        sys.exit(1)
     psv['experiment'] = args.experiment
-    psv['replicate']  = str(args.replicate)
-    psv['rep_tech']   = 'rep' + str(args.replicate) + '_' + str(args.techrep)
-    psv['library_id'] = args.library
+    psv['biorep']  = str(args.br)
+    psv['rep_tech']   = 'rep' + str(args.br) + '_' + str(args.tr)
+
+    mapping = dxencode.get_mapping(args.experiment,args.br,args.tr)
+
+    # Only supported genomes
+    if mapping['organism'] in GENOME_DEFAULTS:
+        psv['genome'] = GENOME_DEFAULTS[mapping['organism']]
+    else:
+        print "Organism %s not currently supported" % mapping['organism']
+        sys.exit(1)
+
+    # Could be multiple annotations supported per genome
+    psv['annotation'] = args.annotation
+    if psv['genome'] != GENOME_DEFAULT and psv['annotation'] == ANNO_DEFAULT:
+        psv['annotation'] = ANNO_DEFAULTS[psv['genome']]
+    if psv['annotation'] not in ANNO_ALLOWED[psv['genome']]:
+        print psv['genome']+" has no "+psv['annotation']+" annotation."
+        sys.exit(1)
+    
+    # Paired ends?  Read files?
+    psv['paired_end'] = dxencode.load_fastqs_from_mapping(psv, mapping)
+
+    # And the rest
+    psv['gender']     = mapping['sex']
+    psv['library_id'] = mapping['library']
+    psv['project']    = args.project
     psv['nthreads']   = 8
     psv['rnd_seed']   = 12345
-    psv['paired']  = pairedEnd
+
+    # Non-file app inputs
+    psv['rootR1'] = psv['experiment'] + psv['rep_tech'] + '_concatR1'
+    psv['rootR2'] = psv['experiment'] + psv['rep_tech'] + '_concatR2'
 
     # workflow labeling
     psv['description'] = "The ENCODE RNA Seq pipeline for long RNAs"
-    psv['name'] = "lrna_"+psv['organism']
-    if psv['organism'] == 'mm10':
+    psv['name'] = "lrna_"+psv['genome']
+    if psv['genome'] == 'mm10':
         psv['name'] += psv['annotation']
     if psv['gender'] == 'female':
         psv['name'] += "XX"
     else:
         psv['name'] += "XY"
-    if pairedEnd:
+    if psv['paired_end']:
         psv['title'] = "long RNA-seq paired-end "
         psv['name'] += "PE"
     else:
         psv['title'] = "long RNA-seq single-end "
         psv['name'] += "SE"
     psv['title']   += psv['experiment']+" - "+psv['rep_tech'] + " (library '"+psv['library_id']+"')"
-    psv['subTitle'] = psv['organism']+", "+psv['gender']+" and annotation '"+psv['annotation']+"'."
+    psv['subTitle'] = psv['genome']+", "+psv['gender']+" and annotation '"+psv['annotation']+"'."
     psv['name']    += "_"+psv['experiment']+"_"+psv['rep_tech']
-
-    # Non-file app inputs
-    psv['rootR1'] = psv['experiment'] + psv['rep_tech'] + '_concatR1'
-    psv['rootR2'] = psv['experiment'] + psv['rep_tech'] + '_concatR2'
 
     # Default locations (with adjustments)
     psv['refLoc'] = args.refLoc
     if psv['refLoc'] == REF_FOLDER_DEFAULT:
-        psv['refLoc'] = REF_FOLDER_DEFAULT + '/' + psv['organism']
+        psv['refLoc'] = REF_FOLDER_DEFAULT + psv['genome'] + '/'
+    if not psv['refLoc'].endswith('/'):
+        psv['refLoc'] += '/' 
     psv['resultsLoc'] = args.resultsLoc
     if psv['resultsLoc'] == RESULT_FOLDER_DEFAULT:
-        if psv['organism'] == 'mm10':
-            psv['resultsLoc'] = RESULT_FOLDER_DEFAULT + '/' + psv['organism'] + '/' + psv['annotation']
+        if psv['genome'] == 'mm10':
+            psv['resultsLoc'] = RESULT_FOLDER_DEFAULT + psv['genome'] + '/' + psv['annotation'] + '/'
         else:
-            psv['resultsLoc'] = RESULT_FOLDER_DEFAULT + '/' + psv['organism']
-    psv['resultsFolder'] = psv['resultsLoc'] + '/' + psv['experiment'] + '/' + psv['rep_tech']
+            psv['resultsLoc'] = RESULT_FOLDER_DEFAULT + psv['genome'] + '/'
+    if not psv['resultsLoc'].endswith('/'):
+        psv['resultsLoc'] += '/' 
+    psv['resultsFolder'] = psv['resultsLoc'] + psv['experiment'] + '/' + psv['rep_tech'] + '/'
 
+    if verbose:
+        print "Pipeline Specific Vars:"
+        print json.dumps(psv,indent=4)
     return psv
 
 
 def find_ref_files(priors,psv):
     '''Locates all reference files based upon gender, organism and annotation.'''
     refFiles = {}
-    topIx = psv['refLoc']+'/'+GENOME_REFERENCES['tophat_index'][psv['organism']][psv['gender']][psv['annotation']]
+    topIx = psv['refLoc']+GENOME_REFERENCES['tophat_index'][psv['genome']][psv['gender']][psv['annotation']]
     topIxFid = dxencode.find_file(topIx,REF_PROJECT_DEFAULT)
     if topIxFid == None:
         sys.exit("ERROR: Unable to locate TopHat index file '" + topIx + "'")
     else:
         priors['tophat_index'] = topIxFid
 
-    starIx = psv['refLoc']+'/'+GENOME_REFERENCES['star_index'][psv['organism']][psv['gender']][psv['annotation']]
+    starIx = psv['refLoc']+GENOME_REFERENCES['star_index'][psv['genome']][psv['gender']][psv['annotation']]
     starIxFid = dxencode.find_file(starIx,REF_PROJECT_DEFAULT)
     if starIxFid == None:
         sys.exit("ERROR: Unable to locate STAR index file '" + starIx + "'")
     else:
         priors['star_index'] = starIxFid
 
-    rsemIx = psv['refLoc']+'/'+GENOME_REFERENCES['rsem_index'][psv['organism']][psv['annotation']]
+    rsemIx = psv['refLoc']+GENOME_REFERENCES['rsem_index'][psv['genome']][psv['annotation']]
     rsemIxFid = dxencode.find_file(rsemIx,REF_PROJECT_DEFAULT)
     if rsemIxFid == None:
         sys.exit("ERROR: Unable to locate RSEM index file '" + rsemIx + "'")
     else:
         priors['rsem_index'] = rsemIxFid
 
-    chromSizes = psv['refLoc']+'/'+GENOME_REFERENCES['chrom_sizes'][psv['organism']][psv['gender']]
+    chromSizes = psv['refLoc']+GENOME_REFERENCES['chrom_sizes'][psv['genome']][psv['gender']]
     chromSizesFid = dxencode.find_file(chromSizes,REF_PROJECT_DEFAULT)
     if chromSizesFid == None:
         sys.exit("ERROR: Unable to locate Chrom Sizes file '" + chromSizes + "'")
@@ -449,20 +447,14 @@ def find_ref_files(priors,psv):
 def main():
 
     args = get_args()
-    if len(args.reads1) < 1:
-        sys.exit('Need to have at at least 1 reads1 fastq file.')
-    if args.reads2 == None:
-        args.reads2 = []  # Normalize
-    pairedEnd = False
-    if len(args.reads2) != 0:
-        pairedEnd = True
-    psv = pipeline_specific_vars(args, pairedEnd)
-    project = dxencode.get_project(args.project)
+    psv = pipeline_specific_vars(args)
+
+    project = dxencode.get_project(psv['project'])
     projectId = project.get_id()
 
     #print "Building apps dictionary..."
     pipePath = STEP_ORDER['se']
-    if pairedEnd:
+    if psv['paired_end']:
         pipePath = STEP_ORDER['pe']
     #pipeSteps, file_globs = dxencode.build_simple_steps(pipePath,projectId,verbose=True)
     pipeSteps = STEPS
@@ -484,10 +476,10 @@ def main():
     # TODO: files could be in: dx (usual), remote (url e.g.https://www.encodeproject.org/...
     #       or possibly local, Currently only DX locations are supported.
     inputs = {}
-    inputs['Reads1'] = dxencode.find_and_copy_read_files(priors, args.reads1, args.test, 'reads1', \
-                                                            psv['resultsFolder'], False, projectId)
-    inputs['Reads2'] = dxencode.find_and_copy_read_files(priors, args.reads2, args.test, 'reads2', \
-                                                            psv['resultsFolder'], False, projectId)
+    inputs['Reads1'] = dxencode.find_and_copy_read_files(priors, psv['fastqs']['1'], args.test, \
+                                                'reads1', psv['resultsFolder'], False, projectId)
+    inputs['Reads2'] = dxencode.find_and_copy_read_files(priors, psv['fastqs']['2'], args.test, 
+                                                'reads2', psv['resultsFolder'], False, projectId)
 
     print "Looking for reference files..."
     find_ref_files(priors,psv)
@@ -505,8 +497,8 @@ def main():
     dxencode.check_run_log(psv['resultsFolder'],projectId, verbose=True)
 
     if len(deprecateFiles) > 0 and not args.test:
-        oldFolder = psv['resultsFolder']+"/deprecated"
-        print "Moving "+str(len(deprecateFiles))+" prior result file(s) to '"+oldFolder+"/'..."
+        oldFolder = psv['resultsFolder']+"deprecated/"
+        print "Moving "+str(len(deprecateFiles))+" prior result file(s) to '"+oldFolder+"'..."
         dxencode.move_files(deprecateFiles,oldFolder,projectId)
 
     if args.test:
