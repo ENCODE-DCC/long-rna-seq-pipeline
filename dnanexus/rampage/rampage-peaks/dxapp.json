@@ -35,13 +35,6 @@
       "patterns": ["*chrom.sizes","*.txt"]
     },
     {
-      "name": "bed12_as_file",
-      "label": "Bed 12 'as' file definition",
-      "class": "file",
-      "optional": false,
-      "patterns": ["*.as"]
-    },
-    {
       "name": "nthreads",
       "label": "Number of threads to use",
       "class": "int",
@@ -61,12 +54,6 @@
       "label": "BigBed file of rampage called peaks",
       "class": "file",
       "patterns": ["*_rampage_peaks.bb"]
-    },
-    {
-      "name": "rampage_regions_bed",
-      "label": "Bed file of rampage called peaks",
-      "class": "file",
-      "patterns": ["*_rampage_peaks.bed"]
     },
     {
       "name": "rampage_peaks_gff",

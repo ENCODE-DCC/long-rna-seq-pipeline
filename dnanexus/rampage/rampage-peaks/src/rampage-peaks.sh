@@ -9,25 +9,24 @@ main() {
     #pip install pysam
     sudo easy_install pysam
     echo "* Download and install grit..."
-    wget https://github.com/nboley/grit/archive/2.0.0.tar.gz -O grit.tgz
-    #mkdir grit
-    #tar -xzf grit.tgz -C grit --strip-components=1
-    #cd grit
-    #sudo python setup.py install
-    sudo easy_install grit.tgz
-    echo "*****"
-    echo `ls`
-    ls
-    echo "*****"
-    #cd grit-2.0.0
+    wget https://github.com/nboley/grit/archive/2.0.1.tar.gz -O grit.tgz
+    #sudo easy_install grit.tgz
+    mkdir grit_local
+    tar -xzf grit.tgz -C grit_local --strip-components=1
+    cd grit_local
+    sudo python setup.py install
+    #echo "***** ls ."
+    #ls
+    #echo "***** ls /usr/local/bin"
+    #ls /usr/local/bin
+    cd ..
 
     # Now in resources/usr/bin
     #wget https://github.com/ENCODE-DCC/kentUtils/archive/v302.1.0.tar.gz
 
     echo "*****"
     echo "* Running: rampage-peaks.sh [v0.0.1]"
-    # TODO: call_peaks.py version?
-    echo "* Running: grit:call_peaks.py [v2.0.0]"
+    echo "* Running: grit:call_peaks version: "`call_peaks --version 2>&1 | grep call_peaks | awk '{print $3}'`
     echo "* bedToBigBed version: "`bedToBigBed 2>&1 | grep "bedToBigBed v" | awk '{printf "v%s", $3}'`
     echo "* samtools version: "`samtools 2>&1 | grep Version | awk '{print $2}'`
     echo "*****"
@@ -36,7 +35,6 @@ main() {
     echo "Value of control bam: '$control_bam'"
     echo "Value of annotation:  '$gene_annotation'"
     echo "Value of chrom_sizes: '$chrom_sizes'"
-    echo "Value of as_file:     '$bed12_as_file'"
     echo "* Value of nthreads:  '$nthreads'"
 
     echo "* Download files..."
@@ -58,7 +56,6 @@ main() {
     echo "* Annotation file: '${annotation_fn}.gtf'"
     
     dx download "$chrom_sizes" -o chromSizes.txt
-    dx download "$bed12_as_file" -o bed12.as
 
     peaks_root=${bam_fn}_rampage_peaks
     echo "* Rampage peaks root: '${peaks_root}'"
@@ -70,22 +67,15 @@ main() {
     samtools index ${control_fn}.bam 
 
     echo "* Calling peaks..."
-    python2.7 call_peaks.py --rampage-reads ${bam_fn}.bam --rnaseq-reads ${control_fn}.bam \
-                                --reference ${annotation_fn}.gtf --exp-filter-fraction 0.05 \
-                                --trim-fraction 0.01 --threads $nthreads --ucsc \
-                                --outfname-type narrowPeak --outfname ${peaks_root}.bed \
-                                --gene-regions-ofname ${peaks_root}_regions.bed
+    call_peaks --rampage-reads ${bam_fn}.bam --rnaseq-reads ${control_fn}.bam --threads $nthreads \
+               --reference ${annotation_fn}.gtf --exp-filter-fraction 0.05 --trim-fraction 0.01 \
+                --ucsc --outfname ${peaks_root}.gff --outfname-type gff \
+               --bed-peaks-ofname ${peaks_root}.bed
     echo `ls`
-
-    #python2.7 bin/call_peaks.py --rampage-reads ${bam_fn}.bam --rnaseq-reads ${control_fn}.bam \
-    #                            --reference ${annotation_fn}.gtf --exp-filter-fraction 0.05 \
-    #                            --trim-fraction 0.01 --threads $nthreads --ucsc \
-    #                            --outfname-type gff --outfname ${peaks_root}.gff
-    touch ${peaks_root}.gff
  
-    echo "* Converting narrowPeak bed to bigBed..."
-    #bedToBigBed ${peaks_root}.bed -as=bed12.as chromSizes.txt ${peaks_root}.bb
-    bedToBigBed ${peaks_root}.bed -type=bed6+3 chromSizes.txt ${peaks_root}.bb
+    echo "* Converting bed to bigBed..."
+    grep "^chr" ${peaks_root}.bed | sort -k1,1 -k2,2n > peaks_polished.bed
+    bedToBigBed peaks_polished.bed -as=/usr/bin/bed6.as chromSizes.txt ${peaks_root}.bb
 
     echo "* Upload results..."
     rampage_peaks_bed=$(dx upload ${peaks_root}.bed --brief)
@@ -96,9 +86,5 @@ main() {
     dx-jobutil-add-output rampage_peaks_bb "$rampage_peaks_bb" --class=file
     dx-jobutil-add-output rampage_peaks_gff "$rampage_peaks_gff" --class=file
     
-    # temporary
-    rampage_regions_bed=$(dx upload ${peaks_root}_regions.bed --brief)
-    dx-jobutil-add-output rampage_regions_bed "$rampage_regions_bed" --class=file
-
     echo "* Finished."
 }
