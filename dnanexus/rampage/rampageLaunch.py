@@ -30,7 +30,7 @@ GENOME_DEFAULT = 'hg19'
 ANNO_DEFAULTS = {'hg19': 'v19', 'mm10':'M4' }
 ANNO_ALLOWED = { 'hg19': [ ANNO_DEFAULTS['hg19'] ],
                  'mm10': [ ANNO_DEFAULTS['mm10'], 'M2', 'M3' ] }
-ANNO_DEFAULT = ANNO_DEFAULTS['hg19']
+ANNO_DEFAULT = ANNO_DEFAULTS[GENOME_DEFAULT]
 ''' Multiple annotations might be supported for each genome.'''
 
 PROJECT_DEFAULT = 'scratchPad'
