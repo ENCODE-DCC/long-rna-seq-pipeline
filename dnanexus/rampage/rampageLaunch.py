@@ -24,9 +24,8 @@ import json
 #        - FILE_GLOBS is needed for locating result files from prior runs.
 
 GENOMES_SUPPORTED = ['hg19', 'mm10']
-GENOME_DEFAULTS = { 'human': 'hg19', 'mouse': 'mm10' }
 GENOME_DEFAULT = 'hg19'
-''' This the default Genome that long RNA-seq experiments are mapped to.'''
+''' This the default Genomes that long RNA-seq experiments are mapped to.'''
 
 ANNO_DEFAULTS = {'hg19': 'v19', 'mm10':'M4' }
 ANNO_ALLOWED = { 'hg19': [ ANNO_DEFAULTS['hg19'] ],
@@ -40,9 +39,6 @@ PROJECT_DEFAULT = 'scratchPad'
 REF_PROJECT_DEFAULT = 'ENCODE Reference Files'
 ''' This the default DNA Nexus project to find reference files in.'''
 
-REF_FOLDER_DEFAULT = '/'
-''' This the default folder that reference files are found in.'''
-
 RESULT_FOLDER_DEFAULT = '/rampage/'
 ''' This the default location to place results folders for each experiment.'''
 
@@ -53,11 +49,13 @@ CONTROL_ROOT_FOLDER = '/lrna/'
 CONTROL_FILE_GLOB = '*_star_genome.bam'
 
 
-STEP_ORDER = [ "concatR1", "concatR2", "rampage-align-pe", "rampage-signals", "rampage-peaks" ]
-#STEP_ORDER = [ "rampage-align-pe", "rampage-signals", "rampage-peaks" ]
+REP_STEP_ORDER = [ "concatR1", "concatR2", "rampage-align-pe", "rampage-signals", "rampage-peaks" ]
 '''The (artifically) linear order of all pipeline steps.'''
 
-STEPS = {
+COMBINED_STEP_ORDER = [ "rampage-idr" ]
+'''The (artifically) linear order of all pipeline steps.'''
+
+REP_STEPS = {
     "concatR1": {
                 "app":     "concat-fastqs",
                 "params":  { "rootR1": "outfile_root" },
@@ -101,8 +99,19 @@ STEPS = {
                      "chrom_sizes": "chrom_sizes",
                      "rampage_marked_bam": "rampage_marked_bam" },
         "results": { "rampage_peaks_bed": "rampage_peaks_bed",
-                     "rampage_peaks_bb": "rampage_peaks_bb",
-                     "rampage_peaks_gtf": "rampage_peaks_gtf" }
+                     "rampage_peaks_bb":  "rampage_peaks_bb",
+                     "rampage_peaks_gff": "rampage_peaks_gff" }
+    }
+}
+COMBINED_STEPS = {
+    "rampage-idr": {
+        "app":     "rampage-idr",
+        "params":  {},
+        "inputs":  { "peaks_a": "peaks_a", 
+                     "peaks_b": "peaks_b", 
+                     "chrom_sizes": "chrom_sizes" },
+        "results": { "rampage_idr_bed": "rampage_idr_bed",
+                     "rampage_idr_bb":  "rampage_idr_bb" }
     }
 }
 
@@ -114,11 +123,13 @@ FILE_GLOBS = {
     "all_minus_bg":       "/*_rampage_5p_minusAll.bg",
     "unique_plus_bg":     "/*_rampage_5p_plusUniq.bg",
     "rampage_peaks_bed":  "/*_rampage_peaks.bed",
-    "rampage_peaks_gtf":  "/*_rampage_peaks.gtf",
+    "rampage_peaks_bb":   "/*_rampage_peaks.bb",
+    "rampage_peaks_gff":  "/*_rampage_peaks.gff",
+    "peaks_a":            "/*_rampage_peaks.gff",
+    "peaks_b":            "/*_rampage_peaks.gff",
     "all_plus_bg":        "/*_rampage_5p_plusAll.bg",
     "rampage_star_log":   "/*_rampage_star_Log.final.out",
     "all_minus_bw":       "/*_rampage_5p_minusAll.bw",
-    "rampage_peaks_bb":   "/*_rampage_peaks.bb",
     "unique_plus_bw":     "/*_rampage_5p_plusUniq.bw",
     "unique_minus_bg":    "/*_rampage_5p_minusUniq.bg",
     "unique_minus_bw":    "/*_rampage_5p_minusUniq.bw"
@@ -189,19 +200,24 @@ def get_args():
                     required=True)
 
     ap.add_argument('--br', '--biological-replicate',
-                    help="Biological replicate number (default: 1)",
+                    help="Biological replicate number",
                     type=int,
-                    default='1',
-                    required=True)
+                    default=0,
+                    required=False)
 
     ap.add_argument('--tr', '--technical-replicate',
                     help="Technical replicate number (default: 1)",
                     type=int,
-                    default='1',
+                    default=1,
                     required=False)
 
     ap.add_argument('-c', '--control',
                     help='The control bam for peak calling.',
+                    required=False)
+
+    ap.add_argument('--cr','--combine-replicates',
+                    help="Combine or compare two replicates (e.g.'1 2_2').'",
+                    nargs='+',
                     required=False)
 
     ### PIPELINE SPECIFIC
@@ -220,8 +236,8 @@ def get_args():
 
     ap.add_argument('--refLoc',
                     help="The location to find reference files (default: '" + \
-                                            REF_PROJECT_DEFAULT + ":" + REF_FOLDER_DEFAULT + "')",
-                    default=REF_FOLDER_DEFAULT,
+                            dxencode.REF_PROJECT_DEFAULT + ":" + dxencode.REF_FOLDER_DEFAULT + "')",
+                    default=dxencode.REF_FOLDER_DEFAULT,
                     required=False)
 
     ap.add_argument('--resultsLoc',
@@ -253,7 +269,7 @@ def get_args():
     return ap.parse_args()
 
 def pipeline_specific_vars(args,verbose=False):
-    '''Adds pipeline specific variables to a dict, for use building the workflow.'''
+    '''Adds common and pipeline specific variables to a dict, for use building the workflow.'''
     # psv can contain any variables, but it must contain these at a minimum:
     # - Any non-file input param needed to launch the workflow
     # - 'resultFolder' - full dx path (without project) to the results folder of the specific run
@@ -264,20 +280,10 @@ def pipeline_specific_vars(args,verbose=False):
     # - 'organism', 'gender', 'experiment', 'replicate' (if appropriate), 
     # - 'pairedEnd' (boolean, if appropriate)
 
-    psv = {}
-    psv['experiment'] = args.experiment
-    psv['biorep']  = str(args.br)
-    psv['rep_tech']   = 'rep' + str(args.br) + '_' + str(args.tr)
-
-    mapping = dxencode.get_mapping(args.experiment,args.br,args.tr)
-
-    # Only supported genomes
-    if mapping['organism'] in GENOME_DEFAULTS:
-        psv['genome'] = GENOME_DEFAULTS[mapping['organism']]
-    else:
-        print "Organism %s not currently supported" % mapping['organism']
-        sys.exit(1)
-
+    # Start with dict containing common variables
+    print "Retrieving experiment specifics..."
+    psv = dxencode.common_variables(args,RESULT_FOLDER_DEFAULT,controls=True)
+    
     # Could be multiple annotations supported per genome
     psv['annotation'] = args.annotation
     if psv['genome'] != GENOME_DEFAULT and psv['annotation'] == ANNO_DEFAULT:
@@ -285,53 +291,35 @@ def pipeline_specific_vars(args,verbose=False):
     if psv['annotation'] not in ANNO_ALLOWED[psv['genome']]:
         print psv['genome']+" has no "+psv['annotation']+" annotation."
         sys.exit(1)
-    
-    # Paired ends?  Read files?
-    psv['paired_end'] = dxencode.load_fastqs_from_mapping(psv, mapping, controls=True)
+
     if not psv['paired_end']:
         print "Rampage is always expected to be paired-end but mapping says otherwise."
         print mapping
         sys.exit(1)
 
-    # And the rest
-    psv['gender']= mapping['sex']
-    psv['library_id'] = mapping['library']
-    psv['project']    = args.project
+    # Some specific settings
     psv['nthreads']   = 8
-
-    # Non-file app inputs
-    psv['rootR1'] = psv['experiment'] + psv['rep_tech'] + '_concatR1'
-    psv['rootR2'] = psv['experiment'] + psv['rep_tech'] + '_concatR2'
-
+    
+    # run will either be for combined or single rep.
+    if not psv['combined']:
+        run = psv['reps']['a']  # If not combined then run will be for the first (only) replicate
+    else:
+        run = psv
+        
     # workflow labeling
     psv['description'] = "The ENCODE Rampage RNA pipeline for long RNAs"
-    psv['name'] = "rampage_"+psv['genome']
+    run['name'] = "rampage_"+psv['genome']
     if psv['genome'] == 'mm10':
-        psv['name'] += psv['annotation']
+        run['name'] += psv['annotation']
     if psv['gender'] == 'female':
-        psv['name'] += "XX"
+        run['name'] += "XX"
     else:
-        psv['name'] += "XY"
-    psv['title'] = "Rampage RNA "
-    psv['title'] += psv['experiment'] + " - "+psv['rep_tech'] + \
-                    " (library '"+psv['library_id']+"') on " + psv['genome']+" - "+psv['gender']
-    psv['name']    += "_"+psv['experiment']+"_"+psv['rep_tech']
-
-    # Default locations (with adjustments)
-    psv['refLoc'] = args.refLoc
-    if psv['refLoc'] == REF_FOLDER_DEFAULT:
-        psv['refLoc'] = REF_FOLDER_DEFAULT + psv['genome'] + '/'
-    if not psv['refLoc'].endswith('/'):
-        psv['refLoc'] += '/' 
-    psv['resultsLoc'] = args.resultsLoc
-    if psv['resultsLoc'] == RESULT_FOLDER_DEFAULT:
-        if psv['genome'] == 'mm10':
-            psv['resultsLoc'] = RESULT_FOLDER_DEFAULT + psv['genome'] + '/' + psv['annotation'] + '/'
-        else:
-            psv['resultsLoc'] = RESULT_FOLDER_DEFAULT + psv['genome'] + '/'
-    if not psv['resultsLoc'].endswith('/'):
-        psv['resultsLoc'] += '/' 
-    psv['resultsFolder'] = psv['resultsLoc'] + psv['experiment'] + '/' + psv['rep_tech'] + '/'
+        run['name'] += "XY"
+    run['title'] = "Rampage RNA " + psv['experiment'] + " - " + run['rep_tech']
+    run['name'] += "_"+psv['experiment']+"_" + run['rep_tech']
+    if not psv['combined']:
+        run['title'] += " [library '"+run['library_id']+"']"
+    run['title'] += " on " + psv['genome']+" - "+psv['gender']
 
     if verbose:
         print "Pipeline Specific Vars:"
@@ -343,33 +331,34 @@ def find_ref_files(priors,psv):
     '''Locates all reference files based upon organism and gender.'''
     refFiles = {}
     starIx = psv['refLoc']+GENOME_REFERENCES['star_index'][psv['genome']][psv['gender']][psv['annotation']]
-    starIxFid = dxencode.find_file(starIx,REF_PROJECT_DEFAULT)
+    starIxFid = dxencode.find_file(starIx,dxencode.REF_PROJECT_DEFAULT)
     if starIxFid == None:
         sys.exit("ERROR: Unable to locate STAR index file '" + starIx + "'")
     else:
         priors['star_index'] = starIxFid
 
     anno = psv['refLoc']+GENOME_REFERENCES['gene_annotation'][psv['genome']][psv['annotation']]
-    anno_fid = dxencode.find_file(anno,REF_PROJECT_DEFAULT)
+    anno_fid = dxencode.find_file(anno,dxencode.REF_PROJECT_DEFAULT)
     if anno_fid == None:
         sys.exit("ERROR: Unable to locate Gene Annotation file '" + anno + "'")
     else:
         priors['gene_annotation'] = anno_fid
 
     chromSizes = psv['refLoc']+GENOME_REFERENCES['chrom_sizes'][psv['genome']][psv['gender']]
-    chromSizesFid = dxencode.find_file(chromSizes,REF_PROJECT_DEFAULT)
+    chromSizesFid = dxencode.find_file(chromSizes,dxencode.REF_PROJECT_DEFAULT)
     if chromSizesFid == None:
         sys.exit("ERROR: Unable to locate Chrom Sizes file '" + chromSizes + "'")
     else:
         priors['chrom_sizes'] = chromSizesFid
+    psv['ref_files'] = GENOME_REFERENCES.keys()
     
 
-def find_control_file(psv,project,default=None):
+def find_control_file(psv,rep,project,default=None):
     '''Attempts to find an appropriate control file.'''
     # TODO Make more generic and move to dxencode.py when needed.
     
     (AUTHID,AUTHPW,SERVER) = dxencode.processkey('default')
-    for file_key in psv['controls']:
+    for file_key in rep['controls']:
         url = '%s%s/?format=json&frame=embedded' % (SERVER,file_key)
         response = dxencode.encoded_get(url, AUTHID, AUTHPW)
         file_obj = response.json()
@@ -395,9 +384,32 @@ def find_control_file(psv,project,default=None):
             
     if default != None:
         return default
-    print "Unable to find control in search of %s" % psv['controls']
+    print "Unable to find control in search of %s" % rep['controls']
     sys.exit(1)
             
+
+def find_combined_inputs(steps,psv,file_globs,proj_id):
+    '''Finds the inputs for a combined run in the directories of the replicate runs.'''
+    # TODO Make more generic and move to dxencode.py when needed.
+    
+    inputs = {}
+    for step in psv['path']:
+        for fileToken in steps[step]['inputs'].keys():
+            rep_key = fileToken[-1]
+            if rep_key not in psv['reps']:
+                continue
+            rep = psv['reps'][rep_key]
+            fid = dxencode.find_file(rep['resultsFolder'] + file_globs[fileToken],proj_id, \
+                                                                                    recurse=False)
+            if fid != None:
+                psv['priors'][fileToken] = fid
+                inputs[fileToken] = fid
+            else:
+                print "Error: Necessary '%s' for combined run, not found in '%s'." \
+                                                                % (fileToken, rep['resultsFolder'])
+                print "       Please run for single replicate first."
+                sys.exit(1)
+    return inputs
     
 
 #######################
@@ -410,66 +422,47 @@ def main():
     projectId = project.get_id()
 
     #print "Building apps dictionary..."
-    #pipeSteps, file_globs = dxencode.build_simple_steps(STEP_ORDER,projectId,verbose=True)
-    pipeSteps = STEPS
+    #pipeSteps, file_globs = dxencode.build_simple_steps(REP_STEP_ORDER,projectId,verbose=True)
+    pipeRepSteps = REP_STEPS
     file_globs = FILE_GLOBS
+    for rep in psv['reps'].values():
+        rep['path'] = REP_STEP_ORDER
+    pipeCombinedSteps = None
+    if psv['combined']:
+        psv['path'] = COMBINED_STEP_ORDER
+        pipeCombinedSteps, combined_globs = dxencode.build_simple_steps(psv['path'],projectId)
+        file_globs.update(combined_globs)
 
-    print "Checking for prior results..."
-    # Check if there are previous results
-    # Perhaps reads files are already there?
-    # NOTE: priors is a dictionary of fileIds that will be used to determine stepsToDo
-    #       and fill in inputs to workflow steps
-    if not args.test:
-        if not dxencode.project_has_folder(project, psv['resultsFolder']):
-            project.new_folder(psv['resultsFolder'],parents=True)
-    priors = dxencode.find_prior_results(STEP_ORDER,pipeSteps,psv['resultsFolder'],file_globs,projectId)
+    # finding fastqs and prior results in a stadardized way
+    dxencode.finding_rep_inputs_and_priors(psv,pipeRepSteps,file_globs,project,args.test)
 
-    print "Checking for input files..."
-    # Find all reads files and move into place
-    # TODO: files could be in: dx (usual), remote (url e.g.https://www.encodeproject.org/...
-    #       or possibly local, Currently only DX locations are supported.
-    inputs = {}
-    inputs['Reads1'] = dxencode.find_and_copy_read_files(priors, psv['fastqs']['1'], args.test, \
-                                              'reads1', psv['resultsFolder'], False, projectId)
-    inputs['Reads2'] = dxencode.find_and_copy_read_files(priors, psv['fastqs']['2'], args.test, \
-                                              'reads2', psv['resultsFolder'], False, projectId)
-    print "Checking for control file..."
-    control = find_control_file(psv,project,args.control)
-    inputs['Control'] = dxencode.find_and_copy_read_files(priors, [ control ], args.test, \
-                                              'control_bam', psv['resultsFolder'], False, projectId)
+    print "Checking for control files..."
+    for rep in psv['reps'].values():
+        control = find_control_file(psv,rep,project,args.control)
+        rep['inputs']['Control'] = dxencode.find_and_copy_read_files(rep['priors'], [ control ], \
+                                                args.test, 'control_bam', rep['resultsFolder'], \
+                                                False, projectId)
 
-    print "Looking for reference files..."
-    find_ref_files(priors,psv)
+    if psv['combined']:
+        print "Checking for combined-replicate inputs..."
+        psv['priors'] = {}
+        psv['inputs'] = find_combined_inputs(pipeCombinedSteps,psv,file_globs,projectId)
 
-    print "Determining steps to run..."
-    # NOTE: stepsToDo is an ordered list of steps that need to be run
-    deprecateFiles = [] # old results will need to be moved/removed if step is rerun
-    stepsToDo = dxencode.determine_steps_to_run(STEP_ORDER, pipeSteps, priors, deprecateFiles, \
-                                                                    projectId, force=args.force)
-    # Report the plans
-    dxencode.report_plans(psv, inputs, GENOME_REFERENCES.keys(), deprecateFiles, priors, \
-                                                                STEP_ORDER, stepsToDo, pipeSteps)
-    print "Checking for currently running analyses..."
-    dxencode.check_run_log(psv['resultsFolder'],projectId,verbose=True)
+    # finding pipeline specific reference files in a stadardized way
+    dxencode.find_all_ref_files(psv,find_ref_files)
 
-    if len(deprecateFiles) > 0 and not args.test:
-        oldFolder = psv['resultsFolder']+"deprecated/"
-        print "Moving "+str(len(deprecateFiles))+" prior result file(s) to '"+oldFolder+"'..."
-        dxencode.move_files(deprecateFiles,oldFolder,projectId)
+    # deterine steps to run in a stadardized way
+    dxencode.determine_steps_needed(psv, pipeRepSteps, pipeCombinedSteps, projectId, args.force)
 
-    if args.test:
-        print "Testing workflow assembly..."
+    # Preperation is done. At this point on we either run rep 'a' or combined.
+    if not psv['combined']:
+        run = psv['reps']['a']
+        run['steps'] = pipeRepSteps
     else:
-        print "Assembling workflow..."
-    wf = dxencode.create_workflow(stepsToDo, pipeSteps, priors, psv, projectId, test=args.test)
-
-    # Exit if test only
-    if args.test:
-        print "TEST ONLY - exiting."
-        sys.exit(0)
-
-    # Roll out to pad and possibly launch
-    dxencode.launchPad(wf,projectId,psv,args.run)        
+        run = psv
+        run['steps'] = pipeCombinedSteps
+        
+    dxencode.report_build_launch(psv, run, projectId, test=args.test, launch=args.run)
             
     print "(success)"
 
