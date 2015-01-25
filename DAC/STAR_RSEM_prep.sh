@@ -17,7 +17,11 @@ export PATH=$PATH:/sonas-hs/gingeras/nlsas_norepl/user/dobin/Software/RSEM/RSEM-
 
 # RSEM genome
 mkdir $RSEMgenomeDir 
-RSEMcommand="rsem-prepare-reference --no-polyA --gtf $gtf $fastaGenome","$fastaSpikeins $RSEMgenomeDir/RSEMref"
+
+### the command below is for RSEM >=1.2.19
+### note, that for RSEM < 1.2.19, --no-polyA should be added
+
+RSEMcommand="rsem-prepare-reference --gtf $gtf $fastaGenome","$fastaSpikeins $RSEMgenomeDir/RSEMref"
 echo $RSEMcommand
 $RSEMcommand
 
