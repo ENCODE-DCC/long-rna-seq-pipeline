@@ -57,15 +57,15 @@ REP_STEPS = {
     # TODO: Any results files not listed here would not be 'deprecated' on reruns.
     "concatR1": {
                 "app":     "concat-fastqs",
-                "params":  { "rootR1": "outfile_root" },
+                "params":  { "concat_id":  "concat_id" },
                 "inputs":  { "reads1_set": "reads_set" },
-                "results": { "reads1": "reads" }
+                "results": { "reads1":     "reads"     }
     },
     "concatR2": {
                 "app":     "concat-fastqs",
-                "params":  { "rootR2": "outfile_root" },
+                "params":  { "concat_id2": "concat_id" },
                 "inputs":  { "reads2_set": "reads_set" },
-                "results": { "reads2": "reads" }
+                "results": { "reads2":     "reads"     }
     },
     "align-tophat-se": {
                 "app":     "align-tophat-se",
@@ -145,8 +145,8 @@ REP_STEPS = {
 
 FILE_GLOBS = {
     # For looking up previous result files, use wild-cards
-    "reads1":               "/*_concatR1.fq.gz",
-    "reads2":               "/*_concatR2.fq.gz",
+    "reads1":               "/*_reads_concat.fq.gz",
+    "reads2":               "/*_reads2_concat.fq.gz",
     "tophat_bam":           "/*_tophat.bam",
     "tophat_minus_all_bw":  "/*_tophat_minusAll.bw",
     "tophat_minus_uniq_bw": "/*_tophat_minusUniq.bw",
@@ -330,6 +330,10 @@ def pipeline_specific_vars(args,verbose=False):
     # Start with dict containing common variables
     print "Retrieving experiment specifics..."
     psv = dxencode.common_variables(args,RESULT_FOLDER_DEFAULT,controls=False)
+    if psv['exp_type'] != 'long-rna-seq':
+        print "Experiment %s is not for long-rna-seq but for '%s'" \
+                                                            % (psv['experiment'],psv['exp_type'])
+        sys.exit(1)
     
     # Could be multiple annotations supported per genome
     psv['annotation'] = args.annotation

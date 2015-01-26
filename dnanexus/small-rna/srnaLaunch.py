@@ -145,20 +145,17 @@ def pipeline_specific_vars(args,verbose=False):
     # Start with dict containing common variables
     print "Retrieving experiment specifics..."
     psv = dxencode.common_variables(args,RESULT_FOLDER_DEFAULT,controls=False)
+    if psv['exp_type'] != 'small-rna-seq':
+        print "Experiment %s is not for small-rna-seq but for '%s'" \
+                                                            % (psv['experiment'],psv['exp_type'])
+        sys.exit(1)
     
     # Now add pipline specific variables and tests
     
     # Paired ends?
     if psv['paired_end']:
         print "Small-RNA is always expected to be single-end but mapping says otherwise."
-        print mapping
         sys.exit(1)
-
-    # Non-file app inputs
-    # Ugly fixup of standard names in other pipelines.
-    for rep in psv['reps'].values():
-        del rep['rootR1']
-        rep['outfile_root'] = psv['experiment'] + rep['rep_tech'] + '_concatReads'
 
     # Some specific settings
     psv['nthreads']   = 8

@@ -58,15 +58,15 @@ COMBINED_STEP_ORDER = [ "rampage-idr" ]
 REP_STEPS = {
     "concatR1": {
                 "app":     "concat-fastqs",
-                "params":  { "rootR1": "outfile_root" },
+                "params":  { "concat_id":  "concat_id" },
                 "inputs":  { "reads1_set": "reads_set" },
-                "results": { "reads1": "reads" }
+                "results": { "reads1":     "reads"     }
     },
     "concatR2": {
                 "app":     "concat-fastqs",
-                "params":  { "rootR2": "outfile_root" },
+                "params":  { "concat_id2": "concat_id" },
                 "inputs":  { "reads2_set": "reads_set" },
-                "results": { "reads2": "reads" }
+                "results": { "reads2":     "reads"     }
     },
     "rampage-align-pe": {
         "app":     "rampage-align-pe",
@@ -116,8 +116,8 @@ COMBINED_STEPS = {
 }
 
 FILE_GLOBS = {
-    "reads1":             "/*_concatR1.fq.gz",
-    "reads2":             "/*_concatR2.fq.gz",
+    "reads1":               "/*_reads_concat.fq.gz",
+    "reads2":               "/*_reads2_concat.fq.gz",
     "all_plus_bw":        "/*_rampage_5p_plusAll.bw",
     "rampage_marked_bam": "/*_rampage_star_marked.bam",
     "all_minus_bg":       "/*_rampage_5p_minusAll.bg",
@@ -283,6 +283,9 @@ def pipeline_specific_vars(args,verbose=False):
     # Start with dict containing common variables
     print "Retrieving experiment specifics..."
     psv = dxencode.common_variables(args,RESULT_FOLDER_DEFAULT,controls=True)
+    if psv['exp_type'] != 'rampage':
+        print "Experiment %s is not for rampage but for '%s'" % (psv['experiment'],psv['exp_type'])
+        sys.exit(1)
     
     # Could be multiple annotations supported per genome
     psv['annotation'] = args.annotation
@@ -399,11 +402,12 @@ def find_combined_inputs(steps,psv,file_globs,proj_id):
             if rep_key not in psv['reps']:
                 continue
             rep = psv['reps'][rep_key]
+            # TODO: No need for multiples at this time.  Deal with it when it comes up.
             fid = dxencode.find_file(rep['resultsFolder'] + file_globs[fileToken],proj_id, \
-                                                                                    recurse=False)
+                                                                      multiple=False, recurse=False)
             if fid != None:
                 psv['priors'][fileToken] = fid
-                inputs[fileToken] = fid
+                inputs[fileToken] = [ fid ]
             else:
                 print "Error: Necessary '%s' for combined run, not found in '%s'." \
                                                                 % (fileToken, rep['resultsFolder'])
