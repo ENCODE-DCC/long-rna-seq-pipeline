@@ -3,7 +3,7 @@
   "title": "Concatenates fastq.gz files",
   "summary": "Takes gzipped fastq files and concatenates them. Optional ENCODE long-rna-seq pipeline step",
   "dxapi": "1.0.0",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -14,8 +14,8 @@
       "patterns": ["*.fastq.gz", "*.fq.gz"]
     },
     {
-      "name": "outfile_root",
-      "label": "Root name of output file",
+      "name": "concat_id",
+      "label": "Part of name output file for later identification",
       "class": "string",
       "optional": false
     }
@@ -25,7 +25,7 @@
       "class": "file",
       "name": "reads",
       "label": "Combined gzipped fastq file",
-      "patterns": ["*.fq.gz"]
+      "patterns": ["*_concat.fq.gz"]
     }
   ],
   "runSpec": {
