@@ -304,8 +304,6 @@ class RampageLaunch(Launch):
                     (rep_obj['biological_replicate_number'], rep_obj['technical_replicate_number'])
             # default by cheating
             control_root = self.CONTROL_ROOT_FOLDER
-            if self.psv['project'] != self.PROJECT_DEFAULT:
-                control_root = '/runs/'        # TODO: remove this cheat!
             path_n_glob = control_root + exp_id + '/' + rep_tech + '/' + self.CONTROL_FILE_GLOB
             target_folder = dxencode.find_folder(exp_id + '/' + rep_tech,self.project,control_root)
             #print "Target found [%s]" % target_folder
@@ -320,49 +318,6 @@ class RampageLaunch(Launch):
         print "Unable to find control in search of %s" % rep['controls']
         sys.exit(1)
             
-
-    #def find_all_control_files(self,test):
-    #    '''Attempts to find all control files needed for a run
-    #    .'''
-    #    if self.CONTROL_FILE_GLOB == None:
-    #        return
-    #    print "Checking for control files..."
-    #    default_control = None
-    #    if 'control' in self.psv:
-    #        default_control = self.psv['control'] # akward but only rep1 may be run
-    #    for rep in self.psv['reps'].values():
-    #        control = self.find_control_file(rep,default_control)
-    #        rep['inputs']['Control'] = dxencode.find_and_copy_read_files(rep['priors'], \
-    #                                                [ control ], test, 'control_bam', \
-    #                                                rep['resultsFolder'], False, self.proj_id)
-
-    def find_combined_inputs(self,steps,file_globs):
-        '''Finds the inputs for a combined run in the directories of the replicate runs.'''
-        # TODO Make more generic and move to dxencode.py when needed.
-        
-        if not self.psv['combined']:
-            return
-
-        inputs = {}
-        for step in self.psv['path']:
-            for fileToken in steps[step]['inputs'].keys():
-                rep_key = fileToken[-1]
-                if rep_key not in self.psv['reps']:
-                    continue
-                rep = self.psv['reps'][rep_key]
-                # TODO: No need for multiples at this time.  Deal with it when it comes up.
-                fid = dxencode.find_file(rep['resultsFolder'] + file_globs[fileToken], \
-                                                        self.proj_id, multiple=False, recurse=False)
-                if fid != None:
-                    self.psv['priors'][fileToken] = fid
-                    inputs[fileToken] = [ fid ]
-                else:
-                    print "Error: Necessary '%s' for combined run, not found in '%s'." % \
-                                                                  (fileToken, rep['resultsFolder'])
-                    print "       Please run for single replicate first."
-                    sys.exit(1)
-        return inputs
-    
 
     #######################
 
