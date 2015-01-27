@@ -599,8 +599,8 @@ def main():
             dxFile = dxpy.DXFile(dxid=priors[token])
             print "Post File: %s %s" % (token, dxFile.name)
             f_ob['dataset'] = args.experiment
-            f_ob['lab'] = exp['lab']['@id']
-            f_ob['award'] = exp['award']['@id']
+            f_ob['lab'] = '/labs/j-michael-cherry/'
+            f_ob['award'] = '/awards/U41HG006992/'
             f_ob['assembly'] = mapping['genome']
             f_ob['genome_annotation'] = args.annotation
             ## temporary haxors until file display works
