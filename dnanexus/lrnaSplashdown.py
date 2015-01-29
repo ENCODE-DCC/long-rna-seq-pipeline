@@ -402,10 +402,21 @@ def get_args():
                     default=RESULT_FOLDER_DEFAULT,
                     required=False)
 
+    ap.add_argument('--testserver',
+                    help="Use the test server designated in keypairs.json",
+                    action='store_true',
+                    required=False)
+
     ap.add_argument('--test',
                     help='Test run only, do not launch anything.',
                     action='store_true',
                     required=False)
+
+    ap.add_argument('--skipvalidate',
+                    help='Skip running Validate Files',
+                    action='store_true',
+                    required=False)
+
     return ap.parse_args()
 
 def pipeline_specific_vars(args,verbose=False):
@@ -599,23 +610,46 @@ def main():
                     print "Fake submission: %s" % fake_acc
                     run['accessions'][token] = [ fake_acc ]
                 else:
-                    applet = dxencode.find_applet_by_name('validate-post', projectId )
-                    job = applet.run({
-                        "pipe_file": dxpy.dxlink(dxFile),
-                        "file_meta": f_ob,
-                        "key": "www",
-                        "debug": True
-                        })
-                    print "Submitting %s" % job.id
-                    job.wait_on_done(interval=1)
-                    accession = job.describe()['output'].get('accession', "Unknown Acc")
-                    error = job.describe()['output'].get('error', "Unknown Error")
-                    run['accessions'][token] = [ accession ]
-                    print "Posted (%s): %s" % (error, accession)
+                    f_ob['derived_from'] = list(itertools.chain(*derived))
+            dxFile = dxpy.DXFile(dxid=priors[token])
+            print "Post File: %s %s" % (token, dxFile.name)
+            f_ob['dataset'] = args.experiment
+            f_ob['lab'] = '/labs/j-michael-cherry/'
+            f_ob['award'] = '/awards/U41HG006992/'
+            f_ob['assembly'] = mapping['genome']
+            f_ob['genome_annotation'] = args.annotation
+            ## temporary haxors until file display works
+            f_ob['replicate'] = mapping['replicate_id']
+            f_ob['notes'] = json.dumps(dxencode.create_notes(dxFile, dxencode.get_sw_from_log(dxFile, '\* (\S+)\s+version:\s+(\S+)')))
+            print json.dumps(f_ob, sort_keys=True, indent=4, separators=(',',': '))
+            if args.testserver:
+                server = 'test'
+            else:
+                server = 'www'
 
-        # Exit if test only
-        if args.test:
-            print "Fake submitted %s files." % n
+            if args.test:
+                fake_acc = 'ENCFF%03dAAA' % n
+                print "Fake submission: %s" % fake_acc
+                submitted[token] = [ fake_acc ]
+            else:
+                applet = dxencode.find_applet_by_name('validate-post', projectId )
+                job = applet.run({
+                    "pipe_file": dxpy.dxlink(dxFile),
+                    "file_meta": f_ob,
+                    "key": server,
+                    "debug": True,
+                    "skipvalidate": args.skipvalidate or False
+                    })
+                print "Submitting %s" % job.id
+                job.wait_on_done(interval=1)
+                accession = job.describe()['output'].get('accession', "Unknown Acc")
+                error = job.describe()['output'].get('error', "Unknown Error")
+                submitted[token] = [ accession ]
+                print "Posted (%s): %s" % (error, accession)
+
+    # Exit if test only
+    if args.test:
+        print "Fake submitted %s files." % n
     if args.test:
         sys.exit(0)
 
