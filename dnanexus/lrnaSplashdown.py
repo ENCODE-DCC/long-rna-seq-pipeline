@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+#### OBSOLETE
+#### OBSOLETE
+#### OBSOLETE
+#### OBSOLETE
+#### OBSOLETE
 import argparse
 import os
 import sys
@@ -516,6 +521,8 @@ def find_ref_files(priors,psv):
 
 #######################
 def main():
+    print "OBSOLETE!!! Run dxencode/splasdown.py instead."
+    sys.exit(1)
 
     print "This program is obsolete!!! Use dxencode/splashdown.py instead."
     sys.exit(1)
@@ -657,5 +664,7 @@ def main():
 
 
 if __name__ == '__main__':
+    print "OBSOLETE!!! Run dxencode/splasdown.py instead."
+    sys.exit(1)
     main()
 
