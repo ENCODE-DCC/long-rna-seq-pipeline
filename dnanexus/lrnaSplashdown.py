@@ -517,6 +517,8 @@ def find_ref_files(priors,psv):
 #######################
 def main():
 
+    print "This program is obsolete!!! Use dxencode/splashdown.py instead."
+    sys.exit(1)
     args = get_args()
     print "Retrieving pipeline specifics..."
     psv = pipeline_specific_vars(args)
