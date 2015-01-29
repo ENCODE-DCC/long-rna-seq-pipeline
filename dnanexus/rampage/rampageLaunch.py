@@ -250,7 +250,6 @@ class RampageLaunch(Launch):
 
     def find_ref_files(self,priors):
         '''Locates all reference files based upon organism and gender.'''
-        refFiles = {}
         starIx = self.psv['refLoc']+self.REFERENCE_FILES['star_index'][self.psv['genome']][self.psv['gender']][self.psv['annotation']]
         starIxFid = dxencode.find_file(starIx,dxencode.REF_PROJECT_DEFAULT)
         if starIxFid == None:

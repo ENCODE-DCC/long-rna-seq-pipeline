@@ -300,7 +300,6 @@ class LrnaLaunch(Launch):
 
     def find_ref_files(self,priors):
         '''Locates all reference files based upon gender, organism and annotation.'''
-        refFiles = {}
         topIx = self.psv['refLoc']+self.REFERENCE_FILES['tophat_index'][self.psv['genome']][self.psv['gender']][self.psv['annotation']]
         topIxFid = dxencode.find_file(topIx,dxencode.REF_PROJECT_DEFAULT)
         if topIxFid == None:

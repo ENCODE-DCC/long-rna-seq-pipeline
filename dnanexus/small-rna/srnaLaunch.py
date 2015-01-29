@@ -93,7 +93,6 @@ class SrnaLaunch(Launch):
 
     def find_ref_files(self,priors):
         '''Locates all reference files based upon organism and gender.'''
-        refFiles = {}
         star_ix = self.psv['refLoc']+self.REFERENCE_FILES['star_index'][self.psv['genome']][self.psv['gender']]
         star_ix_fid = dxencode.find_file(star_ix,dxencode.REF_PROJECT_DEFAULT)
         if star_ix_fid == None:
