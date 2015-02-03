@@ -75,7 +75,7 @@ main() {
  
     echo "* Converting bed to bigBed..."
     grep "^chr" ${peaks_root}.bed | sort -k1,1 -k2,2n > peaks_polished.bed
-    bedToBigBed peaks_polished.bed -as=/usr/bin/bed6.as chromSizes.txt ${peaks_root}.bb
+    bedToBigBed peaks_polished.bed -type=bed6+ -as=/usr/bin/tss_peak.as chromSizes.txt ${peaks_root}.bb
 
     echo "* Upload results..."
     rampage_peaks_bed=$(dx upload ${peaks_root}.bed --brief)

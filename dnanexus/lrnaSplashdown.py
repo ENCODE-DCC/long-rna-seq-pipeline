@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+#### OBSOLETE
+#### OBSOLETE
+#### OBSOLETE
+#### OBSOLETE
+#### OBSOLETE
 import argparse
 import os
 import sys
@@ -6,8 +11,9 @@ import json
 import itertools
 
 import dxpy
-#import dxencode as dxencode
-from dxencode import dxencode as dxencode
+import dxencode as dxencode
+#from dxencode import dxencode as dxencode
+import json
 
 # NOTES: This command-line utility will run the long RNA-seq pipeline for a single replicate
 #      - All results will be written to a folder /lrna/<expId>/rep<#>.
@@ -22,10 +28,15 @@ from dxencode import dxencode as dxencode
 #          to result file tokens of earlier steps.
 #        - FILE_GLOBS is needed for locating result files from prior runs.
 
+GENOMES_SUPPORTED = ['hg19', 'mm10']
 GENOME_DEFAULT = 'hg19'
 ''' This the default Genome that long RNA-seq experiments are mapped to.'''
 
-ANNO_DEFAULT = 'V19'
+ANNO_DEFAULTS = {'hg19': 'v19', 'mm10': 'M4' }
+ANNO_ALLOWED = { 'hg19': [ ANNO_DEFAULTS['hg19'] ],
+                 'mm10': [ ANNO_DEFAULTS['mm10'], 'M2', 'M3' ] }
+ANNO_DEFAULT = ANNO_DEFAULTS[GENOME_DEFAULT]
+''' Multiple annotations might be supported for each genome.'''
 
 PROJECT_DEFAULT = 'scratchPad'
 ''' This the default DNA Nexus project to use for the long RNA-seq pipeline.'''
@@ -36,12 +47,12 @@ REF_PROJECT_DEFAULT = 'ENCODE Reference Files'
 REF_FOLDER_DEFAULT = '/'
 ''' This the default folder that reference files are found in.'''
 
-RESULT_FOLDER_DEFAULT = '/lrna'
+RESULT_FOLDER_DEFAULT = '/lrna/'
 ''' This the default location to place results folders for each experiment.'''
 
 RUNS_LAUNCHED_FILE = "launchedRuns.txt"
 
-STEP_ORDER = {
+REP_STEP_ORDER = {
     # for SE or PE the list in order of steps to run
     "se": [ "concatR1",             "align-tophat-se", "topBwSe", "align-star-se", "starBwSe", "quant-rsem" ],
     "pe": [ "concatR1", "concatR2", "align-tophat-pe", "topBwPe", "align-star-pe", "starBwPe", "quant-rsem" ]
@@ -51,7 +62,7 @@ STEP_ORDER = {
     }
 '''The (artifically) linear order of all pipeline steps for single or paired-end.'''
 
-STEPS = {
+REP_STEPS = {
     # for each step: app, list of any params, inputs and results (both as fileToken: app_obj_name)
     # TODO: Any results files not listed here would not be 'deprecated' on reruns.
     "concatR1": {
@@ -267,10 +278,10 @@ GENOME_REFERENCES = {
     "tophat_index":  {
                     "hg19": {
                             "female":   {
-                                        "V19": "hg19_female_v19_ERCC_tophatIndex.tgz"
+                                        "v19": "hg19_female_v19_ERCC_tophatIndex.tgz"
                                         },
                             "male":     {
-                                        "V19": "hg19_male_v19_ERCC_tophatIndex.tgz"
+                                        "v19": "hg19_male_v19_ERCC_tophatIndex.tgz"
                                         }
                             },
                     "mm10": {
@@ -289,10 +300,10 @@ GENOME_REFERENCES = {
     "star_index":    {
                     "hg19": {
                             "female":   {
-                                        "V19": "hg19_female_v19_ERCC_starIndex.tgz"
+                                        "v19": "hg19_female_v19_ERCC_starIndex.tgz"
                                         },
                             "male":     {
-                                        "V19": "hg19_male_v19_ERCC_starIndex.tgz"
+                                        "v19": "hg19_male_v19_ERCC_starIndex.tgz"
                                         }
                             },
                     "mm10": {
@@ -310,7 +321,7 @@ GENOME_REFERENCES = {
                     },
     "rsem_index":    {
                     "hg19": {
-                            "V19": "hg19_male_v19_ERCC_rsemIndex.tgz"
+                            "v19": "hg19_male_v19_ERCC_rsemIndex.tgz"
                             },
                     "mm10": {
                             "M2":  "mm10_male_M2_ERCC_rsemIndex.tgz",
@@ -365,6 +376,10 @@ def get_args():
                     default='1',
                     required=False)
 
+    ap.add_argument('--cr','--combine-replicates',
+                    help="Combine or compare two replicates (e.g.'1 2_2').'",
+                    nargs='+',
+                    required=False)
 
     ### PIPELINE SPECIFIC
     # TODO: should remove annotation if only one per genome
@@ -409,7 +424,7 @@ def get_args():
 
     return ap.parse_args()
 
-def pipeline_specific_vars(args, mapping, pairedEnd):
+def pipeline_specific_vars(args,verbose=False):
     '''Adds pipeline specific variables to a dict, for use building the workflow.'''
     # psv can contain any variables, but it must contain these at a minimum:
     # - Any non-file input param needed to launch the workflow
@@ -421,190 +436,188 @@ def pipeline_specific_vars(args, mapping, pairedEnd):
     # - 'organism', 'gender', 'experiment', 'replicate' (if appropriate),
     # - 'pairedEnd' (boolean, if appropriate)
 
-    psv = {}
-    psv['project']    = args.project
-    psv['organism']   = mapping['genome']
-    psv['gender']     = mapping['sex']
+    # Start with dict containing common variables
+    print "Retrieving experiment specifics..."
+    psv = dxencode.common_variables(args,RESULT_FOLDER_DEFAULT,controls=False)
+    
+    # Could be multiple annotations supported per genome
     psv['annotation'] = args.annotation
-    if psv['organism'] == 'hg19' and psv['annotation'] not in [ANNO_DEFAULT]:
-        print psv['organism']+" has no "+psv['annotation']+" annotation."
+    if psv['genome'] != GENOME_DEFAULT and psv['annotation'] == ANNO_DEFAULT:
+        psv['annotation'] = ANNO_DEFAULTS[psv['genome']]
+    if psv['annotation'] not in ANNO_ALLOWED[psv['genome']]:
+        print psv['genome']+" has no "+psv['annotation']+" annotation."
         sys.exit(1)
-    if psv['organism'] == 'mm10' and psv['annotation'] not in ['M2','M3','M4']:
-        print psv['organism']+" has no '"+psv['annotation']+"' annotation."
-        sys.exit(1)
-    psv['experiment'] = args.experiment
-    psv['replicate']  = str(args.br)
-    psv['rep_tech']   = mapping['replicate']
-    psv['library_id'] = mapping['library']
+    
+    # Some specific settings
     psv['nthreads']   = 8
     psv['rnd_seed']   = 12345
-    psv['paired']  = pairedEnd
 
-    ## below is not necessary, strictly
+    # run will either be for combined or single rep.
+    if not psv['combined']:
+        run = psv['reps']['a']  # If not combined then run will be for the first (only) replicate
+    else:
+        run = psv
+        print "Long-RNA-seq pipeline currently does not support combined-replicate processing."
+        print mapping
+        sys.exit(1)
+
     # workflow labeling
     psv['description'] = "The ENCODE RNA Seq pipeline for long RNAs"
-    psv['name'] = "lrna_"+psv['organism']
-    if psv['organism'] == 'mm10':
-        psv['name'] += psv['annotation']
+    run['name'] = "lrna_"+psv['genome']
+    if psv['genome'] == 'mm10':
+        run['name'] += psv['annotation']
     if psv['gender'] == 'female':
-        psv['name'] += "XX"
+        run['name'] += "XX"
     else:
-        psv['name'] += "XY"
-    if pairedEnd:
-        psv['title'] = "long RNA-seq paired-end "
-        psv['name'] += "PE"
+        run['name'] += "XY"
+    if psv['paired_end']:
+        run['title'] = "long RNA-seq paired-end "
+        run['name'] += "PE"
     else:
-        psv['title'] = "long RNA-seq single-end "
-        psv['name'] += "SE"
-    psv['title']   += psv['experiment']+" - "+psv['rep_tech'] + " (library '"+psv['library_id']+"')"
-    psv['subTitle'] = psv['organism']+", "+psv['gender']+" and annotation '"+psv['annotation']+"'."
-    psv['name']    += "_"+psv['experiment']+"_"+psv['rep_tech']
+        run['title'] = "long RNA-seq single-end "
+        run['name'] += "SE"
+    run['title']   += psv['experiment']+" - "+run['rep_tech'] + " (library '"+run['library_id']+"')"
+    run['subTitle'] = psv['genome']+", "+psv['gender']+" and annotation '"+psv['annotation']+"'."
+    run['name']    += "_"+psv['experiment']+"_"+run['rep_tech']
 
-    # Non-file app inputs
-    psv['rootR1'] = psv['experiment'] + psv['rep_tech'] + '_concatR1'
-    psv['rootR2'] = psv['experiment'] + psv['rep_tech'] + '_concatR2'
-
-    # Default locations (with adjustments)
-    psv['refLoc'] = args.refLoc
-    if psv['refLoc'] == REF_FOLDER_DEFAULT:
-        psv['refLoc'] = REF_FOLDER_DEFAULT + '/' + psv['organism']
-    psv['resultsLoc'] = args.resultsLoc
-    if psv['resultsLoc'] == RESULT_FOLDER_DEFAULT:
-        if psv['organism'] == 'mm10':
-            psv['resultsLoc'] = RESULT_FOLDER_DEFAULT + '/' + psv['organism'] + '/' + psv['annotation']
-        else:
-            psv['resultsLoc'] = RESULT_FOLDER_DEFAULT + '/' + psv['organism']
-    psv['resultsFolder'] = psv['resultsLoc'] + '/' + psv['experiment'] + '/' + psv['rep_tech']
-
+    if verbose:
+        print "Pipeline Specific Vars:"
+        print json.dumps(psv,indent=4)
     return psv
 
 
+def find_ref_files(priors,psv):
+    '''Locates all reference files based upon gender, organism and annotation.'''
+    refFiles = {}
+    topIx = psv['refLoc']+GENOME_REFERENCES['tophat_index'][psv['genome']][psv['gender']][psv['annotation']]
+    topIxFid = dxencode.find_file(topIx,dxencode.REF_PROJECT_DEFAULT)
+    if topIxFid == None:
+        sys.exit("ERROR: Unable to locate TopHat index file '" + topIx + "'")
+    else:
+        priors['tophat_index'] = topIxFid
+
+    starIx = psv['refLoc']+GENOME_REFERENCES['star_index'][psv['genome']][psv['gender']][psv['annotation']]
+    starIxFid = dxencode.find_file(starIx,dxencode.REF_PROJECT_DEFAULT)
+    if starIxFid == None:
+        sys.exit("ERROR: Unable to locate STAR index file '" + starIx + "'")
+    else:
+        priors['star_index'] = starIxFid
+
+    rsemIx = psv['refLoc']+GENOME_REFERENCES['rsem_index'][psv['genome']][psv['annotation']]
+    rsemIxFid = dxencode.find_file(rsemIx,dxencode.REF_PROJECT_DEFAULT)
+    if rsemIxFid == None:
+        sys.exit("ERROR: Unable to locate RSEM index file '" + rsemIx + "'")
+    else:
+        priors['rsem_index'] = rsemIxFid
+
+    chromSizes = psv['refLoc']+GENOME_REFERENCES['chrom_sizes'][psv['genome']][psv['gender']]
+    chromSizesFid = dxencode.find_file(chromSizes,dxencode.REF_PROJECT_DEFAULT)
+    if chromSizesFid == None:
+        sys.exit("ERROR: Unable to locate Chrom Sizes file '" + chromSizes + "'")
+    else:
+        priors['chrom_sizes'] = chromSizesFid
+    psv['ref_files'] = GENOME_REFERENCES.keys()
 
 
 #######################
 def main():
+    print "OBSOLETE!!! Run dxencode/splasdown.py instead."
+    sys.exit(1)
 
+    print "This program is obsolete!!! Use dxencode/splashdown.py instead."
+    sys.exit(1)
     args = get_args()
+    print "Retrieving pipeline specifics..."
+    psv = pipeline_specific_vars(args)
 
-    (AUTHID,AUTHPW,SERVER) = dxencode.processkey('default')
-    url = SERVER + 'experiments/%s/?format=json&frame=embedded' %(args.experiment)
-    response = dxencode.encoded_get(url, AUTHID, AUTHPW)
-    exp = response.json()
-
-    if not exp.get('replicates') or len(exp['replicates']) < 1:
-        print "No replicates found in %s\n%s" % ( args.experiment, exp )
-        sys.exit(1)
-
-    replicate = "rep%s_%s" % (args.br, args.tr)
-
-    reps_mapping = dxencode.choose_mapping_for_experiment(exp)
-    # could try to do all replicates here
-    try:
-        mapping = reps_mapping[(args.br,args.tr)]
-    except KeyError:
-        print "Specified replicate: %s could not be found in mapping." % replicate
-        print reps_mapping
-        sys.exit(1)
-
-    mapping['replicate'] = replicate
-
-    try:
-        mapping['genome'] = GENOME_MAPPING[mapping.get('organism', "Not Found")]
-
-    except KeyError:
-        print "Organism %s not currently supported" % mapping['organism']
-        sys.exit(1)
-
-    if mapping['unpaired'] and not mapping['paired']:
-        pairedEnd = False
-    elif mapping['paired'] and not mapping['unpaired']:
-        pairedEnd = True
-    elif not mapping['unpaired'] and not mapping['paired']:
-        print "Replicate has no reads either paired or unpaired"
-        print mapping
-        sys.exit(1)
-    else:
-        print "Replicate has both paired(%s) and unpaired(%s) reads, quitting." % (len(mapping['paired'], len(mapping['unpaired'])))
-        print mapping
-        sys.exit(1)
-
-    psv = pipeline_specific_vars(args, mapping, pairedEnd)
-    project = dxencode.get_project(args.project)
+    project = dxencode.get_project(psv['project'])
     projectId = project.get_id()
 
-
-    ## TODO this is a bunch of ugly
-    if pairedEnd:
-        paired_fqs = {
-            '1': [],
-            '2': []
-        }
-        read1s = []
-        read2s = []
-        for (p1, p2) in mapping['paired']:
-            paired_fqs[p1['paired_end']].append(p1['accession']+".fastq.gz")
-            paired_fqs[p2['paired_end']].append(p2['accession']+".fastq.gz")
-            read1s.append(p1['accession'])
-            read2s.append(p2['accession'])
-        pipePath = STEP_ORDER['pe']
-        print "Generating workflow steps (paired-end)..."
-    else:
-        unpaired_fqs = [ f['accession']+".fastq.gz" for f in mapping['unpaired'] ]
-        pipePath = STEP_ORDER['se']
-
-    pipeSteps = STEPS
+    #print "Building apps dictionary..."
+    pipeRepPath = REP_STEP_ORDER['se']
+    if psv['paired_end']:
+        pipeRepPath = REP_STEP_ORDER['pe']
+    #pipeRepSteps, file_globs = dxencode.build_simple_steps(pipeRepPath,projectId,verbose=True)
+    pipeRepSteps = REP_STEPS
     file_globs = FILE_GLOBS
+    for rep in psv['reps'].values():
+        rep['path'] = pipeRepPath
 
-    print "Checking for prior results..."
+    # finding fastqs and prior results in a stadardized way
+    dxencode.finding_rep_inputs_and_priors(psv,pipeRepSteps,file_globs,project,args.test)
 
-    priors = dxencode.find_prior_results(pipePath,pipeSteps,psv['resultsFolder'],file_globs, projectId)
+    # finding pipeline specific reference files in a stadardized way
+    dxencode.find_all_ref_files(psv,find_ref_files)
 
-    if pairedEnd:
-        priors['reads1'] = dxencode.find_file_set(paired_fqs["1"], projectId)
-        priors['reads2'] = dxencode.find_file_set(paired_fqs["2"], projectId)
-        submitted = {
-            'reads1': read1s,
-            'reads2': read2s
-        }
-    else:
-        priors['reads1'] = dxencode.find_file_set(unpaired_fqs, projectId)
-        submitted = {
-            'reads1': [ f['accession'] for f in mapping['unpaired'] ],
-        }
+    # deterine steps to run in a stadardized way
+    dxencode.determine_steps_needed(psv, pipeRepSteps, None, projectId)
 
+    #run = psv['reps']['a']
+    #run['steps'] = pipeRepSteps
+    #dxencode.report_run_plans(psv, run)
 
-    print "Determining steps to run..."
-    #print priors
-    #sys.exit(1)
-    # NOTE: stepsToDo is an ordered list of steps that need to be run
-    deprecateFiles = [] # old results will need to be moved/removed if step is rerun
-    stepsToDo = dxencode.determine_steps_to_run(pipePath,pipeSteps, priors, deprecateFiles, projectId, verbose=True)
+    for rep in psv['reps'].values():
+        if rep['paired_end']: 
+            rep['accessions'] = { 'reads1': [], 'reads2': [] }
+        else:
+            rep['accessions'] = { 'reads1': [] }
+        for rn in rep['fastqs'].keys():
+            token = 'reads' + rn
+            for fn in rep['fastqs'][rn]:
+                rep['accessions'][token].append(fn.split('.')[0]) # split the accession off filename
+    if psv['combined']:
+        psv['accessions'] = { 'reads1': [], 'reads2': [] }
+                
+    exp = dxencode.get_exp(psv['experiment'])
 
-    print "Checking for currently running analyses..."
-    dxencode.check_run_log(psv['resultsFolder'],projectId, verbose=True)
+    # TODO: Prevent resubmissions
+    for run in  (psv['reps'].values() + [ psv ]):
+        if 'combined' in run and not psv['combined']:
+            continue # only do combined if it was set up
 
-    if len(stepsToDo):
-        print "Pipeline incomplete, please resubmit jobs: %s" % stepsToDo
-        sys.exit(0)
+        if len(run['stepsToDo']):
+            print "Pipeline %s:%s incomplete, please resubmit jobs: %s" % \
+                                (psv['experiment'],run['rep_tech'],run['stepsToDo'])
+    
+        print "Checking for currently running analyses..."
+        dxencode.check_run_log(rep['resultsFolder'],projectId, verbose=True)
 
-    to_submit = [ k for k in priors.keys() if POST_TEMPLATES.get(k) ]
-    n = 0 # skip reads
-    print "Attempting to submit %s files to args.experiment" % len(to_submit)
-    while(to_submit):
-        if n > len(priors) * len(priors):
-            print "Too many itereations: %s" % priors
-            break
-        token = to_submit.pop(0)
-        print "%s %s" % (token, priors[token])
-        f_ob = POST_TEMPLATES.get(token, None)
-        n += 1
-        if f_ob:
-            derive_check = f_ob.get('derived_from', [])
-            if derive_check:
-                derived = [ submitted[f] for f in derive_check if submitted.get(f) ]
-                if not derived:
-                    to_submit.append(token)
-                    continue
+        to_submit = [ k for k in run['priors'].keys() if POST_TEMPLATES.get(k) ]
+        n = 0 # skip reads
+        print "Attempting to submit %s files to args.experiment" % len(to_submit)
+        while(to_submit):
+            if n > len(run['priors']) * len(run['priors']):
+                print "Too many itereations: %s" % run['priors']
+                break
+            token = to_submit.pop(0)
+            print "%s %s" % (token, run['priors'][token])
+            f_ob = POST_TEMPLATES.get(token, None)
+            n += 1
+            if f_ob:
+                derive_check = f_ob.get('derived_from', [])
+                if derive_check:
+                    derived = [ run['accessions'][f] for f in derive_check if run['accessions'].get(f) ]
+                    if not derived:
+                        to_submit.append(token)
+                        continue
+                    else:
+                        f_ob['derived_from'] = list(itertools.chain(*derived))
+                dxFile = dxpy.DXFile(dxid=run['priors'][token])
+                print "Post File: %s %s" % (token, dxFile.name)
+                f_ob['dataset'] = args.experiment
+                f_ob['lab'] = exp['lab']['@id']
+                f_ob['award'] = exp['award']['@id']
+                f_ob['assembly'] = psv['genome']
+                f_ob['genome_annotation'] = psv['annotation']
+                ## temporary haxors until file display works
+                if 'replicate_id' not in run:
+                    f_ob['replicate'] = rep['replicate_id']
+                f_ob['notes'] = json.dumps(dxencode.create_notes(dxFile, dxencode.get_sw_from_log(dxFile, '\* (\S+)\s+version:\s+(\S+)')))
+                print json.dumps(f_ob, sort_keys=True, indent=4, separators=(',',': '))
+                if args.test:
+                    fake_acc = 'ENCFF%03dAAA' % n
+                    print "Fake submission: %s" % fake_acc
+                    run['accessions'][token] = [ fake_acc ]
                 else:
                     f_ob['derived_from'] = list(itertools.chain(*derived))
             dxFile = dxpy.DXFile(dxid=priors[token])
@@ -651,5 +664,7 @@ def main():
 
 
 if __name__ == '__main__':
+    print "OBSOLETE!!! Run dxencode/splasdown.py instead."
+    sys.exit(1)
     main()
 
