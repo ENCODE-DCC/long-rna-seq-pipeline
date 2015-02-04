@@ -51,6 +51,6 @@ cat("Pearson correlation is:",cor(logrep1[A>Acutoff],logrep2[A>Acutoff]),"\n")
 cat("Spearman correlation is:",cor(logrep1[A>Acutoff],logrep2[A>Acutoff],method="spearman"),"\n")
 
 ###if you want to make plot
-##bitmap("MAplot.png")
-##plot(A,M)
+bitmap("MAplot.png")
+plot(A,M)
 ##
