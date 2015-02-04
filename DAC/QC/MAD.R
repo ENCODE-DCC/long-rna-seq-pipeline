@@ -49,6 +49,7 @@ cat("MAD of log ratios is ", round(median(abs(M)[A>Acutoff]),3),'\n')
 ##if you want to compute pearson and spearman on same data it's easy:
 cat("Pearson correlation is:",cor(logrep1[A>Acutoff],logrep2[A>Acutoff]),"\n")
 cat("Spearman correlation is:",cor(logrep1[A>Acutoff],logrep2[A>Acutoff],method="spearman"),"\n")
+cat("SD of log ratios is ", round(sqrt(mean(M[A>Acutoff]^2)),3),'\n')
 
 ###if you want to make plot
 bitmap("MAplot.png")
