@@ -3,7 +3,7 @@
   "title": "Long-RNA-Seq-align-star-pe",
   "summary": "Align paired-end (stranded) reads to genome and transcriptome using STAR for the ENCODE long-rna-peq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -59,6 +59,11 @@
       "label": "BAM file fo alignment to the annotation (transcriptome)",
       "class": "file",
       "patterns": ["*_star_anno.bam"]
+    },
+    {
+      "name": "metadata",
+      "label": "JSON formatted string of metadata",
+      "class": "string"
     }
   ],
   "runSpec": {
