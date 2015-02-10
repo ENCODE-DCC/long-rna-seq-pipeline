@@ -253,12 +253,9 @@ POST_TEMPLATES = {
     "rsem_gene_results":    {
         "file_format": "tsv",
         "output_type": "genome quantifications",
-        "derived_from": []
+        "derived_from": ["star_anno_bam"]
         # note should be derived from star_anno_bam
-    }
-}
-
-TNX_TEMPLATES = {
+    },
     "star_anno_bam":        {
         "file_format": "bam",
         "output_type": "transcriptome alignments",
@@ -439,7 +436,7 @@ def pipeline_specific_vars(args,verbose=False):
     # Start with dict containing common variables
     print "Retrieving experiment specifics..."
     psv = dxencode.common_variables(args,RESULT_FOLDER_DEFAULT,controls=False)
-    
+
     # Could be multiple annotations supported per genome
     psv['annotation'] = args.annotation
     if psv['genome'] != GENOME_DEFAULT and psv['annotation'] == ANNO_DEFAULT:
@@ -447,7 +444,7 @@ def pipeline_specific_vars(args,verbose=False):
     if psv['annotation'] not in ANNO_ALLOWED[psv['genome']]:
         print psv['genome']+" has no "+psv['annotation']+" annotation."
         sys.exit(1)
-    
+
     # Some specific settings
     psv['nthreads']   = 8
     psv['rnd_seed']   = 12345
@@ -557,7 +554,7 @@ def main():
     #dxencode.report_run_plans(psv, run)
 
     for rep in psv['reps'].values():
-        if rep['paired_end']: 
+        if rep['paired_end']:
             rep['accessions'] = { 'reads1': [], 'reads2': [] }
         else:
             rep['accessions'] = { 'reads1': [] }
@@ -567,7 +564,7 @@ def main():
                 rep['accessions'][token].append(fn.split('.')[0]) # split the accession off filename
     if psv['combined']:
         psv['accessions'] = { 'reads1': [], 'reads2': [] }
-                
+
     exp = dxencode.get_exp(psv['experiment'])
 
     # TODO: Prevent resubmissions
@@ -578,7 +575,7 @@ def main():
         if len(run['stepsToDo']):
             print "Pipeline %s:%s incomplete, please resubmit jobs: %s" % \
                                 (psv['experiment'],run['rep_tech'],run['stepsToDo'])
-    
+
         print "Checking for currently running analyses..."
         dxencode.check_run_log(rep['resultsFolder'],projectId, verbose=True)
 
