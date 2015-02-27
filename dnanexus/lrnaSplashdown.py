@@ -202,7 +202,7 @@ POST_TEMPLATES = {
     },
     "tophat_plus_uniq_bw":  {
         "file_format": "bigWig",
-        "output_type": "unique minus signal",
+        "output_type": "unique plus signal",
         "derived_from": ["tophat_bam"]
     },
     "tophat_all_bw":        {
