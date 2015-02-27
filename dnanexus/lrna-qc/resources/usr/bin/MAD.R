@@ -44,12 +44,14 @@ logrep2 <- log2(reps$rep2[nozero])
 A <- (logrep1+logrep2)/2
 M <- logrep1-logrep2
 
-cat("MAD of log ratios is ", round(median(abs(M)[A>Acutoff])*1.4826,3),'\n')
+cat("{\n")
+cat("\"MAD of log ratios\":", round(median(abs(M)[A>Acutoff])*1.4826,3),",","\n")
 
 ##if you want to compute pearson and spearman on same data it's easy:
-cat("Pearson correlation is:",cor(logrep1[A>Acutoff],logrep2[A>Acutoff]),"\n")
-cat("Spearman correlation is:",cor(logrep1[A>Acutoff],logrep2[A>Acutoff],method="spearman"),"\n")
-cat("SD of log ratios is ", round(sqrt(mean(M[A>Acutoff]^2)),3),'\n')
+cat("\"Pearson correlation\":",cor(logrep1[A>Acutoff],logrep2[A>Acutoff]),",","\n")
+cat("\"Spearman correlation\":",cor(logrep1[A>Acutoff],logrep2[A>Acutoff],method="spearman"),",","\n")
+cat("\"SD of log ratios\":", round(sqrt(mean(M[A>Acutoff]^2)),3),"\n")
+cat("}\n")
 
 ###if you want to make plot
 bitmap("MAplot.png")

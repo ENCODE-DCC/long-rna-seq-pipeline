@@ -10,47 +10,53 @@
   "inputSpec": [
     {
       "name": "rep1_quants",
-      "label": "Replicate 1 RSEM quantification file",
-      "class": "file",
+      "label": "Replicate 1 RSEM quantification files",
+      "class": "array:file",
+      "patterns": ["*.tsv"],
       "optional": false
     },
     {
       "name": "rep2_quants",
-      "label": "Replicate 2 RSEM quantification file",
-      "class": "file",
+      "label": "Replicate 2 RSEM quantification files",
+      "class": "array:file",
+      "patterns": ["*.tsv"],
       "optional": false
     }
   ],
   "outputSpec": [
     {
-      "name": "MAD",
-      "label": "Mean average deviation of log ratios",
-      "class": "float"
+      "name": "MADs",
+      "label": "Mean average deviations of log ratios",
+      "class": "array:float"
     },
     {
-      "name": "SAD",
-      "label": "SD of log ratios",
-      "class": "float"
+      "name": "SADs",
+      "label": "SDs of log ratios",
+      "class": "array:float"
     },
     {
-      "name": "PCC",
-      "label": "Pearson correlation coefficient",
-      "class": "float"
+      "name": "PCCs",
+      "label": "Pearson correlation coefficients",
+      "class": "array:float"
     },
     {
-      "name": "SCC",
-      "label": "Spearman correlation coefficient",
-      "class": "float"
+      "name": "SCCs",
+      "label": "Spearman correlation coefficients",
+      "class": "array:float"
     },
     {
-      "name": "MAD_plot",
+      "name": "MAD_plots",
       "label": "Plot of mean average deviation of log ratios",
-      "class": "file"
+      "class": "array:file"
     }
   ],
   "runSpec": {
     "interpreter": "python2.7",
-    "file": "src/lrna-qc.py"
+    "file": "src/lrna-qc.py",
+    "execDepends": {
+      "name": "r-base-core",
+      "name": "ghostscript"
+    }
   },
   "access": {
     "network": [

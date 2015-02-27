@@ -15,6 +15,7 @@
 
 import os
 import dxpy
+import subprocess
 
 @dxpy.entry_point("postprocess")
 def postprocess(process_outputs):
@@ -29,13 +30,23 @@ def postprocess(process_outputs):
     return { "answer": "placeholder value" }
 
 @dxpy.entry_point("process")
-def process(input1):
+def process(rep1_quant_file, rep2_quant_file):
     # Change the following to process whatever input this stage
     # receives.  You may also want to copy and paste the logic to download
     # and upload files here as well if this stage receives file input
     # and/or makes file output.
 
-    print input1
+    rep1_quants = dxpy.DXFile(rep1_quant_file)
+    rep2_quants = dxpy.DXFile(rep2_quant_file)
+
+    # The following line(s) download your file inputs to the local file system
+    # using variable names for the filenames.
+
+    dxpy.download_dxfile(rep1_quants.get_id(), "rep1_quants")
+
+    dxpy.download_dxfile(rep2_quants.get_id(), "rep2_quants")
+
+    subprocess.check_output(['R', 'rep1_quants', 'rep2_quants'])
 
     return { "output": "placeholder value" }
 
@@ -45,23 +56,17 @@ def main(rep1_quants, rep2_quants):
     # The following line(s) initialize your data object inputs on the platform
     # into dxpy.DXDataObject instances that you can start using immediately.
 
-    rep1_quants = dxpy.DXFile(rep1_quants)
-    rep2_quants = dxpy.DXFile(rep2_quants)
-
-    # The following line(s) download your file inputs to the local file system
-    # using variable names for the filenames.
-
-    dxpy.download_dxfile(rep1_quants.get_id(), "rep1_quants")
-
-    dxpy.download_dxfile(rep2_quants.get_id(), "rep2_quants")
 
     # Split your work into parallel tasks.  As an example, the
     # following generates 10 subjobs running with the same dummy
     # input.
 
     subjobs = []
-    for i in range(10):
-        subjob_input = { "input1": True }
+    if len(rep1_quants) != len(rep2_quants):
+        raise
+
+    for (rep1, rep2) in zip(rep1_quants, rep2_quants):
+        subjob_input = { "req1_quant_file": rep1, "rep2_quant_file": rep2 }
         subjobs.append(dxpy.new_dxjob(subjob_input, "process"))
 
     # The following line creates the job that will perform the
