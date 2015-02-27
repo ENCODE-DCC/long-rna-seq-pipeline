@@ -1,0 +1,61 @@
+{
+  "name": "lrna-qc",
+  "title": "long RNAseq QC metrics",
+  "summary": "lrna-qc",
+  "dxapi": "1.0.0",
+  "version": "0.0.1",
+  "categories": [
+    "ENCODE"
+  ],
+  "inputSpec": [
+    {
+      "name": "rep1_quants",
+      "label": "Replicate 1 RSEM quantification file",
+      "class": "file",
+      "optional": false
+    },
+    {
+      "name": "rep2_quants",
+      "label": "Replicate 2 RSEM quantification file",
+      "class": "file",
+      "optional": false
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "MAD",
+      "label": "Mean average deviation of log ratios",
+      "class": "float"
+    },
+    {
+      "name": "SAD",
+      "label": "SD of log ratios",
+      "class": "float"
+    },
+    {
+      "name": "PCC",
+      "label": "Pearson correlation coefficient",
+      "class": "float"
+    },
+    {
+      "name": "SCC",
+      "label": "Spearman correlation coefficient",
+      "class": "float"
+    },
+    {
+      "name": "MAD_plot",
+      "label": "Plot of mean average deviation of log ratios",
+      "class": "file"
+    }
+  ],
+  "runSpec": {
+    "interpreter": "python2.7",
+    "file": "src/lrna-qc.py"
+  },
+  "access": {
+    "network": [
+      "*"
+    ]
+  },
+  "authorizedUsers": []
+}
