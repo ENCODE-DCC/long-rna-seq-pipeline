@@ -16,6 +16,9 @@
 import os
 import dxpy
 import subprocess
+import logging
+
+logger = logging.getLogger("Applet")
 
 @dxpy.entry_point("postprocess")
 def postprocess(process_outputs):
@@ -45,10 +48,17 @@ def process(rep1_quant_file, rep2_quant_file):
     dxpy.download_dxfile(rep1_quants.get_id(), "rep1_quants")
 
     dxpy.download_dxfile(rep2_quants.get_id(), "rep2_quants")
+    logger.debug("Run MAD.R")
+    mad_output = subprocess.check_output(['Rscript', '/usr/bin/MAD.R', 'rep1_quants', 'rep2_quants'])
 
-    subprocess.check_output(['R', 'rep1_quants', 'rep2_quants'])
+    logger.debug(mad_output)
+    logger.debug("Upload Plot")
+    filename = rep1_quants.name + '_' + rep2_quants.name + '_MAPlot.png'
+    subprocess.check_call(['mv', "MAPlot.png", filename])
 
-    return { "output": "placeholder value" }
+    plot_dxfile = dxpy.upload_local_file(filename)
+
+    return {"output": mad_output, "plot": plot_dxfile}
 
 @dxpy.entry_point("main")
 def main(rep1_quants, rep2_quants):
@@ -89,38 +99,10 @@ def main(rep1_quants, rep2_quants):
     # job-based object references in the input that refer to the same
     # set of jobs.
 
-    postprocess_job = dxpy.new_dxjob(fn_input={ "process_outputs": [subjob.get_output_ref("output") for subjob in subjobs] },
-                                     fn_name="postprocess",
-                                     depends_on=subjobs)
-
-    # The following line(s) use the Python bindings to upload your file outputs
-    # after you have created them on the local file system.  It assumes that you
-    # have used the output field name for the filename for each output, but you
-    # can change that behavior to suit your needs.
-
-    MAD_plot = dxpy.upload_local_file("MAD_plot")
-
-    # If you would like to include any of the output fields from the
-    # postprocess_job as the output of your app, you should return it
-    # here using a job-based object reference.  If the output field in
-    # the postprocess function is called "answer", you can pass that
-    # on here as follows:
-    #
-    # return { "app_output_field": postprocess_job.get_output_ref("answer"), ...}
-    #
-    # Tip: you can include in your output at this point any open
-    # objects (such as gtables) which will be closed by a job that
-    # finishes later.  The system will check to make sure that the
-    # output object is closed and will attempt to clone it out as
-    # output into the parent container only after all subjobs have
-    # finished.
-
-    output = {}
-    output["MAD"] = MAD
-    output["SAD"] = SAD
-    output["PCC"] = PCC
-    output["SCC"] = SCC
-    output["MAD_plot"] = dxpy.dxlink(MAD_plot)
+    output = {
+                    "mad_plots": [dxpy.dxlink(subjob.get_output_ref("plot")) for subjob in subjobs],
+                    "qc_metrics_json": [subjob.get_output_ref("output") for subjob in subjobs]
+    }
 
     return output
 

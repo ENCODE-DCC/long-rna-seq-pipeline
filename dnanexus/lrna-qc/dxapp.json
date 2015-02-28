@@ -25,24 +25,9 @@
   ],
   "outputSpec": [
     {
-      "name": "MADs",
-      "label": "Mean average deviations of log ratios",
-      "class": "array:float"
-    },
-    {
-      "name": "SADs",
-      "label": "SDs of log ratios",
-      "class": "array:float"
-    },
-    {
-      "name": "PCCs",
-      "label": "Pearson correlation coefficients",
-      "class": "array:float"
-    },
-    {
-      "name": "SCCs",
-      "label": "Spearman correlation coefficients",
-      "class": "array:float"
+      "name": "qc_metrics_json",
+      "label": "Array of JSON stringifyed QC metrics of the form {key: value}",
+      "class": "array:string"
     },
     {
       "name": "MAD_plots",
