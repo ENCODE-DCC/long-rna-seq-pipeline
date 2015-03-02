@@ -10,14 +10,14 @@ import dxpy.app_builder
 from dxpy.exceptions import DXAPIError
 
 src_dir = os.path.join(os.path.dirname(__file__), "..")
-test_resources_dir = os.path.join(src_dir, "test", "resources")
+test_data_dir = os.path.join(src_dir, "test", "data")
 
 def makeInputs():
     # Please fill in this method to generate default inputs for your app.
-    qf1 = dxpy.upload_local_file('data/ENCFF782PCD.tsv')
-    qf2 = dxpy.upload_local_file('data/ENCFF902SEE.tsv')
-    return { 'rep1_quants': qf1,
-             'rep2_quants': qf2 }
+    qf1 = dxpy.upload_local_file(test_data_dir+'/ENCFF782PCD.tsv')
+    qf2 = dxpy.upload_local_file(test_data_dir+'/ENCFF902SEE.tsv')
+    return { 'rep1_quants': [ dxpy.dxlink(qf1) ],
+             'rep2_quants': [ dxpy.dxlink(qf2) ] }
 
 
 class Testlrnaqc(unittest.TestCase):
@@ -46,14 +46,16 @@ class Testlrnaqc(unittest.TestCase):
         pass
 
     def tearDown(self):
-        for f in self.base_input.values():
-            f.remove()
+        for k in self.base_input.keys():
+            for dxl in self.base_input[k]:
+                f = dxpy.DXFile(dxl)
+                f.remove()
 
     def test_base_input(self):
         """
         Tests the app with a basic input.
         """
-        job = dxpy.DXApplet(self.applet_id).run({ k: dxpy.dxlink(v.id) for (k,v) in self.base_input.items() })
+        job = dxpy.DXApplet(self.applet_id).run(self.base_input)
         print "Waiting for %s to complete" % (job.get_id(),)
         job.wait_on_done()
         print json.dumps(job.describe()["output"])

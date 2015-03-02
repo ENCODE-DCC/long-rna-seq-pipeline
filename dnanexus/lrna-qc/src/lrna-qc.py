@@ -53,8 +53,8 @@ def process(rep1_quant_file, rep2_quant_file):
 
     logger.debug(mad_output)
     logger.debug("Upload Plot")
-    filename = rep1_quants.name + '_' + rep2_quants.name + '_MAPlot.png'
-    subprocess.check_call(['mv', "MAPlot.png", filename])
+    filename = rep1_quants.name + '_' + rep2_quants.name + '_MAplot.png'
+    subprocess.check_call(['mv', "MAplot.png", filename])
 
     plot_dxfile = dxpy.upload_local_file(filename)
 
@@ -76,7 +76,7 @@ def main(rep1_quants, rep2_quants):
         raise
 
     for (rep1, rep2) in zip(rep1_quants, rep2_quants):
-        subjob_input = { "req1_quant_file": rep1, "rep2_quant_file": rep2 }
+        subjob_input = { "rep1_quant_file": rep1, "rep2_quant_file": rep2 }
         subjobs.append(dxpy.new_dxjob(subjob_input, "process"))
 
     # The following line creates the job that will perform the
@@ -100,7 +100,7 @@ def main(rep1_quants, rep2_quants):
     # set of jobs.
 
     output = {
-                    "mad_plots": [dxpy.dxlink(subjob.get_output_ref("plot")) for subjob in subjobs],
+                    "MAD_plots": [dxpy.dxlink(subjob.get_output_ref("plot")) for subjob in subjobs],
                     "qc_metrics_json": [subjob.get_output_ref("output") for subjob in subjobs]
     }
 

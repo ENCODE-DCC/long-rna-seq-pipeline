@@ -38,10 +38,10 @@
   "runSpec": {
     "interpreter": "python2.7",
     "file": "src/lrna-qc.py",
-    "execDepends": {
-      "name": "r-base-core",
-      "name": "ghostscript"
-    }
+    "execDepends": [
+      {"name": "r-base-core"},
+      {"name": "ghostscript"}
+    ]
   },
   "access": {
     "network": [
