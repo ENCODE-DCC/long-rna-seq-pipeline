@@ -14,9 +14,13 @@ test_resources_dir = os.path.join(src_dir, "test", "resources")
 
 def makeInputs():
     # Please fill in this method to generate default inputs for your app.
-    return {}
+    qf1 = dxpy.upload_local_file('data/ENCFF782PCD.tsv')
+    qf2 = dxpy.upload_local_file('data/ENCFF902SEE.tsv')
+    return { 'rep1_quants': qf1,
+             'rep2_quants': qf2 }
 
-class Testlrna-qc(unittest.TestCase):
+
+class Testlrnaqc(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Upload the app to the Platform.
@@ -42,13 +46,14 @@ class Testlrna-qc(unittest.TestCase):
         pass
 
     def tearDown(self):
-        pass
+        for f in self.base_input.values():
+            f.remove()
 
     def test_base_input(self):
         """
         Tests the app with a basic input.
         """
-        job = dxpy.DXApplet(self.applet_id).run(self.base_input)
+        job = dxpy.DXApplet(self.applet_id).run({ k: dxpy.dxlink(v.id) for (k,v) in self.base_input.items() })
         print "Waiting for %s to complete" % (job.get_id(),)
         job.wait_on_done()
         print json.dumps(job.describe()["output"])
