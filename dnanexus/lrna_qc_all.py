@@ -38,7 +38,8 @@ def main():
     res = dxencode.encoded_get(SERVER+query, AUTHID=AUTHID, AUTHPW=AUTHPW)
     exps = res.json()['@graph']
 
-    n = 0
+    head = ""
+    tabfh = open('lrna_qc.tsv','w')
     for exp in exps:
         acc = exp['accession']
         if len(exp['replicates']) > 0:
@@ -59,13 +60,14 @@ def main():
                     continue
 
 
-                assd = annd = repd = fild = {}
+                annd = {}
+                repd = {}
+                fild = {}
 
                 annd = dxfiles.setdefault(assembly,{})
                 repd = annd.setdefault(annotation, {})
-                #repd = annd.setdefault(rstr, {})
-
-                fild = { f['output_type']: { 'dxid': json.loads(f['notes'])['dx-id'], 'accession': f['accession'] } }
+                f.update({ 'dxid': json.loads(f['notes'])['dx-id'], 'rstr': rstr })
+                fild = { f['output_type']: f }
                 if repd.has_key(rstr):
                     repd[rstr].update(fild)
                 else:
@@ -81,14 +83,8 @@ def main():
                 else:
                     dxfiles[assembly] = annd
 
-                #dxfiles.update(assd)
-
-                #print json.dumps(dxfiles,indent=4)
-
-
-
         else:
-            print "Skipping %s (0 replicates)" % acc
+            print( "Skipping %s (0 replicates)" % (acc))
 
         r1qs = []
         r2qs = []
@@ -101,13 +97,29 @@ def main():
                                 r1qs.append(dxfiles[assembly][annotation][rep1][out_type])
                                 r2qs.append(dxfiles[assembly][annotation][rep2][out_type])
 
-        #run = applet.run({ "rep1_quants": r1qs, "rep2_quants": r2ss}, project=pid)
         if r1qs and r2qs:
             run = "test"
             print("Running: %s for (%s,%s) in %s" % (run, r1qs, r2qs, acc))
+            job = applet.run({ "rep1_quants": [ dxpy.dxlink(f['dxid']) for f in r1qs ], "rep2_quants": [ dxpy.dxlink(f['dxid']) for f in  r2qs ]}, project=pid)
+            job.wait_on_done(interval=1)
+            pair = 0
+            for qcs_str in job.describe()['output'].get('qc_metrics_json', []):
+                qcs = json.loads(qcs_str)
+                if not head:
+                    head= "\t".join(['Experiment', 'Assembly', 'Annotation', 'RepA', 'RepB', 'type']+qcs.keys())
+                    tabfh.write(head+"\n")
+
+                tabfh.write("\t".join([ r1qs[pair]['dataset'],
+                                  r1qs[pair]['assembly'],
+                                  r1qs[pair]['genome_annotation'],
+                                  r1qs[pair]['rstr'],
+                                  r2qs[pair]['rstr'],
+                                  r1qs[pair]['output_type'] ]+[ str(v) for v in qcs.values() ])+"\n" ) # they are floats
+                pair += 1
+                tabfh.flush()
         elif dxfiles:
             print("%s has DXfiles but nothing to run: %s" % (acc, dxfiles))
 
-
+    tabfh.close()
 if __name__ == '__main__':
     main()
