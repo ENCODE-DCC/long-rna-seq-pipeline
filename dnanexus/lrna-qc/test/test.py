@@ -17,7 +17,7 @@ def makeInputs():
     qf1 = dxpy.upload_local_file(test_data_dir+'/ENCFF782PCD.tsv')
     qf2 = dxpy.upload_local_file(test_data_dir+'/ENCFF902SEE.tsv')
     return { 'rep1_quants': [ dxpy.dxlink(qf1) ],
-             'rep2_quants': [ dxpy.dxlink(qf2) ] }
+             'rep2_quants': [ dxpy.dxlin(qf2) ] }
 
 
 class Testlrnaqc(unittest.TestCase):

@@ -46,37 +46,68 @@ def main():
                 print "Skipping %s with wrong library size (%s)" % (acc, exp['replicates'][0]['library'].get('size_range', ""))
                 #print json.dumps(exp['replicates'][0]['library'], sort_keys=True, indent=4, separators=(',',': '))
                 continue
-            dxfiles = { a: {} for a in [ set([ f['assembly'] for f in exp['original_files'] ]) ] }
-            for f in exp['original_files']:
+            dxfiles = {}
+            for facc in exp['original_files']:
+                f = dxencode.encoded_get(SERVER+facc, AUTHID=AUTHID, AUTHPW=AUTHPW).json()
                 try:
                     json.loads(f['notes'])
                     assembly = f['assembly']
                     annotation = f['genome_annotation']
-                    rstr = "%s_%s" % (f['biological_replicate_number'], f['technical_replicate_number'])
-                except:
-                    print "Skipping %s (%s)" % (f['accession'], f['output_type'])
+                    rstr = "%s_%s" % (f['replicate']['biological_replicate_number'], f['replicate']['technical_replicate_number'])
+                except Exception, e:
+                    print("Skipping %s/%s (%s) 'cause %s" % (acc, f['accession'], f['output_type'], e))
                     continue
 
-                dd = dxfiles[assembly].get(annotation, {})
-                ddd = dd.get(rstr, {})
-                ddd[f['output_type']] = f
-                dd.update(ddd)
-                dxfiles.update()
 
-            r1qs = []
-            r2qs = []
-            for assembly in dxfiles.key():
-                for annotation in assembly.keys():
-                    for rep1 in annotation.keys():
-                        for rep2 in [ r for r in annotation.keys() if r != rep1 ]:
-                            for out_type in rep1.keys():
-                                r1s.append(dxfiles[assembly][annotation][rep1][out_type])
-                                r2s.append(dxfiles[assembly][annotation][rep2][out_type])
+                assd = annd = repd = fild = {}
 
-            run = applet.run({ "rep1_quants": r1qs, "rep2_quants": r2ss}, project=pid)
-            print("Running: %s for (%s,%s)" % (run, r1qs, r2qs)
+                annd = dxfiles.setdefault(assembly,{})
+                repd = annd.setdefault(annotation, {})
+                #repd = annd.setdefault(rstr, {})
+
+                fild = { f['output_type']: { 'dxid': json.loads(f['notes'])['dx-id'], 'accession': f['accession'] } }
+                if repd.has_key(rstr):
+                    repd[rstr].update(fild)
+                else:
+                    repd[rstr] = fild
+
+                if annd.has_key(annotation):
+                    annd[annotation].update(repd)
+                else:
+                    annd[annotation] = repd
+
+                if dxfiles.has_key(assembly):
+                    dxfiles[assembly].update(annd)
+                else:
+                    dxfiles[assembly] = annd
+
+                #dxfiles.update(assd)
+
+                #print json.dumps(dxfiles,indent=4)
+
+
+
         else:
             print "Skipping %s (0 replicates)" % acc
+
+        r1qs = []
+        r2qs = []
+        for assembly in dxfiles.keys():
+            for annotation in dxfiles[assembly].keys():
+                for rep1 in dxfiles[assembly][annotation].keys():
+                    for rep2 in [ r for r in dxfiles[assembly][annotation].keys() if r != rep1 ]:
+                        for out_type in dxfiles[assembly][annotation][rep1].keys():
+                            if out_type.find('quantification') >= 0:
+                                r1qs.append(dxfiles[assembly][annotation][rep1][out_type])
+                                r2qs.append(dxfiles[assembly][annotation][rep2][out_type])
+
+        #run = applet.run({ "rep1_quants": r1qs, "rep2_quants": r2ss}, project=pid)
+        if r1qs and r2qs:
+            run = "test"
+            print("Running: %s for (%s,%s) in %s" % (run, r1qs, r2qs, acc))
+        elif dxfiles:
+            print("%s has DXfiles but nothing to run: %s" % (acc, dxfiles))
+
 
 if __name__ == '__main__':
     main()
