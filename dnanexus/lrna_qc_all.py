@@ -6,6 +6,7 @@ import json
 import random
 
 import dxpy
+import dxpy.exceptions
 import requests
 from dxencode import dxencode as dxencode
 
@@ -33,8 +34,13 @@ def get_args():
     return ap.parse_args()
 
 def run_pairs(head, applet, pid, r1qs, r2qs, outfh=sys.stdout):
-    job = applet.run({ "rep1_quants": [ dxpy.dxlink(f['dxid']) for f in r1qs ], "rep2_quants": [ dxpy.dxlink(f['dxid']) for f in  r2qs ]}, project=pid)
-    job.wait_on_done(interval=1)
+    try:
+        job = applet.run({ "rep1_quants": [ dxpy.dxlink(f['dxid']) for f in r1qs ], "rep2_quants": [ dxpy.dxlink(f['dxid']) for f in  r2qs ]}, project=pid)
+        job.wait_on_done(interval=1)
+    except dxpy.exceptions.DXJobFailureError, e:
+        print("ERROR: %s" % (e))
+        return ""
+
     pair = 0
     for qcs_str in job.describe()['output'].get('qc_metrics_json', []):
         qcs = json.loads(qcs_str)
@@ -117,7 +123,7 @@ def main():
             for annotation in assembly.values():
                 for rep1 in annotation.values():
                     for rep2 in annotation.values():
-                        if rep2 == rep1:
+                        if rep1 is rep2:
                             continue
                         for out_type, out_type_value in rep1.items():
                             if out_type.find('quantification') >= 0:
