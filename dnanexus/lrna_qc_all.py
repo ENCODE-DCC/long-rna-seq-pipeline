@@ -3,6 +3,7 @@ import argparse
 import os
 import sys
 import json
+import random
 
 import dxpy
 import requests
@@ -11,6 +12,7 @@ from dxencode import dxencode as dxencode
 ASSAY_TYPE = 'RNA-seq'
 ASSAY_TERM_ID = "OBI:0001271"
 PROJECT_NAME = 'long-rna-seq-pipeline'
+TOTAL_CONTROLS = 10 # this could be a parameter
 
 
 def get_args():
@@ -22,7 +24,45 @@ def get_args():
                     default='9999999',
                     required=False)
 
+    ap.add_argument('-c', '--controls',
+                    help='generate this many negative control pairs',
+                    type=int,
+                    default=0,
+                    required=False)
+
     return ap.parse_args()
+
+def run_pairs(head, applet, pid, r1qs, r2qs, outfh=sys.stdout):
+    job = applet.run({ "rep1_quants": [ dxpy.dxlink(f['dxid']) for f in r1qs ], "rep2_quants": [ dxpy.dxlink(f['dxid']) for f in  r2qs ]}, project=pid)
+    job.wait_on_done(interval=1)
+    pair = 0
+    for qcs_str in job.describe()['output'].get('qc_metrics_json', []):
+        qcs = json.loads(qcs_str)
+        if not head:
+            head= "\t".join(['Experiment', 'Assembly', 'Annotation', 'RepA', 'RepB', 'type']+qcs.keys())
+            outfh.write(head+"\n")
+
+        outfh.write("\t".join([ r1qs[pair]['dataset'],
+                          r1qs[pair]['assembly'],
+                          r1qs[pair]['genome_annotation'],
+                          r1qs[pair]['rstr'],
+                          r2qs[pair]['rstr'],
+                          r1qs[pair]['output_type'] ]+[ str(v) for v in qcs.values() ])+"\n" ) # they are floats
+        pair += 1
+        outfh.flush()
+
+    return head
+    # probably return some object.
+
+def pick(dictionary):
+
+    while(True):
+        mypick = random.choice(dictionary.values())
+        if mypick:
+            return mypick
+        else:
+            print "Whiff on %s" % dictionary
+
 
 def main():
     cmnd = get_args()
@@ -40,6 +80,7 @@ def main():
 
     head = ""
     tabfh = open('lrna_qc.tsv','w')
+    byexperiment = {}
     for exp in exps:
         acc = exp['accession']
         if len(exp['replicates']) > 0:
@@ -59,67 +100,48 @@ def main():
                     print("Skipping %s/%s (%s) 'cause %s" % (acc, f['accession'], f['output_type'], e))
                     continue
 
-
-                annd = {}
-                repd = {}
-                fild = {}
-
-                annd = dxfiles.setdefault(assembly,{})
-                repd = annd.setdefault(annotation, {})
+                fild = dxfiles.setdefault(assembly, {}).setdefault(annotation, {}).setdefault(rstr, {})
                 f.update({ 'dxid': json.loads(f['notes'])['dx-id'], 'rstr': rstr })
-                fild = { f['output_type']: f }
-                if repd.has_key(rstr):
-                    repd[rstr].update(fild)
-                else:
-                    repd[rstr] = fild
+                fild[f['output_type']] = f
 
-                if annd.has_key(annotation):
-                    annd[annotation].update(repd)
-                else:
-                    annd[annotation] = repd
-
-                if dxfiles.has_key(assembly):
-                    dxfiles[assembly].update(annd)
-                else:
-                    dxfiles[assembly] = annd
+            byexperiment[acc] = dxfiles
 
         else:
             print( "Skipping %s (0 replicates)" % (acc))
+            continue
 
         r1qs = []
         r2qs = []
-        for assembly in dxfiles.keys():
-            for annotation in dxfiles[assembly].keys():
-                for rep1 in dxfiles[assembly][annotation].keys():
-                    for rep2 in [ r for r in dxfiles[assembly][annotation].keys() if r != rep1 ]:
-                        for out_type in dxfiles[assembly][annotation][rep1].keys():
-                            if out_type.find('quantification') >= 0:
-                                r1qs.append(dxfiles[assembly][annotation][rep1][out_type])
-                                r2qs.append(dxfiles[assembly][annotation][rep2][out_type])
 
-        if r1qs and r2qs:
-            run = "test"
-            print("Running: %s for (%s,%s) in %s" % (run, r1qs, r2qs, acc))
-            job = applet.run({ "rep1_quants": [ dxpy.dxlink(f['dxid']) for f in r1qs ], "rep2_quants": [ dxpy.dxlink(f['dxid']) for f in  r2qs ]}, project=pid)
-            job.wait_on_done(interval=1)
-            pair = 0
-            for qcs_str in job.describe()['output'].get('qc_metrics_json', []):
-                qcs = json.loads(qcs_str)
-                if not head:
-                    head= "\t".join(['Experiment', 'Assembly', 'Annotation', 'RepA', 'RepB', 'type']+qcs.keys())
-                    tabfh.write(head+"\n")
+        if not cmnd.controls:
+            for assembly in dxfiles.values():
+                for annotation in assembly.values():
+                    for rep1 in annotation.values():
+                        for rep2 in annotation.values():
+                            if rep2 is rep1:
+                                continue
+                            for out_type, out_type_value in rep1.items():
+                                if out_type.find('quantification') >= 0:
+                                    r1qs.append(out_type_value)
+                                    r2qs.append(rep2[out_type])
 
-                tabfh.write("\t".join([ r1qs[pair]['dataset'],
-                                  r1qs[pair]['assembly'],
-                                  r1qs[pair]['genome_annotation'],
-                                  r1qs[pair]['rstr'],
-                                  r2qs[pair]['rstr'],
-                                  r1qs[pair]['output_type'] ]+[ str(v) for v in qcs.values() ])+"\n" ) # they are floats
-                pair += 1
-                tabfh.flush()
-        elif dxfiles:
-            print("%s has DXfiles but nothing to run: %s" % (acc, dxfiles))
+
+            if r1qs and r2qs:
+                head = run_pairs(head, applet, pid, r1qs, r2qs, outf=tabfh)
+            elif dxfiles:
+                print("%s has DXfiles but nothing to run: %s" % (acc, dxfiles))
 
     tabfh.close()
+    if cmnd.controls:
+        control1s = []
+        control2s = []
+        ctfh = open('lrna_qcs_controls.tsv','w')
+        head = ''
+        for c in range(0, cmnd.controls):
+            for qtype in ('transcript quantifications', 'genome quantifications'):
+                control1s.append(pick(pick(pick(pick(byexperiment))))[qtype])
+                control2s.append(pick(pick(pick(pick(byexperiment))))[qtype])
+
+        run_pairs(head, applet, pid, control1s, control2s, outfh=ctfh)
 if __name__ == '__main__':
     main()
