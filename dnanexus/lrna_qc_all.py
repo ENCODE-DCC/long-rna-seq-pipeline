@@ -113,17 +113,16 @@ def main():
         r1qs = []
         r2qs = []
 
-        if not cmnd.controls:
-            for assembly in dxfiles.values():
-                for annotation in assembly.values():
-                    for rep1 in annotation.values():
-                        for rep2 in annotation.values():
-                            if rep2 is rep1:
-                                continue
-                            for out_type, out_type_value in rep1.items():
-                                if out_type.find('quantification') >= 0:
-                                    r1qs.append(out_type_value)
-                                    r2qs.append(rep2[out_type])
+        for assembly in dxfiles.values():
+            for annotation in assembly.values():
+                for rep1 in annotation.values():
+                    for rep2 in annotation.values():
+                        if rep2 == rep1:
+                            continue
+                        for out_type, out_type_value in rep1.items():
+                            if out_type.find('quantification') >= 0:
+                                r1qs.append(out_type_value)
+                                r2qs.append(rep2[out_type])
 
 
             if r1qs and r2qs:
