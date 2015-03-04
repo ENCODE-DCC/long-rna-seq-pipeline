@@ -126,7 +126,7 @@ def main():
 
 
             if r1qs and r2qs:
-                head = run_pairs(head, applet, pid, r1qs, r2qs, outf=tabfh)
+                head = run_pairs(head, applet, pid, r1qs, r2qs, outfh=tabfh)
             elif dxfiles:
                 print("%s has DXfiles but nothing to run: %s" % (acc, dxfiles))
 
