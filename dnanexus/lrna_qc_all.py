@@ -31,6 +31,11 @@ def get_args():
                     default=0,
                     required=False)
 
+    ap.add_argument('--only-controls',
+                    help='generate this many negative control pairs',
+                    action='store_true',
+                    required=False)
+
     return ap.parse_args()
 
 def run_pairs(head, applet, pid, r1qs, r2qs, outfh=sys.stdout):
@@ -48,12 +53,19 @@ def run_pairs(head, applet, pid, r1qs, r2qs, outfh=sys.stdout):
             head= "\t".join(['Experiment', 'Assembly', 'Annotation', 'RepA', 'RepB', 'type']+qcs.keys())
             outfh.write(head+"\n")
 
-        outfh.write("\t".join([ r1qs[pair]['dataset'],
-                          r1qs[pair]['assembly'],
-                          r1qs[pair]['genome_annotation'],
+        labels = {}
+        for field in ('dataset', 'assembly','genome_annotation','output_type'):
+            if r1qs[pair[field]] != r2qs[pair[field]]:
+                labels[field] = '/'.join((r1qs[pair[field]], r2qs[pair[field]]))
+            else:
+                labels[field] = r1qs[pair[field]]
+
+        outfh.write("\t".join([ labels['dataset'].strip('/experiments/'),
+                          labels['assembly'],
+                          labels['genome_annotation'],
                           r1qs[pair]['rstr'],
                           r2qs[pair]['rstr'],
-                          r1qs[pair]['output_type'] ]+[ str(v) for v in qcs.values() ])+"\n" ) # they are floats
+                          labels['output_type'] ]+[ str(v) for v in qcs.values() ])+"\n" ) # they are floats
         pair += 1
         outfh.flush()
 
@@ -85,7 +97,9 @@ def main():
     exps = res.json()['@graph']
 
     head = ""
-    tabfh = open('lrna_qc.tsv','w')
+    if not cmnd.only_controls:
+
+        tabfh = open('lrna_qc.tsv','w')
     byexperiment = {}
     for exp in exps:
         acc = exp['accession']
@@ -119,16 +133,17 @@ def main():
         r1qs = []
         r2qs = []
 
-        for assembly in dxfiles.values():
-            for annotation in assembly.values():
-                for rep1 in annotation.values():
-                    for rep2 in annotation.values():
-                        if rep1 is rep2:
-                            continue
-                        for out_type, out_type_value in rep1.items():
-                            if out_type.find('quantification') >= 0:
-                                r1qs.append(out_type_value)
-                                r2qs.append(rep2[out_type])
+        if not cmnd.only_controls:
+            for assembly in dxfiles.values():
+                for annotation in assembly.values():
+                    for rep1 in annotation.values():
+                        for rep2 in annotation.values():
+                            if rep1 is rep2:
+                                continue
+                            for out_type, out_type_value in rep1.items():
+                                if out_type.find('quantification') >= 0:
+                                    r1qs.append(out_type_value)
+                                    r2qs.append(rep2[out_type])
 
 
             if r1qs and r2qs:
@@ -136,7 +151,8 @@ def main():
             elif dxfiles:
                 print("%s has DXfiles but nothing to run: %s" % (acc, dxfiles))
 
-    tabfh.close()
+            tabfh.close()
+
     if cmnd.controls:
         control1s = []
         control2s = []
