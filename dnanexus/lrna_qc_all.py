@@ -70,12 +70,12 @@ def run_pairs(head, applet, pid, r1qs, r2qs, outfh=sys.stdout):
 
         labels = {}
         for field in ('dataset', 'assembly','genome_annotation','output_type'):
-            if r1qs[pair[field]] != r2qs[pair[field]]:
-                labels[field] = '/'.join((r1qs[pair[field]], r2qs[pair[field]]))
+            if r1qs[pair][field] != r2qs[pair][field]:
+                labels[field] = '/'.join((r1qs[pair][field].strip('/experiments/'), r2qs[pair][field].strip('/experiments/')))
             else:
-                labels[field] = r1qs[pair[field]]
+                labels[field] = r1qs[pair][field]
 
-        outfh.write("\t".join([ labels['dataset'].strip('/experiments/'),
+        outfh.write("\t".join([ labels['dataset'],
                           labels['assembly'],
                           labels['genome_annotation'],
                           r1qs[pair]['rstr'],
@@ -124,8 +124,6 @@ def main():
 
     applet = dxencode.find_applet_by_name('lrna-qc', pid )
     head = ""
-    if not cmnd.only_controls:
-        tabfh = open('lrna_qc.tsv','w')
 
     byexperiment = {}
     r1qs = []
@@ -136,6 +134,8 @@ def main():
             print("ERROR: Please select exactly 2 replicates with -r/--reps or leave blankf for all")
             sys.exit(1)
         n = 1
+        tabfh = open('lrna_qc_%s.tsv' % (cmnd.reps[0].replace(',','_')+cmnd.reps[1].replace(',','_')) ,'w')
+
         for repstr in cmnd.reps:
             (exp_acc,br,tr) = repstr.split(',')
             print("Looking for %s %s %s (%s %s)" % (exp_acc,"%s_%s" %(br,tr), cmnd.type, cmnd.assembly, cmnd.annotation))
@@ -167,6 +167,8 @@ def main():
 
 
     else:
+        tabfh = open('lrna_qc_all.tsv','w')
+
         query = 'search/?type=experiment&assay_term_id=%s&award.rfa=ENCODE3&limit=all&frame=embedded&replicates.library.biosample.donor.organism.name=mouse&files.file_format=fastq' % ASSAY_TERM_ID
         res = dxencode.encoded_get(SERVER+query, AUTHID=AUTHID, AUTHPW=AUTHPW)
         exps = res.json()['@graph']
