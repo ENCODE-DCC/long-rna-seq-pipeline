@@ -11,7 +11,7 @@ import requests
 from dxencode import dxencode as dxencode
 
 ASSAY_TERM_NAME = 'RNA-seq'
-ASSAY_TERM_ID = "OBI:0001271"
+ASSAY_TERM_ID = ("OBI:0001271", "NTR:0000762")
 PROJECT_NAME = 'long-rna-seq-pipeline'
 
 
@@ -49,6 +49,11 @@ def get_args():
                     help='Use only genome or transcript files',
                     choices=['g','t','genome','transcript','genome quantifications', 'transcript quantification'],
                     default='genome quantifications',
+                    required=False)
+
+    ap.add_argument('--organism',
+                    help='Pick mouse or human',
+                    choices=['mouse', 'human', ''],
                     required=False)
 
     return ap.parse_args()
@@ -168,9 +173,14 @@ def main():
 
     else:
         if not cmnd.only_controls:
-            tabfh = open('lrna_qc_all.tsv','w')
+            fn = 'lrna_qc_all.tsv'
+            if cmnd.organism:
+                fn = 'lrna_qc_%s.tsv' % cmnd.organism
+            tabfh = open(fn,'w')
 
-        query = 'search/?type=experiment&assay_term_id=%s&award.rfa=ENCODE3&limit=all&frame=embedded&replicates.library.biosample.donor.organism.name=mouse&files.file_format=fastq' % ASSAY_TERM_ID
+        query = 'search/?type=experiment&assay_term_id=%s&assay_term_id=%s&award.rfa=ENCODE3&limit=all&frame=embedded&files.file_format=fastq' % ASSAY_TERM_ID
+        if cmnd.organism:
+            query += '&replicates.library.biosample.donor.organism.name=%s' % cmnd.organism
         res = dxencode.encoded_get(SERVER+query, AUTHID=AUTHID, AUTHPW=AUTHPW)
         exps = res.json()['@graph']
 
@@ -185,7 +195,7 @@ def main():
                 dxfiles = {}
                 for facc in exp['original_files']:
                     (f,rstr,assembly,annotation) = get_file(acc,facc)
-                    if not f:
+                    if not f or ( cmnd.type and f['output_type'].find(cmnd.type) == -1 ):
                         continue
 
                     fild = dxfiles.setdefault(assembly, {}).setdefault(annotation, {}).setdefault(rstr, {})
