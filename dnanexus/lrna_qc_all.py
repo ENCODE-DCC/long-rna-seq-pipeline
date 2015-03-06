@@ -167,7 +167,8 @@ def main():
 
 
     else:
-        tabfh = open('lrna_qc_all.tsv','w')
+        if not cmnd.only_controls:
+            tabfh = open('lrna_qc_all.tsv','w')
 
         query = 'search/?type=experiment&assay_term_id=%s&award.rfa=ENCODE3&limit=all&frame=embedded&replicates.library.biosample.donor.organism.name=mouse&files.file_format=fastq' % ASSAY_TERM_ID
         res = dxencode.encoded_get(SERVER+query, AUTHID=AUTHID, AUTHPW=AUTHPW)
@@ -214,7 +215,8 @@ def main():
     elif dxfiles:
         print("%s has DXfiles but nothing to run: %s" % (acc, dxfiles))
 
-    tabfh.close()
+    if not cmnd.only_controls:
+        tabfh.close()
 
     if cmnd.controls:
         control1s = []
@@ -223,8 +225,21 @@ def main():
         head = ''
         for c in range(0, cmnd.controls):
             for qtype in ('transcript quantifications', 'genome quantifications'):
-                control1s.append(pick(pick(pick(pick(byexperiment))))[qtype])
-                control2s.append(pick(pick(pick(pick(byexperiment))))[qtype])
+                pick1 = pick(pick(pick(pick(byexperiment))))[qtype]
+                k=0
+                while(k < 100):
+                    try:
+                        pick2 = pick(pick(byexperiment)[pick1['assembly']][pick1['genome_annotation']])[qtype]
+                        break
+                    except:
+                        pick2 = {}
+                        k+=1
+
+                if not pick2:
+                    print("ERROR: could not match pick1: %s" % ([ pick1[x] for x in ['assembly', 'genome_annotation','rstr', 'qtype'] ]))
+                    continue
+                control1s.append(pick1)
+                control2s.append(pick2)
 
         run_pairs(head, applet, pid, control1s, control2s, outfh=ctfh)
 if __name__ == '__main__':
