@@ -76,7 +76,7 @@ def run_pairs(head, applet, pid, r1qs, r2qs, outfh=sys.stdout):
             outfh.write(head+"\n")
 
         labels = {}
-        for field in ['dataset', 'assembly','genome_annotation','output_type'] + bs_keys + lib_keys:
+        for field in ['dataset', 'assembly','genome_annotation','output_type'] + bs_keys + lib_keys + 'dxuser' + 'lab':
             if r1qs[pair][field] != r2qs[pair][field]:
                 labels[field] = '/'.join((str(r1qs[pair][field]).strip('/experiments/'), str(r2qs[pair][field]).strip('/experiments/')))
             else:
@@ -87,7 +87,9 @@ def run_pairs(head, applet, pid, r1qs, r2qs, outfh=sys.stdout):
                           labels['genome_annotation'],
                           r1qs[pair]['rstr'],
                           r2qs[pair]['rstr'],
-                          labels['output_type'] ] + \
+                          labels['output_type'],
+                          labels['dxuser'],
+                          labels['lab'] ] + \
                           [ str(v) for v in qcs.values() ] + \
                           [ labels[k] for k in bs_keys+lib_keys ])
                           + "\n" )
