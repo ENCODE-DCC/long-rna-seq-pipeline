@@ -14,6 +14,8 @@ ASSAY_TERM_NAME = 'RNA-seq'
 ASSAY_TERM_ID = ("OBI:0001271", "NTR:0000762")
 PROJECT_NAME = 'long-rna-seq-pipeline'
 
+bs_keys = ['biosample_term_name', 'starting_amount', 'starting_amount_units']
+lib_keys = ['nucleic_acid_starting_quantity', 'nucleic_acid_starting_quantity_units', 'nucleic_acid_term_name', 'depleted_in_term_name']
 
 def get_args():
     '''Parse the input arguments.'''
@@ -70,22 +72,25 @@ def run_pairs(head, applet, pid, r1qs, r2qs, outfh=sys.stdout):
     for qcs_str in job.describe()['output'].get('qc_metrics_json', []):
         qcs = json.loads(qcs_str)
         if not head:
-            head= "\t".join(['Experiment', 'Assembly', 'Annotation', 'RepA', 'RepB', 'type']+qcs.keys())
+            head= "\t".join(['Experiment', 'Assembly', 'Annotation', 'RepA', 'RepB', 'type']+qcs.keys()+bs_keys+lib_keys)
             outfh.write(head+"\n")
 
         labels = {}
-        for field in ('dataset', 'assembly','genome_annotation','output_type'):
+        for field in ['dataset', 'assembly','genome_annotation','output_type'] + bs_keys + lib_keys:
             if r1qs[pair][field] != r2qs[pair][field]:
-                labels[field] = '/'.join((r1qs[pair][field].strip('/experiments/'), r2qs[pair][field].strip('/experiments/')))
+                labels[field] = '/'.join((str(r1qs[pair][field]).strip('/experiments/'), str(r2qs[pair][field]).strip('/experiments/')))
             else:
-                labels[field] = r1qs[pair][field]
+                labels[field] = str(r1qs[pair][field])
 
         outfh.write("\t".join([ labels['dataset'],
                           labels['assembly'],
                           labels['genome_annotation'],
                           r1qs[pair]['rstr'],
                           r2qs[pair]['rstr'],
-                          labels['output_type'] ]+[ str(v) for v in qcs.values() ])+"\n" ) # they are floats
+                          labels['output_type'] ] + \
+                          [ str(v) for v in qcs.values() ] + \
+                          [ labels[k] for k in bs_keys+lib_keys ])
+                          + "\n" )
         pair += 1
         outfh.flush()
 
@@ -101,7 +106,7 @@ def pick(dictionary):
         else:
             print "Whiff on %s" % dictionary
 
-def get_file(acc, facc):
+def get_file(exp, facc):
     f = dxencode.encoded_get(SERVER+facc, AUTHID=AUTHID, AUTHPW=AUTHPW).json()
     try:
         json.loads(f['notes'])
@@ -109,11 +114,21 @@ def get_file(acc, facc):
         annotation = f['genome_annotation']
         rstr = "%s_%s" % (f['replicate']['biological_replicate_number'], f['replicate']['technical_replicate_number'])
     except Exception, e:
-        print("Skipping %s/%s (%s) 'cause %s" % (acc, f['accession'], f['output_type'], e))
+        print("Skipping %s/%s (%s) 'cause %s" % (exp['accession'], f['accession'], f['output_type'], e))
         return({},'','','')
 
-    f.update({ 'dxid': json.loads(f['notes'])['dx-id'], 'rstr': rstr })
-
+    rep = exp['replicates'][0]
+    lib = rep['library']
+    bs = lib['biosample']
+    f.update({
+            'dxid': json.loads(f['notes'])['dx-id'],
+            'rstr': rstr,
+            'dxuser': json.loads(f['notes'])['dx-createdBy']['user'],
+            'biosample': bs['biosample_term_name'],
+            'lab': exp['submitted_by']['lab']
+    })
+    f.update({ k: lib.get(k,'n/a') for k in lib_keys })
+    f.update({ k: bs.get(k, 'n/a') for k in bs_keys })
     return f,rstr,assembly, annotation
 
 
@@ -147,14 +162,14 @@ def main():
             query = '/experiments/%s' % exp_acc
             res = dxencode.encoded_get(SERVER+query, AUTHID=AUTHID, AUTHPW=AUTHPW)
             exp = res.json()
-            if exp['assay_term_id'] != ASSAY_TERM_ID:
+            if exp['assay_term_id'] not in ASSAY_TERM_ID:
                 print("ERROR: %s is not an %s experiment" % (exp_acc, ASSAY_TERM_NAME))
                 sys.exit(1)
             if not len(exp['replicates']):
                 print("ERROR: %s has no replicates" % (exp_acc))
 
             for facc in exp['original_files']:
-                (f, rstr, assembly, annotation) = get_file(exp_acc, facc)
+                (f, rstr, assembly, annotation) = get_file(exp, facc)
                 if f and assembly == cmnd.assembly and annotation == cmnd.annotation and rstr == "%s_%s" % (br,tr):
                     if f['output_type'].find(cmnd.type) >= 0:
                         if n==1:
@@ -194,7 +209,7 @@ def main():
                     continue
                 dxfiles = {}
                 for facc in exp['original_files']:
-                    (f,rstr,assembly,annotation) = get_file(acc,facc)
+                    (f,rstr,assembly,annotation) = get_file(exp,facc)
                     if not f or ( cmnd.type and f['output_type'].find(cmnd.type) == -1 ):
                         continue
 
@@ -210,8 +225,8 @@ def main():
             if not cmnd.only_controls:
                 for assembly in dxfiles.values():
                     for annotation in assembly.values():
-                        for rep1 in annotation.values():
-                            for rep2 in annotation.values():
+                        for rep1 in annotation.values()[0:len(annotation.values())-1]:
+                            for rep2 in annotation.values()[1:]:
                                 if rep1 is rep2:
                                     continue
                                 for out_type, out_type_value in rep1.items():
