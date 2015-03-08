@@ -14,6 +14,7 @@ ASSAY_TERM_NAME = 'RNA-seq'
 ASSAY_TERM_ID = ("OBI:0001271", "NTR:0000762")
 PROJECT_NAME = 'long-rna-seq-pipeline'
 
+VALID_TYPES = ['genome quantifications', 'transcript quantifications']
 bs_keys = ['biosample_term_name', 'starting_amount', 'starting_amount_units']
 lib_keys = ['nucleic_acid_starting_quantity', 'nucleic_acid_starting_quantity_units', 'nucleic_acid_term_name', 'depleted_in_term_name']
 
@@ -78,7 +79,7 @@ def run_pairs(head, applet, pid, r1qs, r2qs, outfh=sys.stdout):
         labels = {}
         for field in ['dataset', 'assembly','genome_annotation','output_type'] + bs_keys + lib_keys + ['dxuser', 'lab']:
             if r1qs[pair][field] != r2qs[pair][field]:
-                labels[field] = '/'.join((str(r1qs[pair][field]).strip('/experiments/'), str(r2qs[pair][field]).strip('/experiments/')))
+                labels[field] = '/'.join((str(r1qs[pair][field]), str(r2qs[pair][field])))
             else:
                 labels[field] = str(r1qs[pair][field])
 
@@ -252,22 +253,25 @@ def main():
         ctfh = open('lrna_qcs_controls.tsv','w')
         head = ''
         for c in range(0, cmnd.controls):
-            for qtype in ('transcript quantifications', 'genome quantifications'):
-                pick1 = pick(pick(pick(pick(byexperiment))))[qtype]
-                k=0
-                while(k < 100):
-                    try:
-                        pick2 = pick(pick(byexperiment)[pick1['assembly']][pick1['genome_annotation']])[qtype]
-                        break
-                    except:
-                        pick2 = {}
-                        k+=1
+                rep = pick(pick(pick(pick(byexperiment))))
+                for qtype in rep.keys():
+                    if qtype not in VALID_TYPES:
+                        continue
+                    pick1 = rep[qtype]
+                    k=0
+                    while(k < 100):
+                        try:
+                            pick2 = pick(pick(byexperiment)[pick1['assembly']][pick1['genome_annotation']])[qtype]
+                            break
+                        except:
+                            pick2 = {}
+                            k+=1
 
-                if not pick2:
-                    print("ERROR: could not match pick1: %s" % ([ pick1[x] for x in ['assembly', 'genome_annotation','rstr', 'qtype'] ]))
-                    continue
-                control1s.append(pick1)
-                control2s.append(pick2)
+                    if not pick2:
+                        print("ERROR: could not match pick1: %s" % ([ pick1.get(x,"n/a") for x in ['assembly', 'genome_annotation','rstr', 'qtype'] ]))
+                        continue
+                    control1s.append(pick1)
+                    control2s.append(pick2)
 
         run_pairs(head, applet, pid, control1s, control2s, outfh=ctfh)
 if __name__ == '__main__':
