@@ -76,7 +76,7 @@ def run_pairs(head, applet, pid, r1qs, r2qs, outfh=sys.stdout):
             outfh.write(head+"\n")
 
         labels = {}
-        for field in ['dataset', 'assembly','genome_annotation','output_type'] + bs_keys + lib_keys + 'dxuser' + 'lab':
+        for field in ['dataset', 'assembly','genome_annotation','output_type'] + bs_keys + lib_keys + ['dxuser', 'lab']:
             if r1qs[pair][field] != r2qs[pair][field]:
                 labels[field] = '/'.join((str(r1qs[pair][field]).strip('/experiments/'), str(r2qs[pair][field]).strip('/experiments/')))
             else:
@@ -150,6 +150,7 @@ def main():
     byexperiment = {}
     r1qs = []
     r2qs = []
+    dxfiles = []
 
     if cmnd.reps:
         if len(cmnd.reps) != 2:
