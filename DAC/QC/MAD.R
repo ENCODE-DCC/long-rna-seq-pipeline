@@ -34,7 +34,7 @@ organizeExp <- function(table1,table2,col1,gene1=NA,tx1=NA,align=c("gene","tx"),
 
 Acutoff <-0  ##this means we ignore FPKM < 1 when computing mean
 
-###para will have filenmaes supplied by 
+###para will have filenmaes supplied by
 para <- commandArgs(trailingOnly = TRUE)
 reps <- organizeExp(para[1],para[2],7,1)
 nozero <- which(reps$rep1!=0 | reps$rep2!=0)
@@ -44,7 +44,7 @@ logrep2 <- log2(reps$rep2[nozero])
 A <- (logrep1+logrep2)/2
 M <- logrep1-logrep2
 
-cat("MAD of log ratios is ", round(median(abs(M)[A>Acutoff]),3),'\n')
+cat("MAD of log ratios is ", round(median(abs(M)[A>Acutoff])*1.4826,3),'\n')
 
 ##if you want to compute pearson and spearman on same data it's easy:
 cat("Pearson correlation is:",cor(logrep1[A>Acutoff],logrep2[A>Acutoff]),"\n")
