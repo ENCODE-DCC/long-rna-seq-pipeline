@@ -1,16 +1,16 @@
 #!/bin/bash
-# bam-to-bigwig 1.0.1
+# bam-to-bigwig 2.0.0
 
 main() {
     # Now in resources/usr/bin
     #echo "* Download and install STAR..."
     #git clone https://github.com/alexdobin/STAR
-    #(cd STAR; git checkout tags/STAR_2.4.0h)
+    #(cd STAR; git checkout tags/STAR_2.4.0k)
     #(cd STAR; make)
     #wget https://github.com/ENCODE-DCC/kentUtils/archive/v302.1.0.tar.gz
 
     echo "*****"
-    echo "* Running: bam-to-bigwig-unstranded.sh [v1.0.1]"
+    echo "* Running: bam-to-bigwig-unstranded.sh [v2.0.0]"
     echo "* STAR version:     ["`STAR --version | awk '{print $1}' | cut -d _ -f 2-`"]"
     echo "* bedGraphToBigWig version: "`bedGraphToBigWig 2>&1 | grep "bedGraphToBigWig v" | awk '{print $2$3}'`
     echo "*****"

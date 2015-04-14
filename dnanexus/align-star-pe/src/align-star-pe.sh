@@ -1,16 +1,16 @@
 #!/bin/bash
-# align-star-pe 1.1.0
+# align-star-pe 2.0.0
 
 main() {
     # Now in resources/usr/bin
     #echo "* Download and install STAR..."
     #git clone https://github.com/alexdobin/STAR
-    #(cd STAR; git checkout tags/STAR_2.4.0h)
+    #(cd STAR; git checkout tags/STAR_2.4.0k)
     #(cd STAR; make)
     #wget https://github.com/samtools/samtools/archive/0.1.19.tar.gz
 
     echo "*****"
-    echo "* Running: align-star-pe.sh [v1.1.0]"
+    echo "* Running: align-star-pe.sh [v2.0.0]"
     echo "* STAR version: "`STAR --version | awk '{print $1}' | cut -d _ -f 2-`
     echo "* samtools version: "`samtools 2>&1 | grep Version | awk '{print $2}'`
     echo "*****"
@@ -68,7 +68,7 @@ main() {
         samtools view -@ ${nthreads} -bS - > ${reads1_fn}-${reads2_fn}_star_anno.bam
     
     # Gather metrics
-    meta=`echo \"STAR stats\": { `
+    meta=`echo \"STAR_log_final\": { `
     #                      Number of input reads |       85357051
     var=`grep "Number of input reads" Log.final.out | awk '{print $6}'`
     var=`echo \"Number of input reads\": $var`
@@ -160,25 +160,23 @@ main() {
     #                 % of reads unmapped: other |       0.09%
     var=`grep "\% of reads unmapped\: other" Log.final.out | awk '{print $7}'`
     var=`echo \"Percent of reads unmapped - other\": \"$var\"`
-    meta=`echo $meta, $var`
-    meta=`echo $meta }`
+    meta=`echo $meta, $var }`
+    echo "metadata = <" ${meta} ">"
 
     #mv Aligned.toTranscriptome.out.bam ${reads1_fn}-${reads2_fn}_star_anno.bam
     mv Log.final.out ${reads1_fn}-${reads2_fn}_star_Log.final.out
-    mv Log.out ${reads1_fn}-${reads2_fn}_star_Log.out
 
     echo "* Upload results..."
-    #detail_log=$(dx upload ${reads1_fn}-${reads2_fn}_star_Log.out --brief)
+    # NOTE: adding meta 'details' ensures json is valid.  But details are not updatable so rely on QC property
+    details=`echo { $meta }`
+    star_genome_bam=$(dx upload ${reads1_fn}-${reads2_fn}_star_genome.bam --details="$details" --property QC="$meta" --brief)
+    star_anno_bam=$(dx upload ${reads1_fn}-${reads2_fn}_star_anno.bam --details="$details" --property QC="$meta"  --brief)
     star_log=$(dx upload ${reads1_fn}-${reads2_fn}_star_Log.final.out --brief)
-    star_genome_bam=$(dx upload ${reads1_fn}-${reads2_fn}_star_genome.bam --brief)
-    #star_genome_bai=$(dx upload ${reads1_fn}-${reads2_fn}_star_genome.bam.bai --brief)
-    star_anno_bam=$(dx upload ${reads1_fn}-${reads2_fn}_star_anno.bam --brief)
 
-    #dx-jobutil-add-output detail_log "$detail_log" --class=file
-    dx-jobutil-add-output star_log "$star_log" --class=file
     dx-jobutil-add-output star_genome_bam "$star_genome_bam" --class=file
-    #dx-jobutil-add-output star_genome_bai "$star_genome_bai" --class=file
     dx-jobutil-add-output star_anno_bam "$star_anno_bam" --class=file
+    dx-jobutil-add-output star_log "$star_log" --class=file
     dx-jobutil-add-output metadata "$meta" --class=string
+
     echo "* Finished."
 }

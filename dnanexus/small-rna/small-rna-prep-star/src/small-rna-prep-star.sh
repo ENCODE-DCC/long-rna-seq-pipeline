@@ -1,15 +1,15 @@
 #!/bin/bash
-# small-rna-prep-star 0.0.1
+# small-rna-prep-star 2.0.0
 
 main() {
     # Now in resources/usr/bin
     #echo "* Download and install STAR..."
     #git clone https://github.com/alexdobin/STAR
-    #(cd STAR; git checkout tags/STAR_2.4.0g1)
+    #(cd STAR; git checkout tags/STAR_2.4.0k)
     #(cd STAR; make)
 
     echo "*****"
-    echo "* Running: small-rna-prep-star.sh [v0.0.1]"
+    echo "* Running: small-rna-prep-star.sh [v2.0.0]"
     echo "* STAR version: "`STAR --version | awk '{print $1}' | cut -d _ -f 2-`
     echo "*****"
 

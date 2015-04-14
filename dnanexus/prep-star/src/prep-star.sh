@@ -1,5 +1,5 @@
 #!/bin/bash
-# prep-star 1.0.1
+# prep-star 2.0.0
 
 main() {
     # Now in resources/usr/bin
@@ -9,7 +9,7 @@ main() {
     #(cd STAR; make)
 
     echo "*****"
-    echo "* Running: prep-star.sh [v1.0.1]"
+    echo "* Running: prep-star.sh [v2.0.0]"
     echo "* STAR version: "`STAR --version | awk '{print $1}' | cut -d _ -f 2-`
     echo "*****"
 

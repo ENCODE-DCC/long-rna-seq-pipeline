@@ -6,3 +6,4 @@ keypairs.json
 *.results
 *.diff
 *_diff
+*~

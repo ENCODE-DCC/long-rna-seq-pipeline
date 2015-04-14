@@ -3,7 +3,7 @@
   "title": "Small-RNA-Seq-signals",
   "summary": "Converts BAMs of alignments from stranded libraries to bigwig format",
   "dxapi": "1.0.0",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -17,7 +17,8 @@
       "name": "chrom_sizes",
       "label": "chomosome/name length file",
       "class": "file",
-      "optional": false
+      "optional": false,
+      "patterns": ["*chrom.sizes","*.txt"]
     }
   ],
   "outputSpec": [

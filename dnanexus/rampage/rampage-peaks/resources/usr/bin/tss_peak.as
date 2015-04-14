@@ -1,5 +1,5 @@
 table tss_peak
-"Rampage peak coverage. Browser extensible data (12 fields)."
+"Rampage peak coverage. Browser extensible data (11 fields)."
     (
     string  chrom;       "Reference sequence chromosome (or contig, scaffold, etc.)"
     uint    chromStart;  "Start position in chromosome"
@@ -11,6 +11,5 @@ table tss_peak
     string  gene_id;     "Gene identifier"
     string  gene_name;   "Gene name" 
     string  tss_id;      "TSS identifier"
-    string  gene_region; "the region transcribed by the gene associated with this tss int he format contig:strand:start-stop"
     lstring peak_cov;    "base by base read coverage of the peak"
     )

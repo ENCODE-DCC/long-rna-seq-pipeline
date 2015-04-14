@@ -3,7 +3,7 @@
   "title": "Small-RNA-Seq-align",
   "summary": "Align single-end (stranded) reads to genome using STAR for the ENCODE small-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -46,6 +46,11 @@
       "label": "BAM file of alignment to whole genome",
       "class": "file",
       "patterns": ["*_star_genome.bam"]
+    },
+    {
+      "name": "metadata",
+      "label": "JSON formatted string of metadata",
+      "class": "string"
     }
   ],
   "runSpec": {
