@@ -1,0 +1,76 @@
+{
+  "name": "rampage-idr",
+  "title": "Rampage-RNA-Seq-idr-reporting",
+  "summary": "Compares two sets of peaks and generates an Irreproducible Discovery Rate report",
+  "dxapi": "1.0.0",
+  "version": "0.1.0",
+  "authorizedUsers": [],
+  "inputSpec": [
+    {
+      "name": "peaks_a",
+      "label": "Peaks produced by one replicate",
+      "class": "file",
+      "optional": false,
+      "patterns": ["*.bed"]
+    },
+    {
+      "name": "peaks_b",
+      "label": "Peaks produced by another replicate",
+      "class": "file",
+      "optional": false,
+      "patterns": ["*.bed"]
+    },
+    {
+      "name": "chrom_sizes",
+      "label": "chomosome/name length file",
+      "class": "file",
+      "optional": false,
+      "patterns": ["*chrom.sizes","*.txt"]
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "rampage_idr_bed",
+      "label": "Bed file of rampage idr peaks",
+      "class": "file",
+      "patterns": ["*_rampage_idr.bed"]
+    },
+    {
+      "name": "rampage_idr_bb",
+      "label": "BigBed file of rampage idr peaks",
+      "class": "file",
+      "patterns": ["*_rampage_idr.bb"]
+    },
+    {
+      "name": "rampage_idr_png",
+      "label": "Plot of rampage idr results",
+      "class": "file",
+      "patterns": ["*_rampage_idr.png"]
+    },
+    {
+      "name": "metadata",
+      "label": "JSON formatted string of metadata",
+      "class": "string"
+    }
+  ],
+  "runSpec": {
+    "interpreter": "bash",
+    "file": "src/rampage-idr.sh",
+    "systemRequirements": {
+      "main": {
+        "instanceType": "mem3_hdd2_x8"
+      },
+      "myEntryPoint": {
+        "instanceType": "mem3_hdd2_x8"
+      }
+    }
+  },
+  "access": {
+    "network": [
+      "*"
+    ]
+  },
+  "categories": [
+    "ENCODE"
+  ]
+}
