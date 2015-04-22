@@ -6,7 +6,7 @@ be repurposed for a non-dnanexus environment.
 
 ## Applets (aka steps):
 *Preparation:* Typically these steps are only one once per gender specific reference genome (e.g. GCRh37/hg19 female) and
-             gene annotation (e.g. gencode.v19).  The result os the preparation steps are used in all subsequent pipeline 
+             gene annotation (e.g. gencode.v19).  The result of the preparation steps are used in all subsequent pipeline 
              runs for the same genome, gender and annotation.
 - merge-annotation - Takes a gene annotation (e.g. gencode.v19.annotation.gtf.gz) gzipped gtf file, the corresponding tRNA
                      gzipped gtf and a spike-in set (e.g. ERCC) gzipped fasta file and combines them into a single 
@@ -19,7 +19,7 @@ be repurposed for a non-dnanexus environment.
 - prep-rsem        - Takes a gender specific genome reference gzipped fasta file (e.g. GCRh37/hg19 female) a merged
                      annotation file and produces an RSEM index tar.gz file.
 
-*Normal pipline:* The normal pipeline is actually 2 separate pipelines, as paired-end and signle end fastqs are handled
+*Normal pipline:* The normal pipeline is actually 2 separate pipelines, as paired-end and single end fastqs are handled
                 differently.  The '-pe' and '-se' alignment steps are an obvious distinction, but the pe always produces
                 four signal files, while the se pipeline only produces two. 
 - align-star-pe        - Takes a pair of (paired-end) gzipped fastq files and a STAR genome index tarred, gzipped file.  
@@ -49,8 +49,8 @@ INPUTS:  annatation.gtf.gz      genome-gender.fasta.gz   genome-gender.fasta.gz 
                 |                    |                        |                        |
                 V                    V                        V                        V
 STEPS:   merge-annotation ====> prep-tophat,             prep-star,               prep-rsem
-                |                       |                       |
-                V                       V                       V
+                |                    |                       |
+                V                    V                       V
 OUTPUTS: merge-anno.gtf.gz(a)   tophat-index.tgz(b)      star-index.tgz(c)        rsem-index.tgz(d)
 ```
 

@@ -2,14 +2,14 @@
 # rampage-idr 0.1.0
 
 main() {
-    echo "* Installing Anacaonda3 (python3.4.3, numpy-1.9.2 matplotlib-1.4.3..."
+    echo "* Installing Anaconda3 (python3.4.3, numpy-1.9.2 matplotlib-1.4.3..."
     set -x
     wget https://3230d63b5fc54e62148e-c95ac804525aac4b6dba79b00b39d1d3.ssl.cf1.rackcdn.com/Anaconda3-2.2.0-Linux-x86_64.sh >> ../install.log 2>&1
     bash Anaconda3-2.2.0-Linux-x86_64.sh -b
     ana_bin=`echo ~/anaconda3/bin`
     # python symlink will interfere with python2.7
     rm ${ana_bin}/python
-    ls ${ana_bin}
+    #ls ${ana_bin}
     export PATH=${ana_bin}:$PATH
     python3 -V 2>&1 | tee -a install.log
     #sudo python3 -V 2>&1 | tee -a install.log
@@ -18,17 +18,19 @@ main() {
 
     echo "* Installing idr..."
     set -x
-    wget https://github.com/nboley/idr/archive/2.0.0beta5.tar.gz -O idr.tgz >> ../install.log 2>&1
+    wget https://github.com/nboley/idr/archive/2.0.0.tar.gz -O idr.tgz >> ../install.log 2>&1
+    #wget https://github.com/nboley/idr/archive/2.0.0beta5.tar.gz -O idr.tgz >> ../install.log 2>&1
     mkdir idr
     tar -xzf idr.tgz -C idr --strip-components=1
     cd idr
-    #sudo python3 setup.py install >> ../install.log 2>&1
-    sudo ${ana_bin}/python3 setup.py install
+    # sudo does not see python3 so it requires ana_bin path
+    sudo ${ana_bin}/python3 setup.py install >> ../install.log 2>&1
     cd ..
     set +x
     
     echo "*****"
     echo "* Running: rampage-idr.sh [v0.1.0]"
+    echo "* Anaconda3 version: 2.2.0"
     echo "* idr version: "`idr/bin/idr --version 2>&1 | grep IDR | awk '{print $2}'`
     echo "* bedToBigBed version: "`bedToBigBed 2>&1 | grep "bedToBigBed v" | awk '{printf "v%s", $3}'`
     echo "*****"
@@ -55,12 +57,6 @@ main() {
     idr_root=${peaks_a_fn}_${peaks_b_fn}_idr
     echo "* Rampage IDR root: '"$idr_root"'"
 
-    # TODO:
-    # Proper paramters for idr
-    # Should we remove the ERCC spike-in peaks first?
-    # Do we want bed?  bigBed?  Limit to passing peaks only? (--idr-threshold 0.05)
-    # Do we want plot?
-    
     echo "* Removing any spike-ins from bed files..."
     set -x
     grep "^chr" peaks_a.bed > peaks_a_clean.bed
@@ -68,12 +64,9 @@ main() {
     set -x
 
     echo "* Running IDR..."
-    # Note: --plot: "WARNING: matplotlib does not appear to be installed and is required for plotting"
-    #               even though "sudo apt-get install python-matplotlib" says it is installed 
     set -x
-    idr/bin/idr --input-file-type bed --rank 7 --plot --samples peaks_a_clean.bed peaks_b_clean.bed 2>&1 | tee idr_summary.txt
+    idr/bin/idr --input-file-type bed --rank 7 --plot --verbose --samples peaks_a_clean.bed peaks_b_clean.bed 2>&1 | tee idr_summary.txt
     sort -k1,1 -k2,2n < idrValues.txt > ${idr_root}.bed
-    touch idrValues.txt.png
     mv idrValues.txt.png ${idr_root}.png
     set +x
 
