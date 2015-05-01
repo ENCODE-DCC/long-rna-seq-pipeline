@@ -18,7 +18,7 @@ be repurposed for a non-dnanexus environment.
 ---------
 ## Flow
 ```
-INPUTS:  genome.fasta.gz           reads.fq.gz            rampage.bam(a)
+INPUTS:  genome.fasta.gz           reads.fq.gz            small-rna.bam(b)
                                    star-index.tgz(a)      chrom.sizes
                 |                  chrom.sizes                  |
                 |                       |                       |

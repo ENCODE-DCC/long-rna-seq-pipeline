@@ -49,8 +49,8 @@ INPUTS:  annatation.gtf.gz      genome-gender.fasta.gz   genome-gender.fasta.gz 
                 |                    |                        |                        |
                 V                    V                        V                        V
 STEPS:   merge-annotation ====> prep-tophat,             prep-star,               prep-rsem
-                |                    |                       |
-                V                    V                       V
+                |                    |                        |                        |
+                V                    V                        V                        V
 OUTPUTS: merge-anno.gtf.gz(a)   tophat-index.tgz(b)      star-index.tgz(c)        rsem-index.tgz(d)
 ```
 
