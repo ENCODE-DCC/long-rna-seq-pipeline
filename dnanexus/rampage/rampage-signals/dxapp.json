@@ -45,30 +45,6 @@
       "label": "BigWig file of uniquely mapped 5' minus-stranded reads",
       "class": "file",
       "patterns": ["*_rampage_5p_minusUniq.bw"]
-    },
-    {
-      "name": "all_plus_bg",
-      "label": "BedGraph file for all 5' plus-stranded reads (temporary)",
-      "class": "file",
-      "patterns": ["*_rampage_5p_plusAll.bg"]
-    },
-    {
-      "name": "unique_plus_bg",
-      "label": "BedGraph file of uniquely mapped 5' plus-stranded reads (temporary)",
-      "class": "file",
-      "patterns": ["*_rampage_5p_plusUniq.bg"]
-    },
-    {
-      "name": "all_minus_bg",
-      "label": "BedGraph file for all 5' minus-stranded reads (temporary)",
-      "class": "file",
-      "patterns": ["*_rampage_5p_minusAll.bg"]
-    },
-    {
-      "name": "unique_minus_bg",
-      "label": "BedGraph file of uniquely mapped 5' minus-stranded reads (temporary)",
-      "class": "file",
-      "patterns": ["*_rampage_5p_minusUniq.bg"]
     }
   ],
   "runSpec": {

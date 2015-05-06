@@ -1,5 +1,8 @@
 #!/bin/bash
-# rampage-peaks 1.0.0
+# rampage-peaks.sh
+
+script_name="rampage-peaks.sh"
+script_ver="1.0.0"
 
 main() {
     echo "* Installing python-dev cython python-scipy python-networkx..."
@@ -25,12 +28,17 @@ main() {
     # Now in resources/usr/bin
     #wget https://github.com/ENCODE-DCC/kentUtils/archive/v302.1.0.tar.gz
 
-    echo "*****"
-    echo "* Running: rampage-peaks.sh [v1.0.0]"
-    echo "* Running: grit:call_peaks version: "`call_peaks --version 2>&1 | grep call_peaks | awk '{print $3}'`
-    echo "* bedToBigBed version: "`bedToBigBed 2>&1 | grep "bedToBigBed v" | awk '{printf "v%s", $3}'`
-    echo "* samtools version: "`samtools 2>&1 | grep Version | awk '{print $2}'`
-    echo "*****"
+    # If available, will print tool versions to stderr and json string to stdout
+    versions=''
+    if [ -f /usr/bin/tool_versions.py ]; then 
+        versions=`tool_versions.py --applet $script_name --appver $script_ver`
+    fi
+    #echo "*****"
+    #echo "* Running: rampage-peaks.sh [v1.0.0]"
+    #echo "* Running: grit:call_peaks version: "`call_peaks --version 2>&1 | grep call_peaks | awk '{print $3}'`
+    #echo "* bedToBigBed version: "`bedToBigBed 2>&1 | grep "bedToBigBed v" | awk '{printf "v%s", $3}'`
+    #echo "* samtools version: "`samtools 2>&1 | grep Version | awk '{print $2}'`
+    #echo "*****"
 
     echo "Value of rampage bam: '$rampage_marked_bam'"
     echo "Value of control bam: '$control_bam'"
@@ -64,25 +72,31 @@ main() {
     # TODO:
     # Should we remove the ERCC spike-in peaks first?
     echo "* Indexing bams..."
+    set -x
     samtools index ${bam_fn}.bam 
     samtools index ${control_fn}.bam 
+    set +x
 
     echo "* Calling peaks..."
+    set -x
     call_peaks --rampage-reads ${bam_fn}.bam --rnaseq-reads ${control_fn}.bam --threads $nthreads \
                --reference ${annotation_fn}.gtf --exp-filter-fraction 0.05 --trim-fraction 0.01 \
                 --ucsc --outfname ${peaks_root}.gff --outfname-type gff \
                --bed-peaks-ofname ${peaks_root}.bed
+    set +x
     echo `ls`
  
     echo "* Converting bed to bigBed..."
+    set -x
     grep "^chr" ${peaks_root}.bed | sort -k1,1 -k2,2n > peaks_polished.bed
     #cp peaks_polished.bed ${peaks_root}.bb
     bedToBigBed peaks_polished.bed -type=bed6+ -as=/usr/bin/tss_peak.as chromSizes.txt ${peaks_root}.bb
+    set +x
 
     echo "* Upload results..."
-    rampage_peaks_bed=$(dx upload ${peaks_root}.bed --brief)
-    rampage_peaks_bb=$(dx upload ${peaks_root}.bb --brief)
-    rampage_peaks_gff=$(dx upload ${peaks_root}.gff --brief)
+    rampage_peaks_bed=$(dx upload ${peaks_root}.bed --property SW="$versions" --brief)
+    rampage_peaks_bb=$(dx upload ${peaks_root}.bb   --property SW="$versions" --brief)
+    rampage_peaks_gff=$(dx upload ${peaks_root}.gff --property SW="$versions" --brief)
 
     dx-jobutil-add-output rampage_peaks_bed "$rampage_peaks_bed" --class=file
     dx-jobutil-add-output rampage_peaks_bb "$rampage_peaks_bb" --class=file
