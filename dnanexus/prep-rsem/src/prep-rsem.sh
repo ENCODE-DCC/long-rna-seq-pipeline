@@ -1,5 +1,8 @@
 #!/bin/bash
-# prep-rsem 1.0.1
+# prep-rsem.sh
+
+script_name="prep-rsem.sh"
+script_ver="1.0.2"
 
 main() {
     # Now in resources/usr/bin
@@ -9,10 +12,15 @@ main() {
     ### get correct commit bit from submodule
     #(cd RSEM; make)
 
-    echo "*****"
-    echo "* Running: prep-rsem.sh [v1.0.1]"
-    echo "* RSEM version: "`rsem-calculate-expression --version | awk '{print $5}'`
-    echo "*****"
+    # If available, will print tool versions to stderr and json string to stdout
+    versions=''
+    if [ -f /usr/bin/tool_versions.py ]; then 
+        versions=`tool_versions.py --applet $script_name --appver $script_ver`
+    fi
+    #echo "*****"
+    #echo "* Running: prep-rsem.sh [v1.0.1]"
+    #echo "* RSEM version: "`rsem-calculate-expression --version | awk '{print $5}'`
+    #echo "*****"
 
     echo "* Value of annotations: '$annotations'"
     echo "* Value of genome: '$genome'"
@@ -50,11 +58,14 @@ main() {
     # Fill in your application code here.
 
     echo "* Prepare reference..."
+    set -x
     mkdir out
     rsem-prepare-reference --no-polyA --gtf ${annotation_fn}.gtf ${ref} out/rsem
+    set +x
 
     # Attempt to make bamCommentLines.txt, which should be reviewed. NOTE tabs handled by assignment.
     echo "* Create bam header..."
+    set -x
     refComment="@CO\tREFID:$(basename ${genome_fn})"
     annotationComment="@CO\tANNID:$(basename ${annotation_fn})"
     spikeInComment="@CO\tSPIKEID:${spike_in_fn}"
@@ -63,12 +74,15 @@ main() {
     echo -e ${spikeInComment} >> out/rsem_bamCommentLines.txt
 
     echo `cat "out/rsem_bamCommentLines.txt"`
+    set +x
 
     echo "* Tar and upload..."
     echo `ls out/*`
+    set -x
     tar -czf ${genome_fn}_${annotation_fn}_rsemIndex.tgz out/*
+    set +x
 
-    rsem_index=$(dx upload ${genome_fn}_${annotation_fn}_rsemIndex.tgz --brief)
+    rsem_index=$(dx upload ${genome_fn}_${annotation_fn}_rsemIndex.tgz --property SW="$versions" --brief)
     dx-jobutil-add-output rsem_index $rsem_index --class=file
     echo "* Finished."
 }

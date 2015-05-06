@@ -1,14 +1,22 @@
 #!/bin/bash
-# merge-annotation 1.0.0
+# merge-annotation.sh
+
+script_name="merge-annotation.sh"
+script_ver="1.0.1"
 
 main() {
     # Now in resources/usr/bin
     #wget https://github.com/ENCODE-DCC/long-rna-seq-pipeline/tree/master/DAC/GTF.awk
 
-    echo "*****"
-    echo "* Running: merge_annotation.sh [v1.0.0]"
-    echo "* GTF.awk version: unversioned"
-    echo "*****"
+    # If available, will print tool versions to stderr and json string to stdout
+    versions=''
+    if [ -f /usr/bin/tool_versions.py ]; then 
+        versions=`tool_versions.py --applet $script_name --appver $script_ver`
+    fi
+    #echo "*****"
+    #echo "* Running: merge_annotation.sh [v1.0.0]"
+    #echo "* GTF.awk version: unversioned"
+    #echo "*****"
 
     echo "* Value of gene_annotation: '$gene_annotation'"
     echo "* Value of trna_annoation: '$trna_annotation'"
@@ -34,12 +42,14 @@ main() {
     # Fill in your application code here.
 
     echo "* Merge GTF files..."
+    set -x
     out_fn="$gene_fn"-"tRNAs"-"$spike_in_fn".gtf
     awk -f /usr/bin/GTF.awk ${gene_fn}.gtf ${trna_fn}.gtf ${spike_in_fn}.fa > ${out_fn}
     gzip ${out_fn}
+    set +x
 
     echo "* Upload results..."
-    combined_gtf=$(dx upload $out_fn.gz --brief)
+    combined_gtf=$(dx upload $out_fn.gz --property SW="$versions" --brief)
     dx-jobutil-add-output combined_gtf "$combined_gtf" --class=file
     echo "* Finished."
 }

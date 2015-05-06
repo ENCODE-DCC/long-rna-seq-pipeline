@@ -1,5 +1,8 @@
 #!/bin/bash
-# align-tophat-se 1.0.1
+# align-tophat-pe.sh
+
+script_name="align-tophat-pe.sh"
+script_ver="1.0.1"
 
 main() {
     # Now in resources/usr/bin
@@ -10,13 +13,18 @@ main() {
     #wget https://github.com/samtools/samtools/archive/0.1.19.tar.gz
     #wget wget https://github.com/xweigit/xweiEncodeScripts/archive/v1.0.tar.gz
 
-    echo "*****"
-    echo "* Running: align-tophat-pe.sh v[1.0.1]"
-    echo "* TopHat version: "`tophat -v | awk '{print $2}'`
-    echo "* bowtie2 version: "`bowtie2 --version 2>&1 | grep bowtie | awk '{print $3}'`
-    echo "* samtools version: "`samtools 2>&1 | grep Version | awk '{print $2}'`
-    echo "* tophat_bam_xsA_tag_fix.pl version: "`perl /usr/bin/tophat_bam_xsA_tag_fix.pl --version 2>&1`
-    echo "*****"
+    # If available, will print tool versions to stderr and json string to stdout
+    versions=''
+    if [ -f /usr/bin/tool_versions.py ]; then 
+        versions=`tool_versions.py --applet $script_name --appver $script_ver`
+    fi
+    #echo "*****"
+    #echo "* Running: align-tophat-pe.sh v[1.0.1]"
+    #echo "* TopHat version: "`tophat -v | awk '{print $2}'`
+    #echo "* bowtie2 version: "`bowtie2 --version 2>&1 | grep bowtie | awk '{print $3}'`
+    #echo "* samtools version: "`samtools 2>&1 | grep Version | awk '{print $2}'`
+    #echo "* tophat_bam_xsA_tag_fix.pl version: "`perl /usr/bin/tophat_bam_xsA_tag_fix.pl --version 2>&1`
+    #echo "*****"
 
     echo "* Value of reads: '$reads_1'"
     echo "* Value of reads: '$reads_2'"
@@ -49,12 +57,15 @@ main() {
     # Fill in your application code here.
 
     echo "* Map reads..."
+    set -x
     tophat -p ${nthreads} -z0 -a 8 -m 0 --min-intron-length 20 --max-intron-length 1000000 \
         --read-edit-dist 4 --read-mismatches 4 -g 20  --no-discordant --no-mixed \
         --library-type fr-firststrand --transcriptome-index ${anno_prefix} \
         ${geno_prefix} ${reads1_fn}.fastq.gz ${reads2_fn}.fastq.gz
+    set +x
 
     echo "* Set up headers..."
+    set -x
     HD="@HD\tVN:1.4\tSO:coordinate" 
     stCommand="perl tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | samtools view -bS - | samtools sort - mapped_fixed; samtools merge -h newHeader.sam merged.bam mapped_fixed.bam out/unmapped.bam"
     newPG="@PG\tID:Samtools\tPN:Samtools\tCL:"$stCommand"\tPP:Tophat\tVN:VN:0.1.17 (r973:277)"
@@ -69,24 +80,24 @@ main() {
 
     # Add reference genome and transcriptome used
     cat ${geno_prefix}_bamCommentLines.txt >> newHeader.sam
+    set +x
 
     echo "* Fix unmapped bam and sort before merge..."
+    set -x
     perl /usr/bin/tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | \
                 samtools view -bS - | samtools sort - mapped_fixed
+    set +x
 
     echo "* Merge aligned and unaligned into single bam, using the patched up header..."
+    set -x
     samtools merge -h newHeader.sam merged.bam mapped_fixed.bam tophat_out/unmapped.bam
-    # Note: no longer making unused index.
-    #samtools index merged.bam
 
     mv merged.bam ${reads1_fn}-${reads2_fn}_tophat.bam
-    #mv merged.bam.bai ${reads1_fn}-${reads2_fn}_tophat.bam.bai
+    set +x
 
     echo "* Upload results..."
-    tophat_bam=$(dx upload ${reads1_fn}-${reads2_fn}_tophat.bam --brief)
-    #tophat_bai=$(dx upload ${reads1_fn}-${reads2_fn}_tophat.bam.bai --brief)
+    tophat_bam=$(dx upload ${reads1_fn}-${reads2_fn}_tophat.bam --property SW="$versions" --brief)
     dx-jobutil-add-output tophat_bam "$tophat_bam" --class=file
-    #dx-jobutil-add-output tophat_bai "$tophat_bai" --class=file
     echo "* Finished."
 }
 

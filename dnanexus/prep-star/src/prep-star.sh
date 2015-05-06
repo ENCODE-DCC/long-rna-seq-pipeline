@@ -1,5 +1,8 @@
 #!/bin/bash
-# prep-star 2.0.0
+# prep-star.sh
+
+script_name="prep-star.sh"
+script_ver="2.0.1"
 
 main() {
     # Now in resources/usr/bin
@@ -8,10 +11,15 @@ main() {
     #(cd STAR; git checkout tags/STAR_2.4.0h)
     #(cd STAR; make)
 
-    echo "*****"
-    echo "* Running: prep-star.sh [v2.0.0]"
-    echo "* STAR version: "`STAR --version | awk '{print $1}' | cut -d _ -f 2-`
-    echo "*****"
+    # If available, will print tool versions to stderr and json string to stdout
+    versions=''
+    if [ -f /usr/bin/tool_versions.py ]; then 
+        versions=`tool_versions.py --applet $script_name --appver $script_ver`
+    fi
+    #echo "*****"
+    #echo "* Running: prep-star.sh [v2.0.0]"
+    #echo "* STAR version: "`STAR --version | awk '{print $1}' | cut -d _ -f 2-`
+    #echo "*****"
 
     echo "* Value of annotations: '$annotations'"
     echo "* Value of genome: '$genome'"
@@ -49,13 +57,16 @@ main() {
     # Fill in your application code here.
 
     echo "* Build index..."
+    set -x
     mkdir out
     STAR --runMode genomeGenerate --genomeFastaFiles ${genome_fn}.fa ${spike_in_fn}.fa \
          --sjdbOverhang 100 --sjdbGTFfile ${annotation_fn}.gtf --runThreadN 6 --genomeDir out/ \
          --outFileNamePrefix out
+    set +x
 
     # Attempt to make bamCommentLines.txt, which should be reviewed. NOTE tabs handled by assignment.
     echo "* Create bam header..."
+    set -x
     refComment="@CO\tREFID:$(basename ${genome_fn})"
     annotationComment="@CO\tANNID:$(basename ${annotation_fn})"
     spikeInComment="@CO\tSPIKEID:${spike_in_fn}"
@@ -64,15 +75,18 @@ main() {
     echo -e ${spikeInComment} >> out/star_bamCommentLines.txt
 
     echo `cat "out/star_bamCommentLines.txt"`
+    set +x
 
     echo "* Tar and upload results..."
     echo "/"
     echo `ls`
     echo "out"
     echo `ls out/`
+    set -x
     tar -czf ${genome_fn}_${annotation_fn}_starIndex.tgz out/
+    set +x
 
-    star_index=$(dx upload ${genome_fn}_${annotation_fn}_starIndex.tgz --brief)
+    star_index=$(dx upload ${genome_fn}_${annotation_fn}_starIndex.tgz --property SW="$versions" --brief)
 
     # The following line(s) use the utility dx-jobutil-add-output to format and
     # add output variables to your job's output as appropriate for the output

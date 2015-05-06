@@ -1,5 +1,8 @@
 #!/bin/bash
-# quant-rsem 1.0.2
+# quant-rsem.sh 
+
+script_name="quant-rsem.sh"
+script_ver="1.0.3"
 
 main() {
     # Now in resources/usr/bin
@@ -9,10 +12,15 @@ main() {
     # #### get correct commit bit from submodule
     # (cd RSEM; make)
 
-    echo "*****"
-    echo "* Running: quant_rsem.sh [v1.0.2]"
-    echo "* RSEM version: "`rsem-calculate-expression --version | awk '{print $5}'`
-    echo "*****"
+    # If available, will print tool versions to stderr and json string to stdout
+    versions=''
+    if [ -f /usr/bin/tool_versions.py ]; then 
+        versions=`tool_versions.py --applet $script_name --appver $script_ver`
+    fi
+    #echo "*****"
+    #echo "* Running: quant_rsem.sh [v1.0.2]"
+    #echo "* RSEM version: "`rsem-calculate-expression --version | awk '{print $5}'`
+    #echo "*****"
 
     echo "* Value of annotation_bam: '$star_anno_bam'"
     echo "* Value of rsem_index: '$rsem_index'"
@@ -51,14 +59,16 @@ main() {
     # Fill in your application code here.
 
     echo "* Quantitate with extra flags: [${extraFlags}]..."
+    set -x
     rsem-calculate-expression --bam --estimate-rspd --calc-ci --seed ${rnd_seed} -p ${nthreads} \
         --no-bam-output --ci-memory 30000 ${extraFlags} ${bam_fn}.bam ${index_prefix} ${bam_fn}_rsem
+    set +x
 
     echo `ls ${bam_fn}*`
 
     echo "* Upload results..."
-    rsem_gene_results=$(dx upload ${bam_fn}_rsem.genes.results --brief)
-    rsem_iso_results=$(dx upload ${bam_fn}_rsem.isoforms.results --brief)
+    rsem_gene_results=$(dx upload ${bam_fn}_rsem.genes.results   --property SW="$versions" --brief)
+    rsem_iso_results=$(dx upload ${bam_fn}_rsem.isoforms.results --property SW="$versions" --brief)
 
     dx-jobutil-add-output rsem_gene_results "$rsem_gene_results" --class=file
     dx-jobutil-add-output rsem_iso_results "$rsem_iso_results" --class=file

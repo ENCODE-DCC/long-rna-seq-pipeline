@@ -3,7 +3,7 @@
   "title": "Long-RNA-Seq-align-star-pe",
   "summary": "Align paired-end (stranded) reads to genome and transcriptome using STAR for the ENCODE long-rna-peq pipeline",
   "dxapi": "1.0.0",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "authorizedUsers": [],
   "inputSpec": [
     {
