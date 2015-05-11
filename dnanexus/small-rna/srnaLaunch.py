@@ -17,9 +17,6 @@ class SrnaLaunch(Launch):
     PIPELINE_HELP = "Launches '"+PIPELINE_NAME+"' pipeline analysis for one replicate. "
     ''' This pipline does not support combined replicates.'''
                     
-    RESULT_FOLDER_DEFAULT = '/srna/'
-    ''' This the default location to place results folders for each experiment.'''
-
     REP_STEP_ORDER = [ "concat-fastqs", "small-rna-align", "small-rna-signals" ]
     '''The (artifically) linear order of all pipeline steps.'''
     COMBINED_STEP_ORDER = []

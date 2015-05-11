@@ -227,14 +227,8 @@ class RampageLaunch(Launch):
         run['title'] += " on " + psv['genome']+" - "+psv['gender']
 
         # Must override results location because of annotation
-        psv['resultsLoc'] = args.resultsLoc
-        if psv['resultsLoc'] == self.RESULT_FOLDER_DEFAULT:
-            if psv['genome'] == 'mm10' and 'annotation' in psv:
-                psv['resultsLoc'] = self.RESULT_FOLDER_DEFAULT + psv['genome'] + '/' + psv['annotation'] + '/'
-            else:
-                psv['resultsLoc'] = self.RESULT_FOLDER_DEFAULT + psv['genome'] + '/'
-        if not psv['resultsLoc'].endswith('/'):
-            psv['resultsLoc'] += '/' 
+        psv['resultsLoc'] = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,psv['exp_type'], \
+                                                                                            psv['genome'],psv['annotation'])
         psv['resultsFolder'] = psv['resultsLoc'] + psv['experiment'] + '/'
         psv['reps']['a']['resultsFolder'] = psv['resultsLoc'] + psv['experiment'] + '/' + \
                                                               psv['reps']['a']['rep_tech'] + '/'

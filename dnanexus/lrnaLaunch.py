@@ -23,9 +23,6 @@ class LrnaLaunch(Launch):
     ANNO_DEFAULT = ANNO_DEFAULTS[Launch.GENOME_DEFAULT]
     ''' Multiple annotations might be supported for each genome.'''
 
-    RESULT_FOLDER_DEFAULT = '/lrna/'
-    ''' This the default location to place results folders for each experiment.'''
-
     REP_STEP_ORDER = {
         "se": [ "concatR1",             "align-tophat-se", "topBwSe", "align-star-se", "starBwSe", "quant-rsem" ],
         "pe": [ "concatR1", "concatR2", "align-tophat-pe", "topBwPe", "align-star-pe", "starBwPe", "quant-rsem" ]
@@ -277,14 +274,8 @@ class LrnaLaunch(Launch):
         run['name']    += "_"+psv['experiment']+"_"+run['rep_tech']
 
         # Must override results location because of annotation
-        psv['resultsLoc'] = args.resultsLoc
-        if psv['resultsLoc'] == self.RESULT_FOLDER_DEFAULT:
-            if psv['genome'] == 'mm10' and 'annotation' in psv:
-                psv['resultsLoc'] = self.RESULT_FOLDER_DEFAULT + psv['genome'] + '/' + psv['annotation'] + '/'
-            else:
-                psv['resultsLoc'] = self.RESULT_FOLDER_DEFAULT + psv['genome'] + '/'
-        if not psv['resultsLoc'].endswith('/'):
-            psv['resultsLoc'] += '/' 
+        psv['resultsLoc'] = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,psv['exp_type'], \
+                                                                                            psv['genome'],psv['annotation'])
         psv['resultsFolder'] = psv['resultsLoc'] + psv['experiment'] + '/'
         psv['reps']['a']['resultsFolder'] = psv['resultsLoc'] + psv['experiment'] + '/' + \
                                                               psv['reps']['a']['rep_tech'] + '/'
