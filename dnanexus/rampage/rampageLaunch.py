@@ -69,11 +69,7 @@ class RampageLaunch(Launch):
             "results": { "all_plus_bw":    "all_plus_bw",    
                          "all_minus_bw":    "all_minus_bw",
                          "unique_plus_bw": "unique_plus_bw", 
-                         "unique_minus_bw": "unique_minus_bw",
-                         "all_plus_bg":    "all_plus_bg",    
-                         "all_minus_bg":    "all_minus_bg", 
-                         "unique_plus_bg": "unique_plus_bg", 
-                         "unique_minus_bg": "unique_minus_bg" }
+                         "unique_minus_bw": "unique_minus_bw" }
         },
         "rampage-peaks": {
             "app":     "rampage-peaks",
@@ -94,8 +90,9 @@ class RampageLaunch(Launch):
             "inputs":  { "peaks_a": "peaks_a", 
                          "peaks_b": "peaks_b", 
                          "chrom_sizes": "chrom_sizes" },
-            "results": { "rampage_idr_bed": "rampage_idr_bed",
-                         "rampage_idr_bb":  "rampage_idr_bb" }
+            "results": { "rampage_idr_png": "rampage_idr_png",
+                         "rampage_idr_bb":  "rampage_idr_bb",
+                         "rampage_idr_bed": "rampage_idr_bed" }
         }
     }
 
@@ -116,7 +113,10 @@ class RampageLaunch(Launch):
         "all_minus_bw":       "/*_rampage_5p_minusAll.bw",
         "unique_plus_bw":     "/*_rampage_5p_plusUniq.bw",
         "unique_minus_bg":    "/*_rampage_5p_minusUniq.bg",
-        "unique_minus_bw":    "/*_rampage_5p_minusUniq.bw"
+        "unique_minus_bw":    "/*_rampage_5p_minusUniq.bw",
+        "rampage_idr_bed":    "*_idr.bed",
+        "rampage_idr_bb":     "*_idr.bb",
+        "rampage_idr_png":    "*_idr.png"
     }
 
     REFERENCE_FILES = {
@@ -227,7 +227,7 @@ class RampageLaunch(Launch):
         run['title'] += " on " + psv['genome']+" - "+psv['gender']
 
         # Must override results location because of annotation
-        psv['resultsLoc'] = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,psv['exp_type'], \
+        psv['resultsLoc'] = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name,psv['exp_type'], \
                                                                                             psv['genome'],psv['annotation'])
         psv['resultsFolder'] = psv['resultsLoc'] + psv['experiment'] + '/'
         psv['reps']['a']['resultsFolder'] = psv['resultsLoc'] + psv['experiment'] + '/' + \
@@ -296,7 +296,10 @@ class RampageLaunch(Launch):
             rep_tech = "rep%s_%s" % \
                     (rep_obj['biological_replicate_number'], rep_obj['technical_replicate_number'])
             # default by cheating
-            control_root = self.CONTROL_ROOT_FOLDER
+            if self.proj_name == dxencode.PRODUCTION_PROJECT:
+                control_root = "/long-RNA-seq/runs/"
+            else:
+                control_root = self.CONTROL_ROOT_FOLDER
             path_n_glob = control_root + exp_id + '/' + rep_tech + '/' + self.CONTROL_FILE_GLOB
             target_folder = dxencode.find_folder(exp_id + '/' + rep_tech,self.project,control_root)
             #print "Target found [%s]" % target_folder

@@ -1,7 +1,6 @@
 #!/usr/bin/env python2.7
-# versions.py 0.0.1
-#
-# Creates versions json string for a particular applet
+# tool_versions.py v1  Creates "SW" versions json string for a particular DX applet.
+#                      Write request to stdout and verbose info to stderr.  This allows easy use in dx app scripts.
 
 import sys, os, argparse, json, commands
 

@@ -274,7 +274,7 @@ class LrnaLaunch(Launch):
         run['name']    += "_"+psv['experiment']+"_"+run['rep_tech']
 
         # Must override results location because of annotation
-        psv['resultsLoc'] = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,psv['exp_type'], \
+        psv['resultsLoc'] = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name,psv['exp_type'], \
                                                                                             psv['genome'],psv['annotation'])
         psv['resultsFolder'] = psv['resultsLoc'] + psv['experiment'] + '/'
         psv['reps']['a']['resultsFolder'] = psv['resultsLoc'] + psv['experiment'] + '/' + \

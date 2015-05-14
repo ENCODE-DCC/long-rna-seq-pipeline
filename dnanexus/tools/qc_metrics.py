@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.7
-# qc_metrics.py  Creates a json string of qc_metrics for a given applet.
+# qc_metrics.py v1 Creates a json string of qc_metrics for a given applet.
+#                  Write request to stdout and verbose info to stderr.  This allows easy use in dx app scripts.
 
 # imports needed for Settings class:
 import os, sys, string, argparse, json
