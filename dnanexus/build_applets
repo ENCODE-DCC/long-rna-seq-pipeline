@@ -1,7 +1,9 @@
 #!/bin/bash
 
 applet_dest=`cat ~/.dnanexus_config/DX_PROJECT_CONTEXT_NAME`
-applets='merge-annotation prep-star prep-rsem prep-tophat concat-fastqs align-star-se align-star-pe align-tophat-pe align-tophat-se quant-rsem bam-to-bigwig-stranded bam-to-bigwig-unstranded'
+applets="merge-annotation prep-star prep-rsem prep-tophat concat-fastqs"
+applets="$applets align-tophat-pe align-star-pe bam-to-bigwig-stranded quant-rsem mad-qc"
+applets="$applets align-tophat-se align-star-se bam-to-bigwig-unstranded"
 
 if [ $# -gt 0 ]; then
     if [ $1 == "?" ] || [ $1 == "-h" ] || [ $1 == "--help" ]; then

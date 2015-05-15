@@ -28,7 +28,7 @@ class LrnaLaunch(Launch):
         "pe": [ "concatR1", "concatR2", "align-tophat-pe", "topBwPe", "align-star-pe", "starBwPe", "quant-rsem" ]
         }
     '''The (artifically) linear order of all pipeline steps for single or paired-end.'''
-    COMBINED_STEP_ORDER = []
+    COMBINED_STEP_ORDER = [ "mad-qc" ]
     '''No combined steps in this pipeline.'''
 
     REP_STEPS = {
@@ -121,6 +121,15 @@ class LrnaLaunch(Launch):
                                  "rsem_gene_results": "rsem_gene_results" }
                     }
         }
+    COMBINED_STEPS = {
+        "mad-qc": {
+            "app":     "mad-qc",
+            "params":  {},
+            "inputs":  { "quants_a": "quants_a", 
+                         "quants_b": "quants_b" },
+            "results": { "mad_plot": "mad_plot" }
+        }
+    }
 
     FILE_GLOBS = {
         # For looking up previous result files, use wild-cards
@@ -143,7 +152,10 @@ class LrnaLaunch(Launch):
         "star_all_bw":          "/*_star_genome_all.bw",
         "star_uniq_bw":         "/*_star_genome_uniq.bw",
         "rsem_iso_results":     "/*_rsem.isoforms.results",
-        "rsem_gene_results":    "/*_rsem.genes.results"
+        "rsem_gene_results":    "/*_rsem.genes.results",
+        "quants_a":             "*_rsem.genes.results",
+        "quants_b":             "*_rsem.genes.results",
+        "mad_plot":             "*_mad_plot.png",
         }
 
     REFERENCE_FILES = {
@@ -251,8 +263,6 @@ class LrnaLaunch(Launch):
             run = psv['reps']['a']  # If not combined then run will be for the first (only) replicate
         else:
             run = psv
-            print "Long-RNA-seq pipeline currently does not support combined-replicate processing."
-            sys.exit(1)
 
         # workflow labeling
         psv['description'] = "The ENCODE RNA Seq pipeline for long RNAs"
@@ -269,7 +279,9 @@ class LrnaLaunch(Launch):
         else:
             run['title'] = "long RNA-seq single-end "
             run['name'] += "SE"
-        run['title']   += psv['experiment']+" - "+run['rep_tech'] + " (library '"+run['library_id']+"')"
+        run['title']   += psv['experiment']+" - "+run['rep_tech']
+        if not psv['combined']:
+            run['title']   += " (library '"+run['library_id']+"')"
         run['subTitle'] = psv['genome']+", "+psv['gender']+" and annotation '"+psv['annotation']+"'."
         run['name']    += "_"+psv['experiment']+"_"+run['rep_tech']
 

@@ -19,6 +19,7 @@ APP_TOOLS = {
     "bam-to-bigwig-stranded.sh":   [ "STAR","bedGraphToBigWig" ],
     "bam-to-bigwig-unstranded.sh": [ "STAR","bedGraphToBigWig" ],
     "quant-rsem.sh":               [ "RSEM" ],
+    "mad-qc.py":                   [ "MAD.R" ],
     
     "small-rna-prep-star.sh":      [ "STAR" ], 
     "small-rna-align.sh":          [ "STAR" ], 
@@ -39,6 +40,7 @@ ALL_TOOLS = {
             "call_peaks (grit)":         "call_peaks --version 2>&1 | grep call_peaks | awk '{print $3}'",
             "GTF.awk":                   "echo unversioned",
             "idr":                       "idr/bin/idr --version 2>&1 | grep IDR | awk '{print $2}'",
+            "MAD.R":                     "echo unversioned",
             "RSEM":                      "rsem-calculate-expression --version | awk '{print $5}'",
             "samtools":                  "samtools 2>&1 | grep Version | awk '{print $2}'",
             "STAR":                      "STAR --version | awk '{print $1}' | cut -d _ -f 2-",
