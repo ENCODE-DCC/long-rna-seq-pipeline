@@ -206,35 +206,22 @@ class RampageLaunch(Launch):
         psv['control'] = args.control
         
         # run will either be for combined or single rep.
-        if not psv['combined']:
+        if not self.combined_reps:
             run = psv['reps']['a']  # If not combined then run will be for the first (only) replicate
         else:
             run = psv
             
-        # workflow labeling
-        psv['description'] = "The ENCODE Rampage RNA pipeline for long RNAs"
-        run['name'] = "rampage_"+psv['genome']
-        if psv['genome'] == 'mm10':
-            run['name'] += psv['annotation']
-        if psv['gender'] == 'female':
-            run['name'] += "XX"
-        else:
-            run['name'] += "XY"
-        run['title'] = "Rampage RNA " + psv['experiment'] + " - " + run['rep_tech']
-        run['name'] += "_"+psv['experiment']+"_" + run['rep_tech']
-        if not psv['combined']:
-            run['title'] += " [library '"+run['library_id']+"']"
-        run['title'] += " on " + psv['genome']+" - "+psv['gender']
+        # If annotation is not default, then add it to title
+        if psv['annotation'] != self.ANNO_DEFAULTS[psv['genome']]:
+            psv['title'] += ', ' + psv['annotation']
+            psv['name']  += '_' + psv['annotation']
 
         # Must override results location because of annotation
         psv['resultsLoc'] = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name,psv['exp_type'], \
                                                                                             psv['genome'],psv['annotation'])
         psv['resultsFolder'] = psv['resultsLoc'] + psv['experiment'] + '/'
-        psv['reps']['a']['resultsFolder'] = psv['resultsLoc'] + psv['experiment'] + '/' + \
-                                                              psv['reps']['a']['rep_tech'] + '/'
-        if psv['combined']:
-            psv['reps']['b']['resultsFolder'] = psv['resultsLoc'] + psv['experiment'] + '/' + \
-                                                                  psv['reps']['b']['rep_tech'] + '/'
+        for ltr in psv['reps'].keys():
+            psv['reps'][ltr]['resultsFolder'] = psv['resultsFolder'] + psv['reps'][ltr]['rep_tech'] + '/'
 
         if verbose:
             print "Pipeline Specific Vars:"

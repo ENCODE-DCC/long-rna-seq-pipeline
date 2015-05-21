@@ -65,23 +65,10 @@ class SrnaLaunch(Launch):
         psv['nthreads']   = 8
 
         # run will either be for combined or single rep.
-        if not psv['combined']:
-            run = psv['reps']['a']  # If not combined then run will be for the first (only) replicate
-        else:
-            run = psv
+        if self.combined_reps:
             print "Small-RNA-seq pipeline currently does not support combined-replicate processing."
             sys.exit(1)
-            
-        # workflow labeling
-        psv['description'] = "The ENCODE RNA Seq pipeline for short RNA"
-        genderToken = "XY"
-        if psv['gender'] == 'female':
-            genderToken = "XX"
-        run['title'] = "short RNA-seq " + psv['experiment'] + " - "+run['rep_tech'] + \
-                           " (library '"+run['library_id']+"') on " + psv['genome'] + \
-                            " - "+psv['gender']
-        run['name'] = "srna_"+psv['genome']+genderToken+"_"+psv['experiment'] + "_"+run['rep_tech']
-
+           
         if verbose:
             print "Pipeline Specific Vars:"
             print json.dumps(psv,indent=4)
