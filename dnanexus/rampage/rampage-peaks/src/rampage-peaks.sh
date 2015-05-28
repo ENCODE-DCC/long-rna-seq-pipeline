@@ -2,7 +2,7 @@
 # rampage-peaks.sh
 
 script_name="rampage-peaks.sh"
-script_ver="1.0.0"
+script_ver="1.0.1"
 
 main() {
     echo "* Installing python-dev cython python-scipy python-networkx..."
@@ -12,7 +12,7 @@ main() {
     #pip install pysam
     sudo easy_install pysam >> install.log 2>&1
     echo "* Installing grit..."
-    wget https://github.com/nboley/grit/archive/2.0.3.tar.gz -O grit.tgz
+    wget https://github.com/nboley/grit/archive/2.0.4.tar.gz -O grit.tgz
     mkdir grit_local
     tar -xzf grit.tgz -C grit_local --strip-components=1
     #git clone https://github.com/nboley/grit.git
@@ -33,12 +33,6 @@ main() {
     if [ -f /usr/bin/tool_versions.py ]; then 
         versions=`tool_versions.py --applet $script_name --appver $script_ver`
     fi
-    #echo "*****"
-    #echo "* Running: rampage-peaks.sh [v1.0.0]"
-    #echo "* Running: grit:call_peaks version: "`call_peaks --version 2>&1 | grep call_peaks | awk '{print $3}'`
-    #echo "* bedToBigBed version: "`bedToBigBed 2>&1 | grep "bedToBigBed v" | awk '{printf "v%s", $3}'`
-    #echo "* samtools version: "`samtools 2>&1 | grep Version | awk '{print $2}'`
-    #echo "*****"
 
     echo "Value of rampage bam: '$rampage_marked_bam'"
     echo "Value of control bam: '$control_bam'"
