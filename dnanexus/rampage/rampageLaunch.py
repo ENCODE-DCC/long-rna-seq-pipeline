@@ -32,68 +32,73 @@ class RampageLaunch(Launch):
     ''' Rampage requires a control file which may be discoverable.'''
     CONTROL_FILE_GLOB = '*_star_genome.bam'
 
+    PIPELINE_BRANCH_ORDER = [ "REP", "COMBINED_REPS" ]
+    '''This pipeline has the standard replicate level processing and then combined replicate processing.'''
 
-    REP_STEP_ORDER = [ "concatR1", "concatR2", "rampage-align-pe", "rampage-signals", "rampage-peaks" ]
-    '''The (artifically) linear order of all pipeline steps.'''
-
-    COMBINED_STEP_ORDER = [ "rampage-idr" ]
-    '''The (artifically) linear order of all pipeline steps.'''
-
-    REP_STEPS = {
-        "concatR1": {
-                    "app":     "concat-fastqs",
-                    "params":  { "concat_id":  "concat_id" },
-                    "inputs":  { "reads1_set": "reads_set" },
-                    "results": { "reads1":     "reads"     }
-        },
-        "concatR2": {
-                    "app":     "concat-fastqs",
-                    "params":  { "concat_id2": "concat_id" },
-                    "inputs":  { "reads2_set": "reads_set" },
-                    "results": { "reads2":     "reads"     }
-        },
-        "rampage-align-pe": {
-            "app":     "rampage-align-pe",
-            "params":  { "library_id": "library_id", "nthreads": "nthreads" },
-            "inputs":  { "reads1": "reads_1", 
-                         "reads2": "reads_2", 
-                         "star_index": "star_index" },
-            "results": { "rampage_marked_bam": "rampage_marked_bam", 
-                         "rampage_star_log": "rampage_star_log" }
-        },
-        "rampage-signals": {
-            "app":    "rampage-signals",
-            "params":  {},
-            "inputs":  { "chrom_sizes": "chrom_sizes", 
-                         "rampage_marked_bam": "rampage_marked_bam" },
-            "results": { "all_plus_bw":    "all_plus_bw",    
-                         "all_minus_bw":    "all_minus_bw",
-                         "unique_plus_bw": "unique_plus_bw", 
-                         "unique_minus_bw": "unique_minus_bw" }
-        },
-        "rampage-peaks": {
-            "app":     "rampage-peaks",
-            "params":  { "nthreads": "nthreads" },
-            "inputs":  { "control_bam": "control_bam", 
-                         "gene_annotation": "gene_annotation", 
-                         "chrom_sizes": "chrom_sizes",
-                         "rampage_marked_bam": "rampage_marked_bam" },
-            "results": { "rampage_peaks_bed": "rampage_peaks_bed",
-                         "rampage_peaks_bb":  "rampage_peaks_bb",
-                         "rampage_peaks_gff": "rampage_peaks_gff" }
-        }
-    }
-    COMBINED_STEPS = {
-        "rampage-idr": {
-            "app":     "rampage-idr",
-            "params":  {},
-            "inputs":  { "peaks_a": "peaks_a", 
-                         "peaks_b": "peaks_b", 
-                         "chrom_sizes": "chrom_sizes" },
-            "results": { "rampage_idr_png": "rampage_idr_png",
-                         "rampage_idr_bb":  "rampage_idr_bb",
-                         "rampage_idr_bed": "rampage_idr_bed" }
-        }
+    PIPELINE_BRANCHES = {
+    #'''Each branch must define the 'steps' and their (artificially) linear order.'''
+         "REP": {
+                "ORDER": [ "concatR1", "concatR2", "rampage-align-pe", "rampage-signals", "rampage-peaks" ],
+                "STEPS": {
+                            "concatR1": {
+                                        "app":     "concat-fastqs",
+                                        "params":  { "concat_id":  "concat_id" },
+                                        "inputs":  { "reads1_set": "reads_set" },
+                                        "results": { "reads1":     "reads"     }
+                            },
+                            "concatR2": {
+                                        "app":     "concat-fastqs",
+                                        "params":  { "concat_id2": "concat_id" },
+                                        "inputs":  { "reads2_set": "reads_set" },
+                                        "results": { "reads2":     "reads"     }
+                            },
+                            "rampage-align-pe": {
+                                "app":     "rampage-align-pe",
+                                "params":  { "library_id": "library_id", "nthreads": "nthreads" },
+                                "inputs":  { "reads1": "reads_1", 
+                                             "reads2": "reads_2", 
+                                             "star_index": "star_index" },
+                                "results": { "rampage_marked_bam": "rampage_marked_bam", 
+                                             "rampage_star_log": "rampage_star_log" }
+                            },
+                            "rampage-signals": {
+                                "app":    "rampage-signals",
+                                "params":  {},
+                                "inputs":  { "chrom_sizes": "chrom_sizes", 
+                                             "rampage_marked_bam": "rampage_marked_bam" },
+                                "results": { "all_plus_bw":    "all_plus_bw",    
+                                             "all_minus_bw":    "all_minus_bw",
+                                             "unique_plus_bw": "unique_plus_bw", 
+                                             "unique_minus_bw": "unique_minus_bw" }
+                            },
+                            "rampage-peaks": {
+                                "app":     "rampage-peaks",
+                                "params":  { "nthreads": "nthreads" },
+                                "inputs":  { "control_bam": "control_bam", 
+                                             "gene_annotation": "gene_annotation", 
+                                             "chrom_sizes": "chrom_sizes",
+                                             "rampage_marked_bam": "rampage_marked_bam" },
+                                "results": { "rampage_peaks_bed": "rampage_peaks_bed",
+                                             "rampage_peaks_bb":  "rampage_peaks_bb",
+                                             "rampage_peaks_gff": "rampage_peaks_gff" }
+                            }
+                }
+         },
+         "COMBINED_REPS": {
+                "ORDER": [ "rampage-idr" ],
+                "STEPS": {
+                            "rampage-idr": {
+                                "app":     "rampage-idr",
+                                "params":  {},
+                                "inputs":  { "peaks_a": "peaks_a", 
+                                             "peaks_b": "peaks_b", 
+                                             "chrom_sizes": "chrom_sizes" },
+                                "results": { "rampage_idr_png": "rampage_idr_png",
+                                             "rampage_idr_bb":  "rampage_idr_bb",
+                                             "rampage_idr_bed": "rampage_idr_bed" }
+                            }
+                }
+         }
     }
 
     FILE_GLOBS = {
@@ -220,8 +225,7 @@ class RampageLaunch(Launch):
         psv['resultsLoc'] = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name,psv['exp_type'], \
                                                                                             psv['genome'],psv['annotation'])
         psv['resultsFolder'] = psv['resultsLoc'] + psv['experiment'] + '/'
-        for ltr in psv['reps'].keys():
-            psv['reps'][ltr]['resultsFolder'] = psv['resultsFolder'] + psv['reps'][ltr]['rep_tech'] + '/'
+        self.update_rep_result_folders(psv)
 
         if verbose:
             print "Pipeline Specific Vars:"

@@ -17,10 +17,16 @@ class SrnaLaunch(Launch):
     PIPELINE_HELP = "Launches '"+PIPELINE_NAME+"' pipeline analysis for one replicate. "
     ''' This pipline does not support combined replicates.'''
                     
-    REP_STEP_ORDER = [ "concat-fastqs", "small-rna-align", "small-rna-signals" ]
-    '''The (artifically) linear order of all pipeline steps.'''
-    COMBINED_STEP_ORDER = []
-    '''No combined steps in this pipeline.'''
+    PIPELINE_BRANCH_ORDER = [ "REP" ]
+    '''Currently there are no combined replicate processing steps.'''
+    
+    PIPELINE_BRANCHES = {
+    #'''Each branch must define the 'steps' and their (artificially) linear order.'''
+         "REP": {
+                "ORDER": [ "concat-fastqs", "small-rna-align", "small-rna-signals" ]
+                # "STEPS" can be discovered in this simple pipeline
+         }
+    }
 
     REFERENCE_FILES = {
         # For looking up reference file names.
@@ -59,6 +65,7 @@ class SrnaLaunch(Launch):
         # Paired ends?
         if psv['paired_end']:
             print "Small-RNA is always expected to be single-end but mapping says otherwise."
+            #print json.dumps(psv,indent=4,sort_keys=True)
             sys.exit(1)
 
         # Some specific settings

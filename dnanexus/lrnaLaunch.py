@@ -23,111 +23,116 @@ class LrnaLaunch(Launch):
     ANNO_DEFAULT = ANNO_DEFAULTS[Launch.GENOME_DEFAULT]
     ''' Multiple annotations might be supported for each genome.'''
 
-    REP_STEP_ORDER = {
-        "se": [ "concatR1",             "align-tophat-se", "topBwSe", "align-star-se", "starBwSe", "quant-rsem" ],
-        "pe": [ "concatR1", "concatR2", "align-tophat-pe", "topBwPe", "align-star-pe", "starBwPe", "quant-rsem" ]
-        }
-    '''The (artifically) linear order of all pipeline steps for single or paired-end.'''
-    COMBINED_STEP_ORDER = [ "mad-qc" ]
-    '''No combined steps in this pipeline.'''
-
-    REP_STEPS = {
-        # for each step: app, list of any params, inputs and results
-        # TODO: Any results files not listed here would not be 'deprecated' on reruns.
-        "concatR1": {
-                    "app":     "concat-fastqs",
-                    "params":  { "concat_id":  "concat_id" },
-                    "inputs":  { "reads1_set": "reads_set" },
-                    "results": { "reads1":     "reads"     }
+    PIPELINE_BRANCH_ORDER = [ "REP", "COMBINED_REPS" ]
+    '''This pipeline has the standard replicate level processing and then combined replicate processing.'''
+    
+    PIPELINE_BRANCHES = {
+    #'''Each branch must define the 'steps' and their (artificially) linear order.'''
+         "REP": {
+                "ORDER": {
+                    "se": [ "concatR1",             "align-tophat-se", "topBwSe", "align-star-se", "starBwSe", "quant-rsem" ],
+                    "pe": [ "concatR1", "concatR2", "align-tophat-pe", "topBwPe", "align-star-pe", "starBwPe", "quant-rsem" ]
+                },
+                "STEPS": {
+                            "concatR1": {
+                                        "app":     "concat-fastqs",
+                                        "params":  { "concat_id":  "concat_id" },
+                                        "inputs":  { "reads1_set": "reads_set" },
+                                        "results": { "reads1":     "reads"     }
+                            },
+                            "concatR2": {
+                                        "app":     "concat-fastqs",
+                                        "params":  { "concat_id2": "concat_id" },
+                                        "inputs":  { "reads2_set": "reads_set" },
+                                        "results": { "reads2":     "reads"     }
+                            },
+                            "align-tophat-se": {
+                                        "app":     "align-tophat-se",
+                                        "params":  { "library_id":   "library_id" }, #, "nthreads"
+                                        "inputs":  { "reads1":       "reads",
+                                                     "tophat_index": "tophat_index" },
+                                        "results": { "tophat_bam":   "tophat_bam" }
+                            },
+                            "align-tophat-pe": {
+                                        "app":     "align-tophat-pe",
+                                        "params":  { "library_id":   "library_id" }, #, "nthreads"
+                                        "inputs":  { "reads1":       "reads_1",
+                                                     "reads2":       "reads_2",
+                                                     "tophat_index": "tophat_index" },
+                                        "results": { "tophat_bam":   "tophat_bam" }
+                            },
+                            "topBwSe":  {
+                                        "app":     "bam-to-bigwig-unstranded",
+                                        "inputs":  { "tophat_bam":     "bam_file",
+                                                     "chrom_sizes":    "chrom_sizes" },
+                                        "results": { "tophat_all_bw":  "all_bw",
+                                                     "tophat_uniq_bw": "uniq_bw" }
+                            },
+                            "topBwPe":  {
+                                        "app":     "bam-to-bigwig-stranded",
+                                        "inputs":  { "tophat_bam":           "bam_file",
+                                                     "chrom_sizes":          "chrom_sizes" },
+                                        "results": { "tophat_minus_all_bw":  "minus_all_bw",
+                                                     "tophat_minus_uniq_bw": "minus_uniq_bw",
+                                                     "tophat_plus_all_bw":   "plus_all_bw",
+                                                     "tophat_plus_uniq_bw":  "plus_uniq_bw" }
+                            },
+                            "align-star-se":   {
+                                        "app":     "align-star-se",
+                                        "params":  { "library_id":      "library_id" }, #, "nthreads"
+                                        "inputs":  { "reads1":          "reads",
+                                                     "star_index":      "star_index" },
+                                        "results": { "star_genome_bam": "star_genome_bam",
+                                                     "star_anno_bam":   "star_anno_bam",
+                                                     "star_log":        "star_log" }
+                            },
+                            "align-star-pe":   {
+                                        "app":     "align-star-pe",
+                                        "params":  { "library_id":      "library_id" }, #, "nthreads"
+                                        "inputs":  { "reads1":          "reads_1",
+                                                     "reads2":          "reads_2",
+                                                     "star_index":      "star_index" },
+                                        "results": { "star_genome_bam": "star_genome_bam",
+                                                     "star_anno_bam":   "star_anno_bam",
+                                                     "star_log":        "star_log" }
+                            },
+                            "starBwSe": {
+                                        "app":     "bam-to-bigwig-unstranded",
+                                        "inputs":  { "star_genome_bam": "bam_file",
+                                                     "chrom_sizes":     "chrom_sizes" },
+                                        "results": { "star_all_bw":     "all_bw",
+                                                     "star_uniq_bw":    "uniq_bw" }
+                            },
+                            "starBwPe": {
+                                        "app":     "bam-to-bigwig-stranded",
+                                        "inputs":  { "star_genome_bam":    "bam_file",
+                                                     "chrom_sizes":        "chrom_sizes" },
+                                        "results": { "star_minus_all_bw":  "minus_all_bw",
+                                                     "star_minus_uniq_bw": "minus_uniq_bw",
+                                                     "star_plus_all_bw":   "plus_all_bw",
+                                                     "star_plus_uniq_bw":  "plus_uniq_bw" }
+                            },
+                            "quant-rsem":     {
+                                        "app":     "quant-rsem",
+                                        "params":  { "paired_end":        "paired_end" },  #, "nthreads", "rnd_seed"
+                                        "inputs":  { "star_anno_bam":     "star_anno_bam",
+                                                     "rsem_index":        "rsem_index" },
+                                        "results": { "rsem_iso_results":  "rsem_iso_results",
+                                                     "rsem_gene_results": "rsem_gene_results" }
+                            }
+                }
         },
-        "concatR2": {
-                    "app":     "concat-fastqs",
-                    "params":  { "concat_id2": "concat_id" },
-                    "inputs":  { "reads2_set": "reads_set" },
-                    "results": { "reads2":     "reads"     }
-        },
-        "align-tophat-se": {
-                    "app":     "align-tophat-se",
-                    "params":  { "library_id":   "library_id" }, #, "nthreads"
-                    "inputs":  { "reads1":       "reads",
-                                 "tophat_index": "tophat_index" },
-                    "results": { "tophat_bam":   "tophat_bam" }
-        },
-        "align-tophat-pe": {
-                    "app":     "align-tophat-pe",
-                    "params":  { "library_id":   "library_id" }, #, "nthreads"
-                    "inputs":  { "reads1":       "reads_1",
-                                 "reads2":       "reads_2",
-                                 "tophat_index": "tophat_index" },
-                    "results": { "tophat_bam":   "tophat_bam" }
-        },
-        "topBwSe":  {
-                    "app":     "bam-to-bigwig-unstranded",
-                    "inputs":  { "tophat_bam":     "bam_file",
-                                 "chrom_sizes":    "chrom_sizes" },
-                    "results": { "tophat_all_bw":  "all_bw",
-                                 "tophat_uniq_bw": "uniq_bw" }
-        },
-        "topBwPe":  {
-                    "app":     "bam-to-bigwig-stranded",
-                    "inputs":  { "tophat_bam":           "bam_file",
-                                 "chrom_sizes":          "chrom_sizes" },
-                    "results": { "tophat_minus_all_bw":  "minus_all_bw",
-                                 "tophat_minus_uniq_bw": "minus_uniq_bw",
-                                 "tophat_plus_all_bw":   "plus_all_bw",
-                                 "tophat_plus_uniq_bw":  "plus_uniq_bw" }
-        },
-        "align-star-se":   {
-                    "app":     "align-star-se",
-                    "params":  { "library_id":      "library_id" }, #, "nthreads"
-                    "inputs":  { "reads1":          "reads",
-                                 "star_index":      "star_index" },
-                    "results": { "star_genome_bam": "star_genome_bam",
-                                 "star_anno_bam":   "star_anno_bam",
-                                 "star_log":        "star_log" }
-        },
-        "align-star-pe":   {
-                    "app":     "align-star-pe",
-                    "params":  { "library_id":      "library_id" }, #, "nthreads"
-                    "inputs":  { "reads1":          "reads_1",
-                                 "reads2":          "reads_2",
-                                 "star_index":      "star_index" },
-                    "results": { "star_genome_bam": "star_genome_bam",
-                                 "star_anno_bam":   "star_anno_bam",
-                                 "star_log":        "star_log" }
-        },
-        "starBwSe": {
-                    "app":     "bam-to-bigwig-unstranded",
-                    "inputs":  { "star_genome_bam": "bam_file",
-                                 "chrom_sizes":     "chrom_sizes" },
-                    "results": { "star_all_bw":     "all_bw",
-                                 "star_uniq_bw":    "uniq_bw" }
-        },
-        "starBwPe": {
-                    "app":     "bam-to-bigwig-stranded",
-                    "inputs":  { "star_genome_bam":    "bam_file",
-                                 "chrom_sizes":        "chrom_sizes" },
-                    "results": { "star_minus_all_bw":  "minus_all_bw",
-                                 "star_minus_uniq_bw": "minus_uniq_bw",
-                                 "star_plus_all_bw":   "plus_all_bw",
-                                 "star_plus_uniq_bw":  "plus_uniq_bw" }
-        },
-        "quant-rsem":     {
-                    "app":     "quant-rsem",
-                    "params":  { "paired_end":        "paired_end" },  #, "nthreads", "rnd_seed"
-                    "inputs":  { "star_anno_bam":     "star_anno_bam",
-                                 "rsem_index":        "rsem_index" },
-                    "results": { "rsem_iso_results":  "rsem_iso_results",
-                                 "rsem_gene_results": "rsem_gene_results" }
-                    }
-        }
-    COMBINED_STEPS = {
-        "mad-qc": {
-            "app":     "mad-qc",
-            "params":  {},
-            "inputs":  { "quants_a": "quants_a", 
-                         "quants_b": "quants_b" },
-            "results": { "mad_plot": "mad_plot" }
+        "COMBINED_REPS": {
+                "ORDER": [ "mad-qc" ],
+                "STEPS": {
+                            "mad-qc": {
+                                        "app":     "mad-qc",
+                                        "params":  {},
+                                        "inputs":  { "quants_a": "quants_a", 
+                                                     "quants_b": "quants_b" },
+                                        "results": { "mad_plot": "mad_plot" }
+                            }
+                }
         }
     }
 
@@ -267,8 +272,7 @@ class LrnaLaunch(Launch):
         psv['resultsLoc'] = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name,psv['exp_type'], \
                                                                                             psv['genome'],psv['annotation'])
         psv['resultsFolder'] = psv['resultsLoc'] + psv['experiment'] + '/'
-        for ltr in psv['reps'].keys():
-            psv['reps'][ltr]['resultsFolder'] = psv['resultsFolder'] + psv['reps'][ltr]['rep_tech'] + '/'
+        self.update_rep_result_folders(psv)
 
         if verbose:
             print "Pipeline Specific Vars:"
