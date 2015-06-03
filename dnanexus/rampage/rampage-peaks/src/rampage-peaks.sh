@@ -2,14 +2,12 @@
 # rampage-peaks.sh
 
 script_name="rampage-peaks.sh"
-script_ver="1.0.1"
+script_ver="1.1.0"
 
 main() {
     echo "* Installing python-dev cython python-scipy python-networkx..."
-    #sudo apt-get install -y python-support python-numpy libamd2.2.0 libumfpack5.4.0 python-scipy python-networkx
     sudo apt-get install -y gcc python-dev cython python-scipy python-networkx >> install.log 2>&1
     echo "* Installing pysam..."
-    #pip install pysam
     sudo easy_install pysam >> install.log 2>&1
     echo "* Installing grit..."
     wget https://github.com/nboley/grit/archive/2.0.4.tar.gz -O grit.tgz
@@ -19,14 +17,7 @@ main() {
     #mv grit grit_local
     cd grit_local
     sudo python setup.py install >> ../install.log 2>&1
-    #echo "***** ls ."
-    #ls
-    #echo "***** ls /usr/local/bin"
-    #ls /usr/local/bin
     cd ..
-
-    # Now in resources/usr/bin
-    #wget https://github.com/ENCODE-DCC/kentUtils/archive/v302.1.0.tar.gz
 
     # If available, will print tool versions to stderr and json string to stdout
     versions=''
