@@ -2,7 +2,7 @@
 # rampage-signals.sh
 
 script_name="rampage-signals.sh"
-script_ver="1.0.0"
+script_ver="1.0.1"
 
 main() {
     # Now in resources/usr/bin
@@ -17,11 +17,6 @@ main() {
     if [ -f /usr/bin/tool_versions.py ]; then 
         versions=`tool_versions.py --applet $script_name --appver $script_ver`
     fi
-    #echo "*****"
-    #echo "* Running: rampage-signals.sh [v1.0.0]"
-    #echo "* STAR version:     ["`STAR --version | awk '{print $1}' | cut -d _ -f 2-`"]"
-    #echo "* bedGraphToBigWig version: "`bedGraphToBigWig 2>&1 | grep "bedGraphToBigWig v" | awk '{print $2$3}'`
-    #echo "*****"
 
     echo "Value of bam_file:    '$rampage_marked_bam'"
     echo "Value of chrom_sizes: '$chrom_sizes'"

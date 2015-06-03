@@ -1,4 +1,4 @@
-table idr_peak
+table rampage_idr_peaks
 "IDR peaks for Rampage. Browser extensible data (14 fields)."
     (
     string  chrom;           "Reference sequence chromosome (or contig, scaffold, etc.)"
