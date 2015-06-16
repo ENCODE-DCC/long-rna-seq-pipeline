@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Runs "mean absolute deviation" QC metrics on two long-RNA-seq gene quantifications
 APP_SCRIPT = "mad-qc.py"
-APP_VER = "1.0.0"
+APP_VER = "1.0.1"
 
 import os, subprocess, json
 import dxpy
@@ -31,9 +31,6 @@ def main(quants_a, quants_b):
     qc_metrics["MAD.R"] = json.loads(mad_output)
     print json.dumps(qc_metrics,indent=4)
     props = {}
-    props["QC"] = json.dumps(qc_metrics)
-    #dxfile_a.set_properties(props) # Frustrating! Can't get these to stick.
-    #dxfile_b.set_properties(props)
     props["SW"] = sw_versions
 
     print "* Upload Plot..."
