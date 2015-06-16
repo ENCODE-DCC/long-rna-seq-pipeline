@@ -2,7 +2,7 @@
 # rampage-align-pe.sh
 
 script_name="rampage-align-pe.sh"
-script_ver="1.0.1"
+script_ver="1.0.2"
 
 main() {
     # Now in resources/usr/bin
@@ -89,8 +89,7 @@ main() {
     mv markdup.Processed.out.bam ${aligned_root}_marked.bam
     set +x
 
-    # NOTE: adding meta 'details' ensures json is valid.  But details are not updatable so rely on QC property
-    rampage_marked_bam=$(dx upload ${aligned_root}_marked.bam --details "{ $meta }" --property QC="{ $meta }" --property SW="$versions" --brief)
+    rampage_marked_bam=$(dx upload ${aligned_root}_marked.bam --details "{ $meta }" --property SW="$versions" --brief)
     rampage_star_log=$(dx upload ${aligned_root}_Log.final.out --property SW="$versions" --brief)
 
     dx-jobutil-add-output rampage_marked_bam "$rampage_marked_bam" --class=file
