@@ -4,7 +4,7 @@
   "summary": "Takes GENCODE and spike-ins and creates a single GTF file for quantitation (prep step)",
   "dxapi": "1.0.0",
   "version": "1.0.0",
-  "authorizedUsers": [],
+  "authorizedUsers": ['PUBLIC'],
   "inputSpec": [
     {
       "optional": false,
