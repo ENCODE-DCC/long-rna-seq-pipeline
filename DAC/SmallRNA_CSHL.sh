@@ -21,9 +21,9 @@ bedGraphToBigWig=bedGraphToBigWig
 
 # STAR parameters: common
 STARparCommon=" --genomeDir $STARgenomeDir  --readFilesIn $read1   --outSAMunmapped Within \
-                --readFilesCommand zcat  --outSAMtype BAM SortedByCoordinate  \
-                --outFilterMultimapNmax 20 --clip3pAdapterSeq TGGAATTCTC --clip3pAdapterMMp 0.1 --outFilterMismatchNoverLmax 0.05 \
-                --outFilterScoreMinOverLread 0 --outFilterMatchNminOverLread 0 --outFilterMatchNmin 16 --alignIntronMax 1 "
+                --readFilesCommand zcat  --outSAMtype BAM SortedByCoordinate  --quantMode GeneCounts \
+                --outFilterMultimapNmax 20 --clip3pAdapterSeq TGGAATTCTC --clip3pAdapterMMp 0.1 --outFilterMismatchNoverLmax 0.03 \
+                --outFilterScoreMinOverLread 0 --outFilterMatchNminOverLread 0 --outFilterMatchNmin 16 --alignSJDBoverhangMin 1000 --alignIntronMax 1 "
 
 
 # STAR parameters: run-time, controlled by DCC
@@ -42,6 +42,12 @@ echo -e '@CO\tLIBID:ENCLB175ZZZ
 echo $STAR $STARparCommon $STARparRun $STARparsMeta
      $STAR $STARparCommon $STARparRun $STARparsMeta
 
+
+#####################################################################################
+### reads per gene for small RNA
+#####################################################################################
+# pre-processing command for annotations
+awk 'BEGIN {OFS="\t"} {if (ARGIND==1) {G[$1]=1} else {if (substr($1,1,2)!="N_") {t+=$3} else {print $1,$3}; if ($1 in G) {print $1,".",".",".",".",".",$3 >"smallRNA.expr"; s+=$3 }}} END {print "N_notSmallRNA", t-s; print "N_smallRNA",s}' $STARgenomeDir/smallRNA.geneID ReadsPerGene.out.tab > smallRNA.info
 
 #####################################################################################
 ### signal tracks
