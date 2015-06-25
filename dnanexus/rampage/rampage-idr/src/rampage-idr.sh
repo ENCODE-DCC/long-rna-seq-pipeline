@@ -2,7 +2,7 @@
 # rampage-idr.sh
 
 script_name="rampage-idr.sh"
-script_ver="1.0.1"
+script_ver="1.0.2"
 
 main() {
     echo "* Installing Anaconda3 (python3.4.3, numpy-1.9.2 matplotlib-1.4.3..."
@@ -84,11 +84,9 @@ main() {
     fi
     
     echo "* Upload results..."
-    # NOTE: adding meta 'details' ensures json is valid.  But details are not updatable so rely on QC property
-    details=`echo { $meta }`
-    rampage_idr_bed=$(dx upload ${idr_root}.bed --details="$details" --property QC="$meta" --property SW="$versions" --brief)
-    rampage_idr_bb=$(dx upload ${idr_root}.bb   --details="$details" --property QC="$meta" --property SW="$versions" --brief)
-    rampage_idr_png=$(dx upload ${idr_root}.png --details="$details" --property QC="$meta" --property SW="$versions" --brief)
+    rampage_idr_bed=$(dx upload ${idr_root}.bed --details="{ $meta }" --property SW="$versions" --brief)
+    rampage_idr_bb=$(dx upload ${idr_root}.bb   --details="{ $meta }" --property SW="$versions" --brief)
+    rampage_idr_png=$(dx upload ${idr_root}.png --details="{ $meta }" --property SW="$versions" --brief)
 
     dx-jobutil-add-output rampage_idr_bed "$rampage_idr_bed" --class=file
     dx-jobutil-add-output rampage_idr_bb "$rampage_idr_bb" --class=file
