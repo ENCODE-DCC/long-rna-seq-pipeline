@@ -4,7 +4,7 @@
   "summary": "Do genome and transcription quantitations with RSEM from STAR alignments",
   "dxapi": "1.0.0",
   "version": "1.0.2",
-  "authorizedUsers": ['PUBLIC'],
+  "authorizedUsers": ["PUBLIC"],
   "inputSpec": [
     {
       "name": "star_anno_bam",
