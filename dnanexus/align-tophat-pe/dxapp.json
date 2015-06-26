@@ -25,7 +25,7 @@
       "label": "Genome and transcriptome indexed for tophat",
       "class": "file",
       "optional": false,
-      "patterns": ["*.tgz"]
+      "patterns": ["*.tophatIndex.tgz"]
     },
     {
       "name": "library_id",
