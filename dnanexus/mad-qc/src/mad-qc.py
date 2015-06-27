@@ -29,6 +29,7 @@ def main(quants_a, quants_b):
     print "* package properties..."
     qc_metrics = {}
     qc_metrics["MAD.R"] = json.loads(mad_output)
+    meta_string = json.dumps(qc_metrics)
     print json.dumps(qc_metrics,indent=4)
     props = {}
     props["SW"] = sw_versions
@@ -36,6 +37,6 @@ def main(quants_a, quants_b):
     print "* Upload Plot..."
     plot_dxfile = dxpy.upload_local_file(filename,properties=props,details=qc_metrics)
     
-    return { "metadata": props["QC"], "mad_plot": plot_dxfile }
+    return { "metadata": meta_string, "mad_plot": plot_dxfile }
 
 dxpy.run()

@@ -2,7 +2,7 @@
 # align-tophat-pe.sh
 
 script_name="align-tophat-pe.sh"
-script_ver="1.0.1"
+script_ver="1.0.3"
 
 main() {
     # Now in resources/usr/bin
