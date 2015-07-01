@@ -1,0 +1,60 @@
+{
+  "name": "small-rna-mad-qc",
+  "title": "small-RNA-seq 'mean absolute deviation' QC metrics",
+  "summary": "mad-qc",
+  "dxapi": "1.0.0",
+  "version": "1.0.0",
+  "categories": [
+    "ENCODE"
+  ],
+  "inputSpec": [
+    {
+      "name": "quants_a",
+      "label": "STAR quantification file from one rep",
+      "class": "file",
+      "patterns": ["*_srna_star_quant.tsv"],
+      "optional": false
+    },
+    {
+      "name": "quants_b",
+      "label": "STAR quantification file from another rep",
+      "class": "file",
+      "patterns": ["*_srna_star_quant.tsv"],
+      "optional": false
+    },
+    {
+      "name": "star_index",
+      "label": "Genome indexed for STAR (used for extracting gene ID quantifications)",
+      "class": "file",
+      "optional": false,
+      "patterns": ["*.tgz"]
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "mad_plot",
+      "label": "Plot of mean absolute deviation of log ratios",
+      "class": "file",
+      "patterns": [ "*_mad_plot.png" ]
+    },
+    {
+      "name": "metadata",
+      "label": "JSON stringifyed QC metrics of the form {key: value}",
+      "class": "string"
+    }
+  ],
+  "runSpec": {
+    "interpreter": "python2.7",
+    "file": "src/small-rna-mad-qc.py",
+    "execDepends": [
+      {"name": "r-base-core"},
+      {"name": "ghostscript"}
+    ]
+  },
+  "access": {
+    "network": [
+      "*"
+    ]
+  },
+  "authorizedUsers": []
+}

@@ -2,13 +2,13 @@
 # small-rna-signals.sh
 
 script_name="small-rna-signals.sh"
-script_ver="1.0.1"
+script_ver="1.1.0"
 
 main() {
     # Now in resources/usr/bin
     #echo "* Download and install STAR..."
     #git clone https://github.com/alexdobin/STAR
-    #(cd STAR; git checkout tags/STAR_2.4.0k)
+    #(cd STAR; git checkout tags/STAR_2.4.2a)
     #(cd STAR; make)
     #wget https://github.com/ENCODE-DCC/kentUtils/archive/v302.1.0.tar.gz
 
@@ -17,11 +17,6 @@ main() {
     if [ -f /usr/bin/tool_versions.py ]; then 
         versions=`tool_versions.py --applet $script_name --appver $script_ver`
     fi
-    #echo "*****"
-    #echo "* Running: small-rna-signals.sh [v2.0.0]"
-    #echo "* STAR version:     ["`STAR --version | awk '{print $1}' | cut -d _ -f 2-`"]"
-    #echo "* bedGraphToBigWig version: "`bedGraphToBigWig 2>&1 | grep "bedGraphToBigWig v" | awk '{print $2$3}'`
-    #echo "*****"
 
     echo "Value of genome_bam: '$genome_bam'"
     echo "Value of chrom_sizes: '$chrom_sizes'"

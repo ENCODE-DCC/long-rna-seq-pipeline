@@ -3,15 +3,15 @@
   "title": "Small-RNA-Seq-align",
   "summary": "Align single-end (stranded) reads to genome using STAR for the ENCODE small-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "authorizedUsers": [],
   "inputSpec": [
     {
       "name": "reads",
-      "label": "Reads to align (fastq.gz)",
-      "class": "file",
+      "label": "Single-end fastq file(s) (gzipped)",
+      "class": "array:file",
       "optional": false,
-      "patterns": ["*.fastq.gz", "*.fq.gz"]
+      "patterns": ["*.fq.gz","*.fastq.gz"]
     },
     {
       "name": "star_index",
@@ -39,13 +39,19 @@
       "name": "star_log",
       "label": "Log file for STAR, contains QC metrics",
       "class": "file",
-      "patterns": ["*_Log.final.out"]
+      "patterns": ["*_srna_star_Log.final.out"]
     },
     {
-      "name": "genome_bam",
+      "name": "srna_bam",
       "label": "BAM file of alignment to whole genome",
       "class": "file",
-      "patterns": ["*_star_genome.bam"]
+      "patterns": ["*_srna_star.bam"]
+    },
+    {
+      "name": "srna_quant",
+      "label": "BAM file of alignment to whole genome",
+      "class": "file",
+      "patterns": ["*_srna_star_quant.tsv"]
     },
     {
       "name": "metadata",

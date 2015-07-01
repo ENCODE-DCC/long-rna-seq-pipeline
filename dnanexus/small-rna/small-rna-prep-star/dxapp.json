@@ -3,15 +3,22 @@
   "title": "Small-RNA-Seq-prep-star-genome",
   "summary": "Prepare reference genome index for STAR used in the ENCODE small-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "authorizedUsers": [],
   "inputSpec": [
     {
       "class": "file",
       "optional": false,
-      "name": "genome",
+      "name": "ref_genome",
       "label": "Reference genome (.fa.gz)",
       "patterns": ["*.fasta.gz", "*.fa.gz"]
+    },
+    {
+      "class": "file",
+      "optional": false,
+      "name": "annotations",
+      "label": "transcript and other annotations (GTF)",
+      "patterns": ["*.gtf.gz"]
     }
   ],
   "outputSpec": [
