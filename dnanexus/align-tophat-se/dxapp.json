@@ -3,15 +3,15 @@
   "title": "Long-RNA-Seq-align-tophat-se",
   "summary": "Align single-end (unstranded) reads to genome and transcriptome using tophat for the ENCODE long-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "authorizedUsers": [],
   "inputSpec": [
     {
       "name": "reads",
-      "label": "Reads to align (fastq.gz)",
-      "class": "file",
+      "label": "Single-end fastq file(s) (gzipped)",
+      "class": "array:file",
       "optional": false,
-      "patterns": ["*.fastq.gz", "*.fq.gz"]
+      "patterns": ["*.fq.gz","*.fastq.gz"]
     },
     {
       "name": "tophat_index",

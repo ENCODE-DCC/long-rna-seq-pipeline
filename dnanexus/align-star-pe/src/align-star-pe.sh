@@ -2,7 +2,7 @@
 # align-star-pe.sh
 
 script_name="align-star-pe.sh"
-script_ver="2.0.2"
+script_ver="2.0.3"
 
 main() {
     # Now in resources/usr/bin
@@ -24,17 +24,71 @@ main() {
     echo "* Value of library_id: '$library_id'"
     echo "* Number of threads (default 8): '$nthreads'"
 
-    echo "* Download files..."
-    reads1_fn=`dx describe "$reads_1" --name`
-    reads1_fn=${reads1_fn%.fastq.gz}
-    reads1_fn=${reads1_fn%.fq.gz}
-    dx download "$reads_1" -o "$reads1_fn".fastq.gz
-    reads2_fn=`dx describe "$reads_2" --name`
-    reads2_fn=${reads2_fn%.fastq.gz}
-    reads2_fn=${reads2_fn%.fq.gz}
-    dx download "$reads_2" -o "$reads2_fn".fastq.gz
-    echo "* Read files: '${reads1_fn}.fastq.gz' '${reads2_fn}.fastq.gz'"
+    #echo "* Download files..."
+    outfile_name=""
+    concat=""
+    rm -f concat.fq
+    for ix in ${!reads1[@]}
+    do
+        file_root=`dx describe "${reads1[$ix]}" --name`
+        file_root=${file_root%.fastq.gz}
+        file_root=${file_root%.fq.gz}
+        if [ "${outfile_name}" == "" ]; then
+            outfile_name="${file_root}"
+        else
+            outfile_name="${file_root}_${outfile_name}"
+            if [ "${concat}" == "" ]; then
+                outfile_name="${outfile_name}_concat" 
+                concat="s concatenated as"
+            fi
+        fi
+        echo "* Downloading concatenating ${file_root}.fq.gz file..."
+        dx download "${reads1[$ix]}" -o - | gunzip >> concat.fq
+    done
+    mv concat.fq ${outfile_name}.fq
+    echo "* Gzipping file..."
+    gzip ${outfile_name}.fq
+    echo "* Reads1 fastq${concat} file: '${outfile_name}.fq.gz'"
+    reads1_root=${outfile_name}
+    ls -l ${reads1_root}.fq.gz
 
+    outfile_name=""
+    concat=""
+    rm -f concat.fq
+    for ix in ${!reads2[@]}
+    do
+        file_root=`dx describe "${reads2[$ix]}" --name`
+        file_root=${file_root%.fastq.gz}
+        file_root=${file_root%.fq.gz}
+        if [ "${outfile_name}" == "" ]; then
+            outfile_name="${file_root}"
+        else
+            outfile_name="${file_root}_${outfile_name}"
+            if [ "${concat}" == "" ]; then
+                outfile_name="${outfile_name}_concat" 
+                concat="s concatenated as"
+            fi
+        fi
+        echo "* Downloading and concatenating ${file_root}.fq.gz file..."
+        dx download "${reads2[$ix]}" -o - | gunzip >> concat.fq
+    done
+    mv concat.fq ${outfile_name}.fq
+    echo "* Gzipping file..."
+    gzip ${outfile_name}.fq
+    echo "* Reads2 fastq${concat} file: '${outfile_name}.fq.gz'"
+    ls -l ${outfile_name}.fq.gz
+    reads2_root=${outfile_name}
+    ls -l ${reads2_root}.fq.gz
+    bam_root="${reads1_root}_${reads2_root}_star"
+    if [ -f /usr/bin/parse_property.py ]; then
+        new_root=`parse_property.py -f "'${reads1[0]}'" --project "${DX_PROJECT_CONTEXT_ID}" --root_name --quiet`
+        if [ "$new_root" != "" ]; then
+            bam_root="${new_root}_star"
+        fi
+    fi
+    echo "* Alignments file will be: '${bam_root}_genome.bam' and '${bam_root}_anno.bam'"
+
+    echo "* Downloading and extracting star index archive..."
     dx download "$star_index" -o star_index.tgz
     tar zxvf star_index.tgz
     # unzips into "out/"
@@ -51,7 +105,7 @@ main() {
 
     echo "* Map reads..."
     set -x
-    STAR --genomeDir out --readFilesIn ${reads1_fn}.fastq.gz ${reads2_fn}.fastq.gz  \
+    STAR --genomeDir out --readFilesIn ${reads1_root}.fq.gz ${reads2_root}.fq.gz    \
         --readFilesCommand zcat --runThreadN ${nthreads} --genomeLoad NoSharedMemory \
         --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1    \
         --outFilterMismatchNmax 999 --outFilterMismatchNoverReadLmax 0.04              \
@@ -61,11 +115,10 @@ main() {
         --outSAMtype BAM SortedByCoordinate --quantMode TranscriptomeSAM --sjdbScore 1     \
         --limitBAMsortRAM 60000000000
 
-    #echo "* Index genome bam..."
-    # Note: no longer making unused index
-    mv Aligned.sortedByCoord.out.bam ${reads1_fn}-${reads2_fn}_star_genome.bam
-    #samtools index ${reads1_fn}-${reads2_fn}_star_genome.bam
+    mv Aligned.sortedByCoord.out.bam ${bam_root}_genome.bam
+    mv Log.final.out ${bam_root}_Log.final.out
     set +x
+    ls -l ${bam_root}_genome.bam
 
     echo "* Sorting annotation bam..."
     set -x
@@ -73,24 +126,20 @@ main() {
         <( samtools view -@ ${nthreads} Aligned.toTranscriptome.out.bam | \
             awk '{printf $0 " "; getline; print}' | \
             sort -S 60G -T ./ | tr ' ' '\n' ) | \
-        samtools view -@ ${nthreads} -bS - > ${reads1_fn}-${reads2_fn}_star_anno.bam
+        samtools view -@ ${nthreads} -bS - > ${bam_root}_anno.bam
     set +x
+    ls -l ${bam_root}_anno.bam
     
     echo "* Prepare metadata..."
     meta=''
     if [ -f /usr/bin/qc_metrics.py ]; then
-        meta=`qc_metrics.py -n STAR_log_final -f Log.final.out`
+        meta=`qc_metrics.py -n STAR_log_final -f ${bam_root}_Log.final.out`
     fi
 
-    #mv Aligned.toTranscriptome.out.bam ${reads1_fn}-${reads2_fn}_star_anno.bam
-    set -x
-    mv Log.final.out ${reads1_fn}-${reads2_fn}_star_Log.final.out
-    set +x
-
     echo "* Upload results..."
-    star_genome_bam=$(dx upload ${reads1_fn}-${reads2_fn}_star_genome.bam --details="{ $meta }" --property SW="$versions" --brief)
-    star_anno_bam=$(dx upload ${reads1_fn}-${reads2_fn}_star_anno.bam     --details="{ $meta }" --property SW="$versions" --brief)
-    star_log=$(dx upload ${reads1_fn}-${reads2_fn}_star_Log.final.out --property SW="$versions" --brief)
+    star_genome_bam=$(dx upload ${bam_root}_genome.bam --details="{ $meta }" --property SW="$versions" --brief)
+    star_anno_bam=$(dx upload ${bam_root}_anno.bam     --details="{ $meta }" --property SW="$versions" --brief)
+    star_log=$(dx upload ${bam_root}_Log.final.out --property SW="$versions" --brief)
 
     dx-jobutil-add-output star_genome_bam "$star_genome_bam" --class=file
     dx-jobutil-add-output star_anno_bam "$star_anno_bam" --class=file

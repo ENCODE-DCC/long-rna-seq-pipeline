@@ -2,7 +2,7 @@
 # rampage-align-pe.sh
 
 script_name="rampage-align-pe.sh"
-script_ver="1.0.2"
+script_ver="1.0.3"
 
 main() {
     # Now in resources/usr/bin
@@ -18,32 +18,81 @@ main() {
         versions=`tool_versions.py --applet $script_name --appver $script_ver`
     fi
 
-    echo "* Value of reads_1: '$reads_1'"
-    echo "* Value of reads_2: '$reads_2'"
+    echo "* Value of reads1: '$reads1'"
+    echo "* Value of reads2: '$reads2'"
     echo "* Value of star_index: '$star_index'"
     echo "* Value of library_id: '$library_id'"
     echo "* Number of threads (default 8): '$nthreads'"
 
-    echo "* Download files..."
-    reads1_fn=`dx describe "$reads_1" --name`
-    reads1_fn=${reads1_fn%.fastq.gz}
-    reads1_fn=${reads1_fn%.fq.gz}
-    dx download "$reads_1" -o "$reads1_fn".fastq.gz
-    reads2_fn=`dx describe "$reads_2" --name`
-    reads2_fn=${reads2_fn%.fastq.gz}
-    reads2_fn=${reads2_fn%.fq.gz}
-    dx download "$reads_2" -o "$reads2_fn".fastq.gz
-    echo "* Read files: '${reads1_fn}.fastq.gz' '${reads2_fn}.fastq.gz'"
+    #echo "* Download files..."
+    outfile_name=""
+    concat=""
+    rm -f concat.fq
+    for ix in ${!reads1[@]}
+    do
+        file_root=`dx describe "${reads1[$ix]}" --name`
+        file_root=${file_root%.fastq.gz}
+        file_root=${file_root%.fq.gz}
+        if [ "${outfile_name}" == "" ]; then
+            outfile_name="${file_root}"
+        else
+            outfile_name="${file_root}_${outfile_name}"
+            if [ "${concat}" == "" ]; then
+                outfile_name="${outfile_name}_concat" 
+                concat="s concatenated as"
+            fi
+        fi
+        echo "* Downloading concatenating ${file_root}.fq.gz file..."
+        dx download "${reads1[$ix]}" -o - | gunzip >> concat.fq
+    done
+    mv concat.fq ${outfile_name}.fq
+    echo "* Gzipping file..."
+    gzip ${outfile_name}.fq
+    echo "* Reads1 fastq${concat} file: '${outfile_name}.fq.gz'"
+    reads1_root=${outfile_name}
+    ls -l ${reads1_root}.fq.gz
 
+    outfile_name=""
+    concat=""
+    rm -f concat.fq
+    for ix in ${!reads2[@]}
+    do
+        file_root=`dx describe "${reads2[$ix]}" --name`
+        file_root=${file_root%.fastq.gz}
+        file_root=${file_root%.fq.gz}
+        if [ "${outfile_name}" == "" ]; then
+            outfile_name="${file_root}"
+        else
+            outfile_name="${file_root}_${outfile_name}"
+            if [ "${concat}" == "" ]; then
+                outfile_name="${outfile_name}_concat" 
+                concat="s concatenated as"
+            fi
+        fi
+        echo "* Downloading and concatenating ${file_root}.fq.gz file..."
+        dx download "${reads2[$ix]}" -o - | gunzip >> concat.fq
+    done
+    mv concat.fq ${outfile_name}.fq
+    echo "* Gzipping file..."
+    gzip ${outfile_name}.fq
+    echo "* Reads2 fastq${concat} file: '${outfile_name}.fq.gz'"
+    ls -l ${outfile_name}.fq.gz
+    reads2_root=${outfile_name}
+    ls -l ${reads2_root}.fq.gz
+    bam_root="${reads1_root}_${reads2_root}_rampage_star"
+    if [ -f /usr/bin/parse_property.py ]; then
+        new_root=`parse_property.py -f "'${reads1[0]}'" --project "${DX_PROJECT_CONTEXT_ID}" --root_name --quiet`
+        if [ "$new_root" != "" ]; then
+            bam_root="${new_root}_rampage_star"
+        fi
+    fi
+    echo "* Alignments file will be: '${bam_root}.bam'"
+
+    echo "* Downloading and extracting star index archive..."
     dx download "$star_index" -o star_index.tgz
     tar zxvf star_index.tgz
     # unzips into "out/"
     
-    aligned_root=${reads1_fn}-${reads2_fn}_rampage_star
-    echo "* Rampage Aligned file root:'${aligned_root}'"
-
-    # Fill in your application code here.
-
     echo "* Set up headers..."
     set -x
     libraryComment="@CO\tLIBID:${library_id}"
@@ -54,7 +103,7 @@ main() {
 
     echo "* Map reads..."
     set -x
-    STAR --genomeDir out --readFilesIn ${reads1_fn}.fastq.gz ${reads2_fn}.fastq.gz       \
+    STAR --genomeDir out --readFilesIn ${reads1_root}.fq.gz ${reads2_root}.fq.gz         \
         --readFilesCommand zcat --runThreadN ${nthreads} --genomeLoad NoSharedMemory      \
         --outFilterMultimapNmax 500 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1        \
         --outFilterMismatchNmax 999 --outFilterMismatchNoverReadLmax 0.04                   \
@@ -65,32 +114,28 @@ main() {
         --clip5pNbases 6 15 --seedSearchStartLmax 30 --outSAMtype BAM SortedByCoordinate         \
         --limitBAMsortRAM 60000000000
     set +x
+    ls -l Aligned.sortedByCoord.out.bam
 
     echo "* Marking PCR duplicates..."
     set -x
     STAR --inputBAMfile Aligned.sortedByCoord.out.bam --bamRemoveDuplicatesType UniqueIdentical \
         --runMode inputAlignmentsFromBAM --bamRemoveDuplicatesMate2basesN 15 \
         --outFileNamePrefix markdup. --limitBAMsortRAM 60000000000
+
+    mv markdup.Processed.out.bam ${bam_root}_marked.bam
+    mv Log.final.out ${bam_root}_Log.final.out
     set +x
+    ls -l ${bam_root}_marked.bam
 
     echo "* Prepare metadata..."
     meta=''
     if [ -f /usr/bin/qc_metrics.py ]; then
-        meta=`qc_metrics.py -n STAR_log_final -f Log.final.out`
+        meta=`qc_metrics.py -n STAR_log_final -f ${bam_root}_Log.final.out`
     fi
 
-    #mv Aligned.toTranscriptome.out.bam ${reads_fn}_star_anno.bam
-    set -x
-    mv Log.final.out ${aligned_root}_Log.final.out
-    set +x
-
     echo "* Upload results..."
-    set -x
-    mv markdup.Processed.out.bam ${aligned_root}_marked.bam
-    set +x
-
-    rampage_marked_bam=$(dx upload ${aligned_root}_marked.bam --details "{ $meta }" --property SW="$versions" --brief)
-    rampage_star_log=$(dx upload ${aligned_root}_Log.final.out --property SW="$versions" --brief)
+    rampage_marked_bam=$(dx upload ${bam_root}_marked.bam --details "{ $meta }" --property SW="$versions" --brief)
+    rampage_star_log=$(dx upload ${bam_root}_Log.final.out --property SW="$versions" --brief)
 
     dx-jobutil-add-output rampage_marked_bam "$rampage_marked_bam" --class=file
     dx-jobutil-add-output rampage_star_log "$rampage_star_log" --class=file

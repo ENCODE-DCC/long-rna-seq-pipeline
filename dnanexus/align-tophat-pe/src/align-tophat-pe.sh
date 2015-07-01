@@ -2,7 +2,7 @@
 # align-tophat-pe.sh
 
 script_name="align-tophat-pe.sh"
-script_ver="1.0.3"
+script_ver="1.0.4"
 
 main() {
     # Now in resources/usr/bin
@@ -32,17 +32,71 @@ main() {
     echo "* Value of library_id: '$library_id'"
     echo "* Value of nthreads: '$nthreads'"
 
-    echo "* Download files..."
-    reads1_fn=`dx describe "$reads_1" --name`
-    reads1_fn=${reads1_fn%.fastq.gz}
-    reads1_fn=${reads1_fn%.fq.gz}
-    dx download "$reads_1" -o "$reads1_fn".fastq.gz
-    reads2_fn=`dx describe "$reads_2" --name`
-    reads2_fn=${reads2_fn%.fastq.gz}
-    reads2_fn=${reads2_fn%.fq.gz}
-    dx download "$reads_2" -o "$reads2_fn".fastq.gz
-    echo "* Read files: '${reads1_fn}.fastq.gz' '${reads2_fn}.fastq.gz'"
+    #echo "* Download files..."
+    outfile_name=""
+    concat=""
+    rm -f concat.fq
+    for ix in ${!reads1[@]}
+    do
+        file_root=`dx describe "${reads1[$ix]}" --name`
+        file_root=${file_root%.fastq.gz}
+        file_root=${file_root%.fq.gz}
+        if [ "${outfile_name}" == "" ]; then
+            outfile_name="${file_root}"
+        else
+            outfile_name="${file_root}_${outfile_name}"
+            if [ "${concat}" == "" ]; then
+                outfile_name="${outfile_name}_concat" 
+                concat="s concatenated as"
+            fi
+        fi
+        echo "* Downloading concatenating ${file_root}.fq.gz file..."
+        dx download "${reads1[$ix]}" -o - | gunzip >> concat.fq
+    done
+    mv concat.fq ${outfile_name}.fq
+    echo "* Gzipping file..."
+    gzip ${outfile_name}.fq
+    echo "* Reads1 fastq${concat} file: '${outfile_name}.fq.gz'"
+    reads1_root=${outfile_name}
+    ls -l ${reads1_root}.fq.gz
 
+    outfile_name=""
+    concat=""
+    rm -f concat.fq
+    for ix in ${!reads2[@]}
+    do
+        file_root=`dx describe "${reads2[$ix]}" --name`
+        file_root=${file_root%.fastq.gz}
+        file_root=${file_root%.fq.gz}
+        if [ "${outfile_name}" == "" ]; then
+            outfile_name="${file_root}"
+        else
+            outfile_name="${file_root}_${outfile_name}"
+            if [ "${concat}" == "" ]; then
+                outfile_name="${outfile_name}_concat" 
+                concat="s concatenated as"
+            fi
+        fi
+        echo "* Downloading and concatenating ${file_root}.fq.gz file..."
+        dx download "${reads2[$ix]}" -o - | gunzip >> concat.fq
+    done
+    mv concat.fq ${outfile_name}.fq
+    echo "* Gzipping file..."
+    gzip ${outfile_name}.fq
+    echo "* Reads2 fastq${concat} file: '${outfile_name}.fq.gz'"
+    ls -l ${outfile_name}.fq.gz
+    reads2_root=${outfile_name}
+    ls -l ${reads2_root}.fq.gz
+    bam_root="${reads1_root}_${reads2_root}_tophat"
+    if [ -f /usr/bin/parse_property.py ]; then
+        new_root=`parse_property.py -f "'${reads1[0]}'" --project "${DX_PROJECT_CONTEXT_ID}" --root_name --quiet`
+        if [ "$new_root" != "" ]; then
+            bam_root="${new_root}_tophat"
+        fi
+    fi
+    echo "* Alignments file will be: '${bam_root}.bam'"
+
+    echo "* Downloading and extracting TopHat index archive..."
     dx download "$tophat_index" -o tophat_index.tgz
     tar zxvf tophat_index.tgz
 
@@ -61,8 +115,10 @@ main() {
     tophat -p ${nthreads} -z0 -a 8 -m 0 --min-intron-length 20 --max-intron-length 1000000 \
         --read-edit-dist 4 --read-mismatches 4 -g 20  --no-discordant --no-mixed \
         --library-type fr-firststrand --transcriptome-index ${anno_prefix} \
-        ${geno_prefix} ${reads1_fn}.fastq.gz ${reads2_fn}.fastq.gz
+        ${geno_prefix} ${reads1_root}.fq.gz ${reads2_root}.fq.gz
     set +x
+    ls -l tophat_out/accepted_hits.bam
+    ls -l tophat_out/unmapped.bam
 
     echo "* Set up headers..."
     set -x
@@ -87,16 +143,17 @@ main() {
     perl /usr/bin/tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | \
                 samtools view -bS - | samtools sort - mapped_fixed
     set +x
+    ls -l mapped_fixed.bam
 
     echo "* Merge aligned and unaligned into single bam, using the patched up header..."
     set -x
     samtools merge -h newHeader.sam merged.bam mapped_fixed.bam tophat_out/unmapped.bam
-
-    mv merged.bam ${reads1_fn}-${reads2_fn}_tophat.bam
+    mv merged.bam ${bam_root}.bam
     set +x
+    ls -l ${bam_root}.bam
 
     echo "* Upload results..."
-    tophat_bam=$(dx upload ${reads1_fn}-${reads2_fn}_tophat.bam --property SW="$versions" --brief)
+    tophat_bam=$(dx upload ${bam_root}.bam --property SW="$versions" --brief)
     dx-jobutil-add-output tophat_bam "$tophat_bam" --class=file
     echo "* Finished."
 }

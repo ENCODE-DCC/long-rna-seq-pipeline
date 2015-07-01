@@ -2,7 +2,7 @@
 # concat-fastqs.sh
 
 script_name="concat-fastqs.sh"
-script_ver="1.0.3"
+script_ver="1.0.4"
 
 main() {
     # If available, will print tool versions to stderr and json string to stdout
@@ -10,39 +10,29 @@ main() {
     if [ -f /usr/bin/tool_versions.py ]; then 
         versions=`tool_versions.py --applet $script_name --appver $script_ver`
     fi
-    #echo "*****"
-    #echo "* Running: concat-fastqs [v1.0.2]"
-    #echo "*****"
 
     echo "* Concat id: '${concat_id}'"
     #echo "* Value of trna_annoation: '$trna_annotation'"
     #echo "* Value of spike_in: '$spike_in'"
 
-    echo "* Download files..."
+    #echo "* Download and concatentating files..."
     outfile_root="${concat_id}_concat"
     for ix in ${!reads_set[@]}
     do
-        filename=`dx describe "${reads_set[$ix]}" --name | cut -d'.' -f1`
-        dx download "${reads_set[$ix]}" -o - | gunzip > ${filename}.fastq
-        file_root=${filename%.fastq.gz}
-        file_root=${filename%.fq.gz}
+        file_root=`dx describe "${reads_set[$ix]}" --name`
+        file_root=${file_root%.fastq.gz}
+        file_root=${file_root%.fq.gz}
+        echo "* Download and concatentating '${file_root}.fq.gz'..."
+        set -x
+        dx download "${reads_set[$ix]}" -o - | gunzip >> concat.fq
+        set +x
         outfile_root="${file_root}_${outfile_root}"
     done
     echo "* Expected name of output file: '${outfile_root}.fq.gz'"
 
-    echo "* Concatenating files..."
-    # Note: must maintain order so that paired reads maintain order.
-    set -x
-    rm -f ${outfile_root}.fq
-    for ix in ${!reads_set[@]}
-    do
-        filename=`dx describe "${reads_set[$ix]}" --name | cut -d'.' -f1`
-        cat ${filename}.fastq >> ${outfile_root}.fq
-    done
-    set +x
-    
     echo "* Gzipping file..."
     set -x
+    mv >> concat.fq ${outfile_root}.fq
     gzip ${outfile_root}.fq
     set +x
 

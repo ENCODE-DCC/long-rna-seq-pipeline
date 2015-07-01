@@ -2,7 +2,7 @@
 # align-tophat-se.sh
 
 script_name="align-tophat-se.sh"
-script_ver="1.0.3"
+script_ver="1.0.4"
 
 main() {
     # Now in resources/usr/bin
@@ -18,26 +18,49 @@ main() {
     if [ -f /usr/bin/tool_versions.py ]; then 
         versions=`tool_versions.py --applet $script_name --appver $script_ver`
     fi
-    #echo "*****"
-    #echo "* Running: align-tophat-se.sh [v1.0.1]"
-    #echo "* TopHat version: "`tophat -v | awk '{print $2}'`
-    #echo "* bowtie2 version: "`bowtie2 --version 2>&1 | grep bowtie | awk '{print $3}'`
-    #echo "* samtools version: "`samtools 2>&1 | grep Version | awk '{print $2}'`
-    #echo "* tophat_bam_xsA_tag_fix.pl version: "`perl /usr/bin/tophat_bam_xsA_tag_fix.pl --version 2>&1`
-    #echo "*****"
 
     echo "* Value of reads: '$reads'"
     echo "* Value of tophat_index: '$tophat_index'"
     echo "* Value of library_id: '$library_id'"
     echo "* Value of nthreads: '$nthreads'"
 
-    echo "* Download files..."
-    reads_fn=`dx describe "$reads" --name`
-    reads_fn=${reads_fn%.fastq.gz}
-    reads_fn=${reads_fn%.fq.gz}
-    dx download "$reads" -o "$reads_fn".fastq.gz
-    echo "* Read file: '"$reads_fn".fastq.gz'"
+    #echo "* Download files..."
+    outfile_name=""
+    concat=""
+    rm -f concat.fq
+    for ix in ${!reads[@]}
+    do
+        file_root=`dx describe "${reads[$ix]}" --name`
+        file_root=${file_root%.fastq.gz}
+        file_root=${file_root%.fq.gz}
+        if [ "${outfile_name}" == "" ]; then
+            outfile_name="${file_root}"
+        else
+            outfile_name="${file_root}_${outfile_name}"
+            if [ "${concat}" == "" ]; then
+                outfile_name="${outfile_name}_concat" 
+                concat="s concatenated as"
+            fi
+        fi
+        echo "* Downloading and concatenating ${file_root}.fq.gz file..."
+        dx download "${reads[$ix]}" -o - | gunzip >> concat.fq
+    done
+    mv concat.fq ${outfile_name}.fq
+    echo "* Gzipping file..."
+    gzip ${outfile_name}.fq
+    echo "* Fastq${concat} file: '${outfile_name}.fq.gz'"
+    reads_root=${outfile_name}
+    ls -l ${reads_root}.fq.gz
+    bam_root="${reads_root}_tophat"
+    if [ -f /usr/bin/parse_property.py ]; then
+        new_root=`parse_property.py -f "'${reads[0]}'" --project "${DX_PROJECT_CONTEXT_ID}" --root_name --quiet`
+        if [ "$new_root" != "" ]; then
+            bam_root="${new_root}_tophat"
+        fi
+    fi
+    echo "* Alignments file will be: '${bam_root}.bam'"
 
+    echo "* Downloading and extracting TopHat index archive..."
     dx download "$tophat_index" -o tophat_index.tgz
     tar zxvf tophat_index.tgz
 
@@ -52,11 +75,16 @@ main() {
     # Fill in your application code here.
 
     echo "* Map reads..."
+    set -x
     tophat -p ${nthreads} -z0 -a 8 -m 0 --min-intron-length 20 --max-intron-length 1000000 \
         --read-edit-dist 4 --read-mismatches 4 -g 20  --library-type fr-unstranded \
-        --transcriptome-index ${anno_prefix} ${geno_prefix} ${reads_fn}.fastq.gz
+        --transcriptome-index ${anno_prefix} ${geno_prefix} ${reads_root}.fq.gz
+    set +x
+    ls -l tophat_out/accepted_hits.bam
+    ls -l tophat_out/unmapped.bam
 
     echo "* Set up headers..."
+    set -x
     HD="@HD\tVN:1.4\tSO:coordinate" 
     stCommand="perl tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | samtools view -bS - | samtools sort - mapped_fixed; samtools merge -h newHeader.sam merged.bam mapped_fixed.bam out/unmapped.bam"
     newPG="@PG\tID:Samtools\tPN:Samtools\tCL:"$stCommand"\tPP:Tophat\tVN:VN:0.1.17 (r973:277)"
@@ -71,23 +99,26 @@ main() {
 
     # Add reference genome and transcriptome used
     cat ${geno_prefix}_bamCommentLines.txt >> newHeader.sam
+    set +x
     cat newHeader.sam
 
     echo "* Fix unmapped bam and sort before merge..."
     #perl /usr/bin/tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | \
     #            samtools view -bS - | samtools sort - mapped_fixed
+    set -x
     mv tophat_out/accepted_hits.bam mapped_fixed.bam
+    set +x
+    ls -l mapped_fixed.bam
 
     echo "* Merge aligned and unaligned into single bam, using the patched up header..."
+    set -x
     samtools merge -h newHeader.sam merged.bam mapped_fixed.bam tophat_out/unmapped.bam
-    # Note: no longer making unused index.
-    #samtools index merged.bam
-
-    mv merged.bam ${reads_fn}_tophat.bam
-    #mv merged.bam.bai ${reads_fn}_tophat.bam.bai
+    mv merged.bam ${bam_root}.bam
+    set +x
+    ls -l ${bam_root}.bam
 
     echo "* Upload results..."
-    tophat_bam=$(dx upload ${reads_fn}_tophat.bam --property SW="$versions" --brief)
+    tophat_bam=$(dx upload ${bam_root}.bam --property SW="$versions" --brief)
     dx-jobutil-add-output tophat_bam "$tophat_bam" --class=file
     echo "* Finished."
 }

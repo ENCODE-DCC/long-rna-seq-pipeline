@@ -3,22 +3,22 @@
   "title": "Long-RNA-Seq-align-star-pe",
   "summary": "Align paired-end (stranded) reads to genome and transcriptome using STAR for the ENCODE long-rna-peq pipeline",
   "dxapi": "1.0.0",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "authorizedUsers": [],
   "inputSpec": [
     {
-      "name": "reads_1",
-      "label": "Pair 1 Reads to align (fastq.gz)",
-      "class": "file",
+      "name": "reads1",
+      "label": "Read1 of paired-end fastq file(s) (gzipped)",
+      "class": "array:file",
       "optional": false,
-      "patterns": ["*.fastq.gz", "*.fq.gz"]
+      "patterns": ["*.fq.gz","*.fastq.gz"]
     },
     {
-      "name": "reads_2",
-      "label": "Pair 2 Reads to align (fastq.gz)",
-      "class": "file",
+      "name": "reads2",
+      "label": "Read2 of paired-end fastq files (gzipped)",
+      "class": "array:file",
       "optional": false,
-      "patterns": ["*.fastq.gz", "*.fq.gz"]
+      "patterns": ["*.fq.gz","*.fastq.gz"]
     },
     {
       "name": "star_index",

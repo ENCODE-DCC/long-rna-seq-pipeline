@@ -57,6 +57,7 @@ for applet in $applets; do
     mkdir -p ${applet}/resources/usr/bin 
     cp ../tools/tool_versions.py ${applet}/resources/usr/bin
     cp ../tools/qc_metrics.py ${applet}/resources/usr/bin
+    cp ../tools/parse_property.py ${applet}/resources/usr/bin
     dx build "${applet}" --archive --destination "${applet_dest}:/"
     rm ${applet}/resources/usr/bin/tool_versions.py
     rm ${applet}/resources/usr/bin/qc_metrics.py
