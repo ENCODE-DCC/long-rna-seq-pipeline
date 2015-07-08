@@ -24,6 +24,7 @@ APP_TOOLS = {
     "small-rna-prep-star.sh":      [ "STAR" ], 
     "small-rna-align.sh":          [ "STAR" ], 
     "small-rna-signals.sh":        [ "STAR","bedGraphToBigWig" ], 
+    "small-rna-mad-qc.py":         [ "MAD.R" ],
 
     "rampage-align-pe.sh":         [ "STAR" ],
     "rampage-signals.sh":          [ "STAR", "bedGraphToBigWig" ],

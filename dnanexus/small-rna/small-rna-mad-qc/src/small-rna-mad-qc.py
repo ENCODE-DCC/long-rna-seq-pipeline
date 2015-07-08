@@ -1,37 +1,43 @@
 #!/usr/bin/env python
 # Runs "mean absolute deviation" QC metrics on two long-RNA-seq gene quantifications
-APP_SCRIPT = "mad-qc.py"
-APP_VER = "1.0.1"
+APP_SCRIPT = "small-rna-mad-qc.py"
+APP_VER = "0.0.1"
 
 import os, subprocess, json
 import dxpy
 
 @dxpy.entry_point("main")
-def main(quants_a, quants_b):
+def main(quants_a, quants_b, annotations):
 
     # tool_versions.py --applet $script_name --appver $script_ver
     sw_versions = subprocess.check_output(['tool_versions.py', '-a', APP_SCRIPT, '-av', APP_VER])
 
     dxfile_a = dxpy.DXFile(quants_a)
     dxfile_b = dxpy.DXFile(quants_b)
-    dxfile_index = dxpy.DXFile(star_index)
+    dxfile_anno = dxpy.DXFile(annotations)
 
     print "* Downloading files..."
-    dxpy.download_dxfile(dxfile_a.get_id(), "quants_a")
-    dxpy.download_dxfile(dxfile_b.get_id(), "quants_b")
-    dxpy.download_dxfile(dxfile_index.get_id(), "star_index.tgz")
+    dxpy.download_dxfile(dxfile_a.get_id(), "quants_a.tsv")
+    dxpy.download_dxfile(dxfile_b.get_id(), "quants_b.tsv")
+    dxpy.download_dxfile(dxfile_anno.get_id(), "annotations.gtf.gz")
     
-    # How to extract the gene ids file from tar?
-    print "* Extracting gene ids from archive..."
-    mad_output = subprocess.check_output(['tar', '-xzf', "star_index.tgz", '-C', './', 'out/smallRNA.geneID'])
+    print "* Extracting gene ids from annotation..."
+    subprocess.check_call(['gunzip', 'annotations.gtf.gz'])
+    subprocess.check_call(['gawk', '-f', '/usr/bin/extract_gene_ids.awk', 'annotations.gtf', 'out=srna_gene_ids.txt'])
     
-    # How to extract desired gene expr files from quants?
-    print "* Extracting expression values..."
-    
-    mad_output = subprocess.check_output(['Rscript', '/usr/bin/MAD.R', 'quants_a', 'quants_b'])
+    print "* Generating expression values for "+dxfile_a.name+"..."
+    summary_a = subprocess.check_output(['gawk','-f','/usr/bin/sum_srna_expression.awk','srna_gene_ids.txt', \
+                                                                                        'quants_a.tsv', 'out=expr_a.tsv'])
+    print summary_a
 
+    print "* Generating expression values for "+dxfile_b.name+"..."
+    summary_b = subprocess.check_output(['gawk','-f','/usr/bin/sum_srna_expression.awk','srna_gene_ids.txt',\
+                                                                                        'quants_b.tsv', 'out=expr_b.tsv'])
+    print summary_b
+    print subprocess.check_output(['ls', '-l'])
+    
     print "* Runnning MAD.R..."
-    mad_output = subprocess.check_output(['Rscript', '/usr/bin/MAD.R', 'quants_a', 'quants_b'])
+    mad_output = subprocess.check_output(['Rscript', '/usr/bin/MAD.R', 'expr_a.tsv', 'expr_b.tsv'])
     quants_a_name = dxfile_a.name.split('.')
     quants_b_name = dxfile_b.name.split('.')
     filename = quants_a_name[0] + '_' + quants_b_name[0] + '_' + quants_a_name[1] + '_mad_plot.png'

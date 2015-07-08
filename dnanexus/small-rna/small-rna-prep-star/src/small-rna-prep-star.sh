@@ -74,6 +74,7 @@ main() {
         fi
     fi
     archive_root="${genome}_${gender}_${anno}_sRNA_starIndex"
+    gene_id_root="${genome}_${anno}_gene_ids"
     
     echo "* Build index for '${genome}-${gender} and annotation ${anno}'..."
     set -x
@@ -87,6 +88,7 @@ main() {
     set -x
     awk '$3=="gene" || substr($14,2,length($14)-3)=="tRNAscan" {g=substr($14,2,length($14)-3); if (g=="miRNA" || g=="snoRNA" || g=="snRNA" || g=="tRNAscan") {print substr($10,2,length($10)-3)} }' \
         ${annotation_root}.gtf | sort > out/smallRNA.geneID
+    cp out/smallRNA.geneID ${gene_id_root}.txt
     set +x
 
     # Attempt to make bamCommentLines.txt, which should be reviewed. NOTE tabs handled by assignment.
@@ -106,7 +108,9 @@ main() {
 
     star_index=$(dx upload ${archive_root}.tgz --property genome="$genome" --property gender="$gender" \
                                                --property annotation="$anno" --property SW="$versions" --brief)
+    star_genes=$(dx upload ${gene_id_root}.txt --property genome="$genome" --property annotation="$anno" --brief)
     dx-jobutil-add-output star_index $star_index --class=file
+    dx-jobutil-add-output star_genes $star_genes --class=file
 
     echo "* Finished."
 }

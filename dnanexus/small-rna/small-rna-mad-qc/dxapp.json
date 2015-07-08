@@ -23,11 +23,11 @@
       "optional": false
     },
     {
-      "name": "star_index",
-      "label": "Genome indexed for STAR (used for extracting gene ID quantifications)",
+      "name": "annotations",
+      "label": "transcript and other annotations (GTF)",
       "class": "file",
       "optional": false,
-      "patterns": ["*.tgz"]
+      "patterns": ["*.gtf.gz"]
     }
   ],
   "outputSpec": [
@@ -48,7 +48,8 @@
     "file": "src/small-rna-mad-qc.py",
     "execDepends": [
       {"name": "r-base-core"},
-      {"name": "ghostscript"}
+      {"name": "ghostscript"},
+      { "name": "gawk" }
     ]
   },
   "access": {

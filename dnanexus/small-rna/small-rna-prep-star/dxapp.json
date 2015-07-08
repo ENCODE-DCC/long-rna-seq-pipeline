@@ -23,9 +23,16 @@
   ],
   "outputSpec": [
     {
-      "class": "file",
       "name": "star_index",
-      "label": "Reference files indexed for STAR"
+      "label": "Reference files indexed for STAR",
+      "class": "file",
+      "patterns": ["*_sRNA_starIndex.tgz"]
+    },
+    {
+      "name": "star_genes",
+      "label": "Text file list of gene ids",
+      "class": "file",
+      "patterns": ["*_gene_ids.txt"]
     }
   ],
   "runSpec": {

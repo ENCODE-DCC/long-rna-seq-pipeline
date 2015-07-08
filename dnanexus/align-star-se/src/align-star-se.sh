@@ -54,7 +54,7 @@ main() {
     if [ -f /usr/bin/parse_property.py ]; then
         new_root=`parse_property.py -f "'${reads[0]}'" --project "${DX_PROJECT_CONTEXT_ID}" --root_name --quiet`
         if [ "$new_root" != "" ]; then
-            bam_root="${new_root}_star_srna"
+            bam_root="${new_root}_star"
         fi
     fi
     echo "* Alignments file will be: '${bam_root}_genome.bam' and '${bam_root}_anno.bam'"
