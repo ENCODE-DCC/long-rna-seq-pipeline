@@ -1,5 +1,5 @@
 
-/usr/bin/bowtie2-build -f  data/ref/female.hg19.fa,data/refENCFF001RTP.fasta data/female.spikeins.hg19
+/usr/bin/bowtie2-build -f  data/ref/female.hg19.fa,data/ref/ENCFF001RTP.fasta data/female.spikeins.hg19
 
 #- /archive/TGCapps_data/bowtie2_indexes/male.spikeins.hg19
 
@@ -17,7 +17,7 @@
 
 /usr/bin/tophat -p 24 -z0 -o output/test-female -a 8 -m 0 --min-intron-length 20 \
   --max-intron-length 1000000 --read-edit-dist 4 --read-mismatches 4 -g 20 \
-  --no-discordant --no-mixed --library-type fr-firststrand -G data/gencode.v19.annotation.gtf \
+  --no-discordant --no-mixed --library-type fr-firststrand -G data/ref/gencode.v19.annotation.gtf \
   --transcriptome-index data/gencode.v19.female.spikeins data/female.spikeins.hg19 data/Read1.fastq.gz data/Read2.fastq.gz
 
 #- /archive/TGCore_User_Data/ENCODE/ENCODE_ANNOTATIONS/gencode.v19.male.spikeins
@@ -29,5 +29,5 @@
 #Generate a chromosome sizes file (should use male’s bam file):
 #- /archive/TGCore_User_Data/ENCODE/ENCODE_ANNOTATIONS/chromosizes_spikeIns.txt
 
-/usr/binsamtools view -H /output/folder/tophat/test2-male/accepted_hits.bam | awk '/@SQ/ {OFS="\t"; gsub("SN:", "", $2); gsub("LN:", "", $3); print $2, $3}' > /archive/TGCore_User_Data/ENCODE/ENCODE_ANNOTATIONS/chromosizes_spikeIns.txt
+/usr/bin/samtools view -H output/test-female/accepted_hits.bam | awk '/@SQ/ {OFS="\t"; gsub("SN:", "", $2); gsub("LN:", "", $3); print $2, $3}' > data/chromosizes_spikeIns.txt
 

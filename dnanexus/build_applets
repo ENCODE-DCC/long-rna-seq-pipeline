@@ -1,5 +1,18 @@
 #!/bin/bash
 
+# PLAN for virtual applets: applets that must be created with a different name for Launrences analysis_step_version plans:
+# A) Case of singleton applet that has new analysis_step ONLY because of preceeding applet change
+#    1) change applet minor version (e.g. quant-rsem when align-star-pe was versioned)
+#    2) continue to rely upon the alias: dnanexus:app-name-v-1-2 to find analysis_step
+# B) Case of applet run by sister pipelines (e.g. quant-rsem run in both lrna-pe and lrna-se)
+#    AND
+# C) Case of same applet run multiple times in a single pipeline (e.g. bam-to-bigwig-stranded)
+#    1) cp -rf bam-to-bigwig-stranded bam-to-bigwig-stranded-b
+#    2) edit name in dxapp.json only (do not edit script name)
+#       sed s/"bam-to-bigwig-stranded"/"bam-to-bigwig-stranded-b"/ < bam-to-bigwig-stranded/dxapp.json > bam-to-bigwig-stranded-b/dxapp.json
+#    3) build new applet
+#    4) Never check in contents of virtual applet dir.
+#    5) Edit launcher to handle the new virtual applet
 applet_dest=`cat ~/.dnanexus_config/DX_PROJECT_CONTEXT_NAME`
 applets="merge-annotation prep-star prep-rsem prep-tophat concat-fastqs"
 applets="$applets align-tophat-pe align-star-pe bam-to-bigwig-stranded quant-rsem mad-qc"

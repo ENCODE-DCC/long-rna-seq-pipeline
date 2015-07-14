@@ -15,7 +15,7 @@ use FileHandle;
 
 my $BAM= $ARGV[0];
 
-my $add_header_file = "/archive/TGCore_User_Data/ENCODE/ENCODE_ANNOTATIONS/additional_bam_header.txt";
+my $add_header_file = "/home/ubuntu/data/long-rna-seq-pipeline/DAC/additional_bam_header.txt";
 
 my $header_file = $BAM . ".header";
 my $new_bam = $BAM;

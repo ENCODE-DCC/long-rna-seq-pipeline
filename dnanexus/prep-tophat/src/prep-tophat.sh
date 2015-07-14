@@ -101,4 +101,3 @@ main() {
     dx-jobutil-add-output tophat_index $tophat_index --class=file
     echo "* Finished."
 }
-
