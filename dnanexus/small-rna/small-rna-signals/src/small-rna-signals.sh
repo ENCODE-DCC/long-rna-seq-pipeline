@@ -2,7 +2,7 @@
 # small-rna-signals.sh
 
 script_name="small-rna-signals.sh"
-script_ver="1.1.0"
+script_ver="1.1.1"
 
 main() {
     # Now in resources/usr/bin
@@ -18,14 +18,14 @@ main() {
         versions=`tool_versions.py --applet $script_name --appver $script_ver`
     fi
 
-    echo "Value of genome_bam: '$genome_bam'"
+    echo "Value of srna_bam: '$srna_bam'"
     echo "Value of chrom_sizes: '$chrom_sizes'"
 
     echo "* Download files..."
-    bam_fn=`dx describe "$genome_bam" --name`
+    bam_fn=`dx describe "$srna_bam" --name`
     bam_fn=${bam_fn%.bam}
     echo "* Bam file: '"$bam_fn".bam'"
-    dx download "$genome_bam" -o "$bam_fn".bam
+    dx download "$srna_bam" -o "$bam_fn".bam
 
     dx download "$chrom_sizes" -o chromSizes.txt
 
