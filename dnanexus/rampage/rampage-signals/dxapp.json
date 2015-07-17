@@ -1,9 +1,9 @@
 {
   "name": "rampage-signals",
-  "title": "RNA-Seq-rampage-signals",
+  "title": "bam to signals - Rampage (v1.0.2)",
   "summary": "Converts 'Marked' BAMs 5' reads to bigwig format for rampage-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "authorizedUsers": [],
   "inputSpec": [
     {

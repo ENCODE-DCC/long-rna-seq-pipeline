@@ -1,9 +1,6 @@
 #!/bin/bash
 # rampage-idr.sh
 
-script_name="rampage-idr.sh"
-script_ver="1.0.2"
-
 main() {
     echo "* Installing Anaconda3 (python3.4.3, numpy-1.9.2 matplotlib-1.4.3..."
     set -x
@@ -34,7 +31,7 @@ main() {
     # If available, will print tool versions to stderr and json string to stdout
     versions=''
     if [ -f /usr/bin/tool_versions.py ]; then 
-        versions=`tool_versions.py --applet $script_name --appver $script_ver`
+        versions=`tool_versions.py --dxjson dnanexus-executable.json`
     fi
 
     echo "Value of peaks_a:     '$peaks_a'"

@@ -1,14 +1,11 @@
 #!/bin/bash
 # concat-fastqs.sh
 
-script_name="concat-fastqs.sh"
-script_ver="1.0.4"
-
 main() {
     # If available, will print tool versions to stderr and json string to stdout
     versions=''
     if [ -f /usr/bin/tool_versions.py ]; then 
-        versions=`tool_versions.py --applet $script_name --appver $script_ver`
+        versions=`tool_versions.py --dxjson dnanexus-executable.json`
     fi
 
     echo "* Concat id: '${concat_id}'"

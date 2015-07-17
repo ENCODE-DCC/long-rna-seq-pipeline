@@ -1,6 +1,6 @@
 {
-  "name": "mad-qc",
-  "title": "Mean Absolute Deviation QC metrics (v1.0.2)",
+  "name": "mad-qc-alt",
+  "title": "Mean Absolute Deviation QC metrics (virtual-1.0.2)",
   "summary": "mad-qc",
   "dxapi": "1.0.0",
   "version": "1.0.2",

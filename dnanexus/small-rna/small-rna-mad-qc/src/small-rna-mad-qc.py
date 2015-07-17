@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 # Runs "mean absolute deviation" QC metrics on two long-RNA-seq gene quantifications
-APP_SCRIPT = "small-rna-mad-qc.py"
-APP_VER = "0.0.1"
 
 import os, subprocess, json
 import dxpy
@@ -10,7 +8,7 @@ import dxpy
 def main(quants_a, quants_b, annotations):
 
     # tool_versions.py --applet $script_name --appver $script_ver
-    sw_versions = subprocess.check_output(['tool_versions.py', '-a', APP_SCRIPT, '-av', APP_VER])
+    sw_versions = subprocess.check_output(['tool_versions.py', '--dxjson', 'dnanexus-executable.json'])
 
     dxfile_a = dxpy.DXFile(quants_a)
     dxfile_b = dxpy.DXFile(quants_b)

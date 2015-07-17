@@ -1,9 +1,9 @@
 {
   "name": "align-tophat-pe",
-  "title": "Long-RNA-Seq-align-tophat-pe",
+  "title": "TopHat align - pe (v1.0.5)",
   "summary": "Align paired-end (stranded) reads to genome and transcriptome using tophat for the ENCODE long-rna-peq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -31,7 +31,8 @@
       "name": "library_id",
       "label": "Identifier for biosample library",
       "class": "string",
-      "optional": false
+      "optional": false,
+      "default": "not specified"
     },
     {
       "name": "nthreads",

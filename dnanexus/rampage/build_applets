@@ -1,7 +1,15 @@
 #!/bin/bash
 
+# NOTE: A virtual applet is almost identical to an existing applet.  However we need a separate name/version for 
+#       ENCODEd analysis-step accounting to work.  To acheave this, the virtual app as a real dxapp.json definitition
+#       but all other applet contents are temporary symlinks to the true applets's contents.  This script handles the symlinks.
+
 applet_dest=`cat ~/.dnanexus_config/DX_PROJECT_CONTEXT_NAME`
 applets='rampage-align-pe rampage-signals rampage-peaks rampage-idr'
+
+tools="tool_versions.py qc_metrics.py parse_property.py"
+virtual_pairs="" # NO VIRTUALS at this time
+virtual_links="src resources Readme.developer.md Readme.md"
 
 if [ $# -gt 0 ]; then
     if [ $1 == "?" ] || [ $1 == "-h" ] || [ $1 == "--help" ]; then
@@ -13,53 +21,119 @@ if [ $# -gt 0 ]; then
         exit 1
     fi
 fi
-if [ "$1" = "--test" ]; then
-    echo "Would build '$applets' in project '$applet_dest'"
-    exit 0
-fi
 
-skipped_project="nope"
-if [ $# -gt 0 ]; then
-    if [ "$1" != "-" ] && [ "$1" != "." ]; then
-        if [ -d $1 ]; then
-            #echo "First missing project as first argument.  Assuming '$applet_dest'"
-            skipped_project="true"
-        else
-            applet_dest=$1
-        fi 
+# Generate the default list of virtual_apps from the virtual_pairs
+virtual_applets=""
+for pair in $virtual_pairs; do
+    virtual=$(echo $pair | cut -f2 -d:)
+    virtual_applets="$virtual_applets $virtual"
+done
+
+# Parse args
+testing="nope"
+# Only the first arg can be project
+if [ $# -gt 0 ] && [ ! -d $1 ] && [ ! -d "virtual/$1" ]; then 
+    if [ "$1" == "--test" ]; then
+        testing=$1
+    else
+        applet_dest=$1
     fi
-    if [ $# -gt 1 ] || [ "$skipped_project" == "true" ]; then
-        if [ "$skipped_project" != "true" ]; then
-            shift
-        fi
-        applets=''
-        while (( "$#" )); do
-            if [ "$1" == '--test' ]; then
-                echo "Would build '$applets' in project '$applet_dest'"
+    shift
+fi
+if [ $# -gt 0 ]; then
+    applets=''
+    virtual_applets=''
+    while (( "$#" )); do
+        if [ "$1" == '--test' ]; then
+            testing=$1
+        else            
+            applet=${1%/}
+            if [ -d $applet ]; then
+                applets="$applets $applet"
+                for pair in $virtual_pairs; do
+                    original=$(echo $pair | cut -f1 -d:)
+                    if [ "$applet" == "$original" ]; then
+                        virtual=$(echo $pair | cut -f2 -d:)
+                        virtual_applets="$virtual_applets $virtual"
+                    fi
+                done
+            elif [ -d "virtual/$applet" ]; then
+                virtual_applets="$virtual_applets $applet"
+            else
+                echo "Can't find '$applet'."
                 exit 0
             fi
-            applets="$applets ${1%/}"
-            shift
-        done
-    fi
+        fi
+        shift
+    done
 fi
-echo "Project: $applet_dest"
-echo "Apps:    $applets"
 
+# Test project
 project=$(dx find projects --name "$applet_dest")
 if [ -z "$project" ]
   then
-    dx new project "$applet_dest" --brief
+    #dx new project "$applet_dest" --brief
+    echo "Unknown project: $applet_dest"
+    exit 1
 fi
 
-for applet in $applets; do
-    echo "Building $applet at $applet_dest..."
-    mkdir -p ${applet}/resources/usr/bin 
-    cp ../tools/tool_versions.py ${applet}/resources/usr/bin
-    cp ../tools/qc_metrics.py ${applet}/resources/usr/bin
-    cp ../tools/parse_property.py ${applet}/resources/usr/bin
-    dx build "${applet}" --archive --destination "${applet_dest}:/"
-    rm ${applet}/resources/usr/bin/tool_versions.py
-    rm ${applet}/resources/usr/bin/qc_metrics.py
-done
+# Say what is going down
+echo "Project: $applet_dest"
+if [ "$applets" != "" ]; then
+    echo "Apps:   $applets"
+fi
+if [ "$virtual_applets" != "" ]; then
+    echo "Virtual:$virtual_applets"
+fi
+if [ "$testing" == "--test" ]; then
+    echo "Testing only."
+    exit 0
+fi
+
+# Applets first
+if [ "$applets" != "" ]; then
+    for applet in $applets; do
+        echo "Building $applet in project $applet_dest..."
+        mkdir -p ${applet}/resources/usr/bin 
+        for tool in $tools; do
+            cp ../tools/$tool ${applet}/resources/usr/bin
+        done
+        dx build "${applet}" --archive --destination "${applet_dest}:/"
+        for tool in $tools; do
+            rm ${applet}/resources/usr/bin/$tool 
+        done
+    done
+fi
+# virtual applets now
+if [ "$virtual_applets" != "" ]; then
+    for applet in $virtual_applets; do
+        echo "Building virtual $applet in project $applet_dest..."
+        cd virtual
+        # If we know what this applet is a virtual copy of, we could fill in everything except dxapp.json
+        for pair in $virtual_pairs; do
+            virtual=$(echo $pair | cut -f2 -d:)
+            if [ "$applet" == "$virtual" ]; then
+                original=$(echo $pair | cut -f1 -d:)
+                #echo "'$applet' is virtual of '$original'"
+                cd $applet
+                for link in $virtual_links; do
+                    ln -sf ../../${original}/$link $link
+                done
+                cd ..
+                break
+            fi
+        done
+        for tool in $tools; do
+            cp ../../tools/$tool ${applet}/resources/usr/bin
+        done
+        dx build "${applet}" --archive --destination "${applet_dest}:/"
+        for tool in $tools; do
+            rm -f ${applet}/resources/usr/bin/$tool 
+        done
+        for link in $virtual_links; do
+            rm -f ${applet}/$link
+        done
+        cd ..
+    done
+fi
 

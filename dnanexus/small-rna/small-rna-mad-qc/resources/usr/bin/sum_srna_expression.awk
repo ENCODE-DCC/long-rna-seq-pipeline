@@ -1,5 +1,6 @@
 #! /bin/awk -f 
 # Sums small-rna gene expression from STAR quantification files for use in mad.qc
+# version 1.0
 # usage: sum_srna_expression.awk smallRNA.geneID star_quant.tsv out=srna_gene_expr.tsv > srna_expr_summary.txt
 #    input files:
 #       smallRNA.geneID:        Small RNA gene IDs extracted from a gencode alignments gtf and saved in the star index archive.

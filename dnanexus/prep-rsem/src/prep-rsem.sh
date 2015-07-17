@@ -1,9 +1,6 @@
 #!/bin/bash
 # prep-rsem.sh
 
-script_name="prep-rsem.sh"
-script_ver="1.0.2"
-
 main() {
     # Now in resources/usr/bin
     #echo "* Dowload and install RSEM..."
@@ -15,12 +12,8 @@ main() {
     # If available, will print tool versions to stderr and json string to stdout
     versions=''
     if [ -f /usr/bin/tool_versions.py ]; then 
-        versions=`tool_versions.py --applet $script_name --appver $script_ver`
+        versions=`tool_versions.py --dxjson dnanexus-executable.json`
     fi
-    #echo "*****"
-    #echo "* Running: prep-rsem.sh [v1.0.1]"
-    #echo "* RSEM version: "`rsem-calculate-expression --version | awk '{print $5}'`
-    #echo "*****"
 
     echo "* Value of annotations: '$annotations'"
     echo "* Value of genome: '$genome'"

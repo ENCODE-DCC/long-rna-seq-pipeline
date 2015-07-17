@@ -1,6 +1,6 @@
 {
-  "name": "bam-to-bigwig-unstranded",
-  "title": "bam to unstranded signals (v2.0.2)",
+  "name": "bam-to-bigwig-unstranded-tophat",
+  "title": "bam to unstranded signals - TopHat (virtual-2.0.2)",
   "summary": "Converts BAMs from alignments from unstranded libraries to bigwig format",
   "dxapi": "1.0.0",
   "version": "2.0.2",
@@ -11,7 +11,7 @@
       "label": "Input BAM file for all mapped reads",
       "class": "file",
       "optional": false,
-      "patterns": ["*.bam"]
+      "patterns": ["*_tophat.bam"]
     },
     {
       "name": "chrom_sizes",

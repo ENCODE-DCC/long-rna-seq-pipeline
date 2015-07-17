@@ -1,9 +1,6 @@
 #!/bin/bash
 # merge-annotation.sh
 
-script_name="merge-annotation.sh"
-script_ver="1.0.1"
-
 main() {
     # Now in resources/usr/bin
     #wget https://github.com/ENCODE-DCC/long-rna-seq-pipeline/tree/master/DAC/GTF.awk
@@ -11,12 +8,8 @@ main() {
     # If available, will print tool versions to stderr and json string to stdout
     versions=''
     if [ -f /usr/bin/tool_versions.py ]; then 
-        versions=`tool_versions.py --applet $script_name --appver $script_ver`
+        versions=`tool_versions.py --dxjson dnanexus-executable.json`
     fi
-    #echo "*****"
-    #echo "* Running: merge_annotation.sh [v1.0.0]"
-    #echo "* GTF.awk version: unversioned"
-    #echo "*****"
 
     echo "* Value of gene_annotation: '$gene_annotation'"
     echo "* Value of trna_annoation: '$trna_annotation'"

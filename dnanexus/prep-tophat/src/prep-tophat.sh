@@ -1,9 +1,6 @@
 #!/bin/bash
 # prep-tophat.sh
 
-script_name="prep-tophat.sh"
-script_ver="1.0.1"
-
 main() {
     # Now in resources/usr/bin
     ## install tophat 2.0.8
@@ -14,13 +11,8 @@ main() {
     # If available, will print tool versions to stderr and json string to stdout
     versions=''
     if [ -f /usr/bin/tool_versions.py ]; then 
-        versions=`tool_versions.py --applet $script_name --appver $script_ver`
+        versions=`tool_versions.py --dxjson dnanexus-executable.json`
     fi
-    #echo "*****"
-    #echo "* Running: prep_tophat.sh [v1.0.0]"
-    #echo "* TopHat version: "`tophat -v | awk '{print $2}'`
-    #echo "* bowtie2 version: "`bowtie2 --version 2>&1 | grep bowtie | awk '{print $3}'`
-    #echo "*****"
 
     echo "* Value of annotations: '$annotations'"
     echo "* Value of genome: '$genome'"

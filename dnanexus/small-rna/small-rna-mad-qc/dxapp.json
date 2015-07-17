@@ -1,9 +1,9 @@
 {
   "name": "small-rna-mad-qc",
-  "title": "small-RNA-seq 'mean absolute deviation' QC metrics",
+  "title": "Mean Absolute Deviation - small-RNA-seq (v1.0.1)",
   "summary": "mad-qc",
   "dxapi": "1.0.0",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "categories": [
     "ENCODE"
   ],

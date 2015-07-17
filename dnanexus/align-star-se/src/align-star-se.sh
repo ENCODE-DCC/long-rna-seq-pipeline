@@ -1,9 +1,6 @@
 #!/bin/bash
 # align-star-se.sh
 
-script_name="align-star-se.sh"
-script_ver="2.0.3"
-
 main() {
     # Now in resources/usr/bin
     #echo "* Download and install STAR..."
@@ -15,7 +12,7 @@ main() {
     # If available, will print tool versions to stderr and json string to stdout
     versions=''
     if [ -f /usr/bin/tool_versions.py ]; then 
-        versions=`tool_versions.py --applet $script_name --appver $script_ver`
+        versions=`tool_versions.py --dxjson dnanexus-executable.json`
     fi
 
     echo "* Value of reads: '$reads'"

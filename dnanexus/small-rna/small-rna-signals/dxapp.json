@@ -1,9 +1,9 @@
 {
   "name": "small-rna-signals",
-  "title": "Small-RNA-Seq-signals",
+  "title": "bam to signals - small-RNA-seq (v1.1.2)",
   "summary": "Converts BAMs of alignments from stranded libraries to bigwig format",
   "dxapi": "1.0.0",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "authorizedUsers": [],
   "inputSpec": [
     {

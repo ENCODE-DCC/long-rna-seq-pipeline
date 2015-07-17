@@ -1,4 +1,5 @@
 ## input two table, each is from one rep
+## version: 1.0
 
 ##table1 and table2 are the filenames with data
 organizeExp <- function(table1,table2,col1,gene1=NA,tx1=NA,align=c("gene","tx"),col2=col1,gene2=gene1,tx2=tx1){
@@ -34,7 +35,7 @@ organizeExp <- function(table1,table2,col1,gene1=NA,tx1=NA,align=c("gene","tx"),
 
 Acutoff <-0  ##this means we ignore FPKM < 1 when computing mean
 
-###para will have filenmaes supplied by
+###para will have filenames supplied by
 para <- commandArgs(trailingOnly = TRUE)
 reps <- organizeExp(para[1],para[2],7,1)
 nozero <- which(reps$rep1!=0 | reps$rep2!=0)

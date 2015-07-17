@@ -1,6 +1,6 @@
 {
-  "name": "quant-rsem",
-  "title": " RSEM quantify genes - se (v1.0.4)",
+  "name": "quant-rsem-alt",
+  "title": " RSEM quantify genes (virtual-1.0.4)",
   "summary": "Do genome and transcription quantitations with RSEM from STAR alignments",
   "dxapi": "1.0.0",
   "version": "1.0.4",

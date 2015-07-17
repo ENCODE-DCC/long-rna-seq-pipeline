@@ -1,9 +1,6 @@
 #!/bin/bash
 # bam-to-bigwig-unstranded.sh
 
-script_name="bam-to-bigwig-unstranded.sh"
-script_ver="2.0.1"
-
 main() {
     # Now in resources/usr/bin
     #echo "* Download and install STAR..."
@@ -15,21 +12,11 @@ main() {
     # If available, will print tool versions to stderr and json string to stdout
     versions=''
     if [ -f /usr/bin/tool_versions.py ]; then 
-        versions=`tool_versions.py --applet $script_name --appver $script_ver`
+        versions=`tool_versions.py --dxjson dnanexus-executable.json`
     fi
-    #echo "*****"
-    #echo "* Running: bam-to-bigwig-unstranded.sh [v2.0.0]"
-    #echo "* STAR version:     ["`STAR --version | awk '{print $1}' | cut -d _ -f 2-`"]"
-    #echo "* bedGraphToBigWig version: "`bedGraphToBigWig 2>&1 | grep "bedGraphToBigWig v" | awk '{print $2$3}'`
-    #echo "*****"
 
     echo "* Value of bam_file: '$bam_file'"
     echo "* Value of chrom_sizes: '$chrom_sizes'"
-
-    # The following line(s) use the dx command-line tool to download your file
-    # inputs to the local file system using variable names for the filenames. To
-    # recover the original filenames, you can use the output of "dx describe
-    # "$variable" --name".
 
     echo "* Download files..."
     bam_fn=`dx describe "$bam_file" --name`

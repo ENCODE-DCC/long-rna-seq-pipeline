@@ -1,9 +1,9 @@
 {
   "name": "rampage-idr",
-  "title": "Rampage-RNA-Seq-idr-reporting",
+  "title": "IDR on  Rampage peaks (v1.0.3)",
   "summary": "Compares two sets of peaks and generates an Irreproducible Discovery Rate report",
   "dxapi": "1.0.0",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "authorizedUsers": [],
   "inputSpec": [
     {

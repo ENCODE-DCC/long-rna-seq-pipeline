@@ -1,9 +1,9 @@
 {
   "name": "concat-fastqs",
-  "title": "Concatenates fastq.gz files",
+  "title": "Concatenates fastq.gz files (v1.0.5)",
   "summary": "Takes gzipped fastq files and concatenates them. Optional ENCODE long-rna-seq pipeline step",
   "dxapi": "1.0.0",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "authorizedUsers": [],
   "inputSpec": [
     {

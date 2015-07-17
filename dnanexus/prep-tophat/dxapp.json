@@ -1,9 +1,9 @@
 {
   "name": "prep-tophat",
-  "title": "Long-RNA-Seq-prep-tophat-genome",
+  "title": "TopHat genome indexing (v1.0.2)",
   "summary": "Prepare reference genome and transcriptome indexes for tophat used in the ENCODE long-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "authorizedUsers": [],
   "inputSpec": [
     {

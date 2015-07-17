@@ -1,5 +1,6 @@
 #! /bin/awk -f 
 # Extracts small-rna gene id's from a gencode annotation (gtf) file for use in mad.qc
+# version 1.0
 # usage: extract_gene_ids.awk gencode.v19.annotation.gtf out=srna_gene_ids.txt
 #   input files:
 #      gencode.v19.annotation.gtf:  Gencode annotation file

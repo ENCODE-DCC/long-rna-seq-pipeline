@@ -1,9 +1,9 @@
 {
   "name": "merge-annotation",
-  "title": "Long-RNA-seq-merge-gtf-annotation",
+  "title": "Merge annotation, t-RNAs and spike-ins (v1.0.2)",
   "summary": "Takes GENCODE and spike-ins and creates a single GTF file for quantitation (prep step)",
   "dxapi": "1.0.0",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "authorizedUsers": [],
   "inputSpec": [
     {

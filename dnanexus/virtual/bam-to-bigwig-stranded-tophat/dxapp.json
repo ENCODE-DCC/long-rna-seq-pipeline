@@ -1,6 +1,6 @@
 {
-  "name": "bam-to-bigwig-stranded",
-  "title": "bam to stranded signals (v2.0.2)",
+  "name": "bam-to-bigwig-stranded-tophat",
+  "title": "bam to stranded signals - TopHat (virtual-2.0.2)",
   "summary": "Converts BAMs from alignments from stranded libraries to bigwig format",
   "dxapi": "1.0.0",
   "version": "2.0.2",
@@ -11,7 +11,7 @@
       "label": "Input BAM file for all mapped reads",
       "class": "file",
       "optional": false,
-      "patterns": ["*.bam"]
+      "patterns": ["*_tophat.bam"]
     },
     {
       "name": "chrom_sizes",
