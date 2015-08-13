@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# lrnaLaunch.py 0.0.1
+# lrnaLaunch.py 2.1.1
 
 import argparse,os, sys, json
 
@@ -30,7 +30,7 @@ class LrnaLaunch(Launch):
     #'''Each branch must define the 'steps' and their (artificially) linear order.'''
          "REP": {
                 "ORDER": {
-                    "se": [ "align-tophat-se", "topBwSe", "align-star-se", "starBwSe", "quant-rsem" ],
+                    "se": [ "align-tophat-se", "topBwSe", "align-star-se", "starBwSe", "quant-rsem-alt" ],
                     "pe": [ "align-tophat-pe", "topBwPe", "align-star-pe", "starBwPe", "quant-rsem" ]
                 },
                 "STEPS": {
@@ -44,20 +44,20 @@ class LrnaLaunch(Launch):
                             "align-tophat-pe": {
                                         "app":     "align-tophat-pe",
                                         "params":  { "library_id":   "library_id" }, #, "nthreads"
-                                        "inputs":  { "reads1":       "reads_1",
-                                                     "reads2":       "reads_2",
+                                        "inputs":  { "reads1":       "reads1",
+                                                     "reads2":       "reads2",
                                                      "tophat_index": "tophat_index" },
                                         "results": { "tophat_bam":   "tophat_bam" }
                             },
                             "topBwSe":  {
-                                        "app":     "bam-to-bigwig-unstranded",
+                                        "app":     "bam-to-bigwig-unstranded-tophat",
                                         "inputs":  { "tophat_bam":     "bam_file",
                                                      "chrom_sizes":    "chrom_sizes" },
                                         "results": { "tophat_all_bw":  "all_bw",
                                                      "tophat_uniq_bw": "uniq_bw" }
                             },
                             "topBwPe":  {
-                                        "app":     "bam-to-bigwig-stranded",
+                                        "app":     "bam-to-bigwig-stranded-tophat",
                                         "inputs":  { "tophat_bam":           "bam_file",
                                                      "chrom_sizes":          "chrom_sizes" },
                                         "results": { "tophat_minus_all_bw":  "minus_all_bw",
@@ -77,8 +77,8 @@ class LrnaLaunch(Launch):
                             "align-star-pe":   {
                                         "app":     "align-star-pe",
                                         "params":  { "library_id":      "library_id" }, #, "nthreads"
-                                        "inputs":  { "reads1":          "reads_1",
-                                                     "reads2":          "reads_2",
+                                        "inputs":  { "reads1":          "reads1",
+                                                     "reads2":          "reads2",
                                                      "star_index":      "star_index" },
                                         "results": { "star_genome_bam": "star_genome_bam",
                                                      "star_anno_bam":   "star_anno_bam",
@@ -107,14 +107,32 @@ class LrnaLaunch(Launch):
                                                      "rsem_index":        "rsem_index" },
                                         "results": { "rsem_iso_results":  "rsem_iso_results",
                                                      "rsem_gene_results": "rsem_gene_results" }
+                            },
+                            "quant-rsem-alt":     {
+                                        "app":     "quant-rsem-alt",
+                                        "params":  { "paired_end":        "paired_end" },  #, "nthreads", "rnd_seed"
+                                        "inputs":  { "star_anno_bam":     "star_anno_bam",
+                                                     "rsem_index":        "rsem_index" },
+                                        "results": { "rsem_iso_results":  "rsem_iso_results",
+                                                     "rsem_gene_results": "rsem_gene_results" }
                             }
                 }
         },
         "COMBINED_REPS": {
-                "ORDER": [ "mad-qc" ],
+                "ORDER": {
+                    "se": [ "mad-qc-alt" ],
+                    "pe": [ "mad-qc"     ]
+                },
                 "STEPS": {
                             "mad-qc": {
                                         "app":     "mad-qc",
+                                        "params":  {},
+                                        "inputs":  { "quants_a": "quants_a", 
+                                                     "quants_b": "quants_b" },
+                                        "results": { "mad_plot": "mad_plot" }
+                            },
+                            "mad-qc-alt": {
+                                        "app":     "mad-qc-alt",
                                         "params":  {},
                                         "inputs":  { "quants_a": "quants_a", 
                                                      "quants_b": "quants_b" },
