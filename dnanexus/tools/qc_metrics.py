@@ -349,7 +349,7 @@ def main():
                         default=None,
                         required=False)
     parser.add_argument('-j', '--json', action="store_true", required=False, default=False, 
-                        help="Prints pretty json.")
+                        help="Print just the json object, without the name.")
     parser.add_argument('-v', '--verbose', action="store_true", required=False, default=False, 
                         help="Make some noise.")
 
@@ -399,6 +399,9 @@ def main():
         else:
             print '"' + args.keypair + '": '
             sys.stderr.write('"' + args.keypair + '": \n')
+    elif args.json:
+        print json.dumps(metrics)
+        sys.stderr.write(json.dumps(metrics,indent=4) + '\n')
     else: 
         print '"' + args.name + '": ' + json.dumps(metrics)
         sys.stderr.write('"' + args.name + '": ' + json.dumps(metrics,indent=4) + '\n')
