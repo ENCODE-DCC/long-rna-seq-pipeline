@@ -141,6 +141,9 @@ class LrnaLaunch(Launch):
                 }
         }
     }
+    
+    PRUNE_STEPS = ["align-tophat-se","align-tophat-pe","topBwSe","topBwPe"]
+    '''If --no-tophat is requested, these steps are pruned from the pipeline before launching.'''
 
     FILE_GLOBS = {
         # For looking up previous result files, use wild-cards
@@ -251,6 +254,12 @@ class LrnaLaunch(Launch):
                         choices=[self.ANNO_DEFAULT, 'M2','M3','M4'],
                         default=self.ANNO_DEFAULT,
                         required=False)
+
+        ap.add_argument('--no_tophat',
+                        help='Do not include TopHat steps in pipeline (default: include TopHat steps).',
+                        action='store_true',
+                        required=False)
+
         return ap.parse_args()
 
     def pipeline_specific_vars(self,args,verbose=False):
@@ -273,6 +282,10 @@ class LrnaLaunch(Launch):
         if psv['annotation'] != self.ANNO_DEFAULTS[psv['genome']]:
             psv['title'] += ', ' + psv['annotation']
             psv['name']  += '_' + psv['annotation']
+            
+        self.no_tophat = args.no_tophat
+        if not self.no_tophat:
+            self.PRUNE_STEPS = []
 
         # Must override results location because of annotation
         psv['resultsLoc'] = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name,psv['exp_type'], \
