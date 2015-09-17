@@ -28,7 +28,7 @@ class RampageLaunch(Launch):
 
     # NOTE '/lrna/' or '/run/' is safer and more efficient than '/', but also more brittle
     #CONTROL_ROOT_FOLDER = '/'
-    CONTROL_ROOT_FOLDER = '/lrna/'
+    CONTROL_ROOT_FOLDER = '/long-RNA-seq/'
     ''' Rampage requires a control file which may be discoverable.'''
     CONTROL_FILE_GLOB = '*_star_genome.bam'
 
@@ -78,14 +78,15 @@ class RampageLaunch(Launch):
                                              "gene_annotation": "gene_annotation", 
                                              "chrom_sizes": "chrom_sizes",
                                              "rampage_marked_bam": "rampage_marked_bam" },
-                                "results": { "rampage_peaks_bed": "rampage_peaks_bed",
-                                             "rampage_peaks_bb":  "rampage_peaks_bb",
-                                             "rampage_peaks_gff": "rampage_peaks_gff" }
+                                "results": { "rampage_peaks_bed":  "rampage_peaks_bed",
+                                             "rampage_peaks_bb":   "rampage_peaks_bb",
+                                             "rampage_peaks_gff":  "rampage_peaks_gff",
+                                             "rampage_peak_quants":"rampage_peak_quants" }
                             }
                 }
          },
          "COMBINED_REPS": {
-                "ORDER": [ "rampage-idr" ],
+                "ORDER": [ "rampage-idr", "rampage-mad-qc" ],
                 "STEPS": {
                             "rampage-idr": {
                                 "app":     "rampage-idr",
@@ -96,14 +97,21 @@ class RampageLaunch(Launch):
                                 "results": { "rampage_idr_png": "rampage_idr_png",
                                              "rampage_idr_bb":  "rampage_idr_bb",
                                              "rampage_idr_bed": "rampage_idr_bed" }
-                            }
+                            },
+                            "rampage-mad-qc": {
+                                        "app":     "rampage-mad-qc",
+                                        "params":  {},
+                                        "inputs":  { "quants_a": "quants_a", 
+                                                     "quants_b": "quants_b" },
+                                        "results": { "mad_plot": "mad_plot" }
+                            },
                 }
          }
     }
 
     FILE_GLOBS = {
-        "reads1":               "/*_reads_concat.fq.gz",
-        "reads2":               "/*_reads2_concat.fq.gz",
+        "reads1":             "/*_reads_concat.fq.gz",
+        "reads2":             "/*_reads2_concat.fq.gz",
         "all_plus_bw":        "/*_rampage_5p_plusAll.bw",
         "rampage_marked_bam": "/*_rampage_star_marked.bam",
         "all_minus_bg":       "/*_rampage_5p_minusAll.bg",
@@ -111,17 +119,21 @@ class RampageLaunch(Launch):
         "rampage_peaks_bed":  "/*_rampage_peaks.bed",
         "rampage_peaks_bb":   "/*_rampage_peaks.bb",
         "rampage_peaks_gff":  "/*_rampage_peaks.gff",
+        "rampage_peak_quants":"/*_rampage_peaks_quant.tsv",
         "peaks_a":            "/*_rampage_peaks.bed",
         "peaks_b":            "/*_rampage_peaks.bed",
+        "quants_a":           "/*_rampage_peaks_quant.tsv",
+        "quants_b":           "/*_rampage_peaks_quant.tsv",
         "all_plus_bg":        "/*_rampage_5p_plusAll.bg",
         "rampage_star_log":   "/*_rampage_star_Log.final.out",
         "all_minus_bw":       "/*_rampage_5p_minusAll.bw",
         "unique_plus_bw":     "/*_rampage_5p_plusUniq.bw",
         "unique_minus_bg":    "/*_rampage_5p_minusUniq.bg",
         "unique_minus_bw":    "/*_rampage_5p_minusUniq.bw",
-        "rampage_idr_bed":    "*_idr.bed",
-        "rampage_idr_bb":     "*_idr.bb",
-        "rampage_idr_png":    "*_idr.png"
+        "rampage_idr_bed":    "/*_rampage_idr.bed",
+        "rampage_idr_bb":     "/*_rampage_idr.bb",
+        "rampage_idr_png":    "/*_rampage_idr.png",
+        "mad_plot":           "/*_rampage_mad_plot.png",
     }
 
     REFERENCE_FILES = {
@@ -188,6 +200,7 @@ class RampageLaunch(Launch):
                         choices=[self.ANNO_DEFAULT, 'M2','M3','M4'],
                         default=self.ANNO_DEFAULT,
                         required=False)
+
         return ap.parse_args()
 
     def pipeline_specific_vars(self,args,verbose=False):
@@ -263,34 +276,21 @@ class RampageLaunch(Launch):
         # TODO Make more generic and move to dxencode.py when needed.
         
         (AUTHID,AUTHPW,SERVER) = dxencode.processkey(self.server_key)
+        if 'controls' not in rep:
+            return None
         for file_key in rep['controls']:
-            url = '%s%s/?format=json&frame=embedded' % (SERVER,file_key)
-            #print '-- ' + AUTHID + " " + AUTHPW + " " + SERVER + " " + url
-            try:
-                response = dxencode.encoded_get(url, AUTHID, AUTHPW)
-                file_obj = response.json()
-            except:
-                print "URL to control [%s] returned ?" % url
-                print response
-                sys.exit(1)
-            #print json.dumps(response,indent=4)
+            if isinstance(file_key,list):
+                file_key = file_key[0]
+            file_obj = dxencode.enc_lookup_json(file_key,self.server_key,frame='embedded')
             rep_id = file_obj["replicate"]['@id']
-            url = '%s%s/?format=json&frame=embedded' % (SERVER,rep_id)
-            try:
-                response = dxencode.encoded_get(url, AUTHID, AUTHPW)
-                rep_obj = response.json()
-            except:
-                print "URL to replicate [%s] returned ?" % url
-                print response
-                sys.exit(1)
-            exp_id = rep_obj['experiment'].split('/')[2]
+            rep_obj = dxencode.enc_lookup_json(rep_id,self.server_key,frame='embedded')
+            exp_id = rep_obj['experiment']['@id'].split('/')[2]
             rep_tech = "rep%s_%s" % \
                     (rep_obj['biological_replicate_number'], rep_obj['technical_replicate_number'])
-            # default by cheating
-            if self.proj_name == dxencode.PRODUCTION_PROJECT:
-                control_root = "/long-RNA-seq/runs/"
-            else:
-                control_root = self.CONTROL_ROOT_FOLDER
+            control_root = self.psv['control_path']
+            # Cheating:
+            if self.proj_name == "scratchPad" and self.psv['control_path'] == self.CONTROL_ROOT_FOLDER:
+                control_root = "/lrna"
             path_n_glob = control_root + exp_id + '/' + rep_tech + '/' + self.CONTROL_FILE_GLOB
             target_folder = dxencode.find_folder(exp_id + '/' + rep_tech,self.project,control_root)
             #print "Target found [%s]" % target_folder
@@ -302,6 +302,7 @@ class RampageLaunch(Launch):
                 
         if default != None:
             return default
+        #print json.dumps(rep,indent=4)
         print "Unable to find control in search of %s" % rep['controls']
         sys.exit(1)
             

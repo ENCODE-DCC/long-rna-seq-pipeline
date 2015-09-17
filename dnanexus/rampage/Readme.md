@@ -16,29 +16,31 @@ be repurposed for a non-dnanexus environment.
                      (produced by the long-rna-seq-pipeline's '`align-star-pe`' applet).  An annotation gzipped gtf 
                      file (such as gencode.v19.annotation.gtf.gz) and a chromosome name/length file is also required. 
                      This peak calling step produces three files all with essentially the same data in different 
-                     formats: gff, bed, and bigBed for easy display in a genome browser.  
-- rampage idr      - Takes the bed output from two separate runs of '`rampage-peaks`' and performs an "Irreproducible 
+                     formats: gff, bed, and bigBed; and a fourth file of TSS quantifications.  
+- rampage-idr      - Takes the bed output from two separate runs of '`rampage-peaks`' and performs an "Irreproducible 
                      Discover Rate" analysis comparing the 2 sets of peaks.  The input peaks are typically from a 
                      pair of replicates of the same experiment allowing validation of the experiment methods, as well
                      as a means of reducing noise in the final results.  This step also needs a chromosome name/size 
                      file and produces a bed and a bigWig file, each containing the superset of peaks and the idr 
                      statistics on the overlapping set of peaks.  This applet also produces a plot in png format.
+- rampage-mad-qc   - Takes two TSS quantification files produced from '`rampage-peaks`' and calculates the 
+                     Mean Absolute Deviation and correlations. This step produces a plot (png) file and some QC metric values.
                      
 ---------
 ## Flow
 ```
-INPUTS:  read1.fq.gz            rampage.bam(a)    rampage.bam(a)     peaks.bed(b) from replicate 1
-         read2.fq.gz            chrom.sizes       long-rna.bed       peaks.bed(b) from replicate 2
-         star-index.tar.gz          |             chrom.sizes        chrom.sizes
-            |                       |             annotation.gtf.gz      |
-            |                       |                 |                  |
-            V                       V                 V                  V
-STEPS:   rampage-align-pe ====> rampage-signals,  rampage-peaks ===> rampage-idr
-            |                       |                 |                  |
-            V                       V                 V                  V
-OUTPUTS: rampage.bam(a)         unique-plus.bw    peaks.gtf          peaks-idr.bed
+INPUTS:  read1.fq.gz            rampage.bam(a)    rampage.bam(a)     2*peaks.bed(b)  2*quants.tsv(c)
+         read2.fq.gz            chrom.sizes       long-rna.bed       chrom.sizes        |
+         star-index.tar.gz          |             chrom.sizes            |              |
+            |                       |             annotation.gtf.gz      |              |
+            |                       |                 |                  |              |
+            V                       V                 V                  V              V
+STEPS:   rampage-align-pe ====> rampage-signals,  rampage-peaks ===> rampage-idr, rampage-mad-qc
+            |                       |                 |                  |              |
+            V                       V                 V                  V              V
+OUTPUTS: rampage.bam(a)         unique-plus.bw    peaks.gtf          peaks-idr.bed   plot.png
                                 unique-minus.bw   peaks.bed(b)       peaks-idr.bb
                                 all-plus.bw       peaks.bb           idr-plot.png
-                                all-minus.bw
+                                all-minus.bw      quants.tsv(c)
 ```
 

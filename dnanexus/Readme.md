@@ -38,6 +38,8 @@ be repurposed for a non-dnanexus environment.
                          The alignment signals are filtered into uniquely mapped vs. all mapped reads.
 - quant-rsem           - Takes a STAR genome aligned bam (single or paired-end) and an RSEM index tarred, gzipped file.
                          This step produces two quantification csv files, one for genes and one for transcripts.
+- mad-qc               - Takes two RSEM gene quantification files and calculates the Mean Absolute Deviation and
+                         correlations. This step produces a plot (png) file and some QC metric values.
 
 ---------
 ## Flow
@@ -57,15 +59,15 @@ OUTPUTS: merge-anno.gtf.gz(a)   tophat-index.tgz(b)      star-index.tgz(c)      
 ---------
 *Paired-end pipeline:*
 ```
-INPUTS:  read1.fq.gz             read1.fq.gz            tophat-pe.bam(e)     star-genome-pe.bam(f)   star-anno-pe.bam(g)
-         read2.fq.gz             read2.fq.gz            chrom.sizes          chrom.sizes             rsem-index.tgz(d)
-         tophat-index.tar.gz(b)  star-index.tar.gz(c)        |                     |                     |
-              |                       |                      |                     |                     |
-              V                       V                      V                     V                     V
-STEPS:   align-tophat-pe,        align-star-pe   ====>  bam-to-bw-stranded,  bam-to-bw-stranded ===> quant-rsem
-              |                       |                      |                     |                     |
-              V                       V                      V                     V                     V
-OUTPUTS: tophat-pe.bam(e)        star-genome-pe.bam(f)  tophat-uniq-plus.bw   star-uniq-plus.bw      gene-quant.csv
+INPUTS:  read1.fq.gz             read1.fq.gz            tophat-pe.bam(e)     star-genome-pe.bam(f)   star-anno-pe.bam(g)  2*gene-quant.csv(h)
+         read2.fq.gz             read2.fq.gz            chrom.sizes          chrom.sizes             rsem-index.tgz(d)          |
+         tophat-index.tar.gz(b)  star-index.tar.gz(c)        |                     |                     |                      |
+              |                       |                      |                     |                     |                      |
+              V                       V                      V                     V                     V                      V
+STEPS:   align-tophat-pe,        align-star-pe   ====>  bam-to-bw-stranded,  bam-to-bw-stranded ===> quant-rsem ============> mad-qc
+              |                       |                      |                     |                     |                      |
+              V                       V                      V                     V                     V                      V
+OUTPUTS: tophat-pe.bam(e)        star-genome-pe.bam(f)  tophat-uniq-plus.bw   star-uniq-plus.bw      gene-quant.csv(h)        plot.png
                                  star-anno-pe.bam(g)    tophat-uniq-minus.bw  star-uniq-minus.bw     transcript-quant.csv
                                                         tophat-all-plus.bw    star-all-plus.bw
                                                         tophat-all-minus.bw   star-all-minus.bw
@@ -74,15 +76,15 @@ OUTPUTS: tophat-pe.bam(e)        star-genome-pe.bam(f)  tophat-uniq-plus.bw   st
 ---------
 *Single-end pipeline:*
 ```
-INPUTS:  reads.fq.gz             reads.fq.gz            tophat-se.bam(h)     star-genome-se.bam(i)      star-anno-se.bam(j)
-         tophat-index.tar.gz(b)  star-index.tar.gz(c)   chrom.sizes          chrom.sizes                rsem-index.tgz(d)
-              |                       |                      |                     |                        |
-              V                       V                      V                     V                        V
-STEPS:   align-tophat-se,        align-star-se   ====>  bam-to-bw-unstranded, bam-to-bw-unstranded ===> quant-rsem
-              |                       |                      |                     |                        |
-              V                       V                      V                     V                        V
-OUTPUTS: tophat-se.bam(h)        star-genome-se.bam(i)  tophat-uniq.bw        star-uniq.bw              gene-quant.csv
-                                 star-anno-se.bam(j)    tophat-all.bw         star-all.bw               transcript-quant.csv
+INPUTS:  reads.fq.gz             reads.fq.gz            tophat-se.bam(i)     star-genome-se.bam(j)   star-anno-se.bam(k)  2*gene-quant.csv(l)
+         tophat-index.tar.gz(b)  star-index.tar.gz(c)   chrom.sizes          chrom.sizes             rsem-index.tgz(d)          |
+              |                       |                      |                     |                        |                   |
+              V                       V                      V                     V                        V                   V
+STEPS:   align-tophat-se,        align-star-se   ====>  bam-to-bw-unstranded, bam-to-bw-unstranded ==> quant-rsem ============> mad-qc
+              |                       |                      |                     |                        |                   |
+              V                       V                      V                     V                        V                   V
+OUTPUTS: tophat-se.bam(i)        star-genome-se.bam(j)  tophat-uniq.bw        star-uniq.bw           gene-quant.csv(l)        plot.png
+                                 star-anno-se.bam(k)    tophat-all.bw         star-all.bw            transcript-quant.csv
 ```
 
 

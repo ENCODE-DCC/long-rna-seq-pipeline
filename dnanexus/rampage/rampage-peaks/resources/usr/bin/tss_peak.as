@@ -1,5 +1,5 @@
 table tss_peak
-"Rampage peak coverage. Browser extensible data (11 fields)."
+"Tss peak coverage. Browser extensible data BED6+5."
     (
     string  chrom;       "Reference sequence chromosome (or contig, scaffold, etc.)"
     uint    chromStart;  "Start position in chromosome"

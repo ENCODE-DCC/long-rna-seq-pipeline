@@ -1,0 +1,53 @@
+{
+  "name": "rampage-mad-qc",
+  "title": "Mean Absolute Deviation QC metrics (v1.0.0)",
+  "summary": "Compares two quantifications and calculates Mean Absolute Deviation",
+  "dxapi": "1.0.0",
+  "version": "1.0.0",
+  "categories": [
+    "ENCODE"
+  ],
+  "inputSpec": [
+    {
+      "name": "quants_a",
+      "label": "Quantification file from one rep",
+      "class": "file",
+      "patterns": ["*_rampage_peaks_quant.tsv","*.tsv"],
+      "optional": false
+    },
+    {
+      "name": "quants_b",
+      "label": "Quantification file from another rep",
+      "class": "file",
+      "patterns": ["*_rampage_peaks_quant.tsv","*.tsv"],
+      "optional": false
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "mad_plot",
+      "label": "Plot of mean absolute deviation of log ratios",
+      "class": "file",
+      "patterns": [ "*_mad_plot.png" ]
+    },
+    {
+      "name": "metadata",
+      "label": "JSON stringifyed QC metrics of the form {key: value}",
+      "class": "string"
+    }
+  ],
+  "runSpec": {
+    "interpreter": "python2.7",
+    "file": "src/rampage-mad-qc.py",
+    "execDepends": [
+      {"name": "r-base-core"},
+      {"name": "ghostscript"}
+    ]
+  },
+  "access": {
+    "network": [
+      "*"
+    ]
+  },
+  "authorizedUsers": []
+}

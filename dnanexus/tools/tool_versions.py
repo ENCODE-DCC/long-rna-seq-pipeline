@@ -27,6 +27,7 @@ APP_TOOLS = {
     "rampage-signals":          [ "STAR", "bedGraphToBigWig" ],
     "rampage-peaks":            [ "call_peaks (grit)", "bedToBigBed", "samtools" ],
     "rampage-idr":              [ "Anaconda3", "idr", "bedToBigBed" ],
+    "rampage-mad-qc":           [ "MAD.R" ],
 
     # utility:    
     "merge-annotation":         [ "GTF.awk" ],

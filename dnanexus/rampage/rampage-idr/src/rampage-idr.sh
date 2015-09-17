@@ -18,7 +18,8 @@ main() {
 
     echo "* Installing idr..."
     set -x
-    wget https://github.com/nboley/idr/archive/2.0.0.tar.gz -O idr.tgz >> ../install.log 2>&1
+    wget https://github.com/nboley/idr/archive/2.0.2.tar.gz -O idr.tgz >> ../install.log 2>&1
+    #wget https://github.com/nboley/idr/archive/2.0.0.tar.gz -O idr.tgz >> ../install.log 2>&1
     #wget https://github.com/nboley/idr/archive/2.0.0beta5.tar.gz -O idr.tgz >> ../install.log 2>&1
     mkdir idr
     tar -xzf idr.tgz -C idr --strip-components=1
@@ -53,7 +54,7 @@ main() {
 
     dx download "$chrom_sizes" -o chromSizes.txt
 
-    idr_root=${peaks_a_fn}_${peaks_b_fn}_idr
+    idr_root=${peaks_a_fn}_${peaks_b_fn}_rampage_idr
     echo "* Rampage IDR root: '"$idr_root"'"
 
     echo "* Removing any spike-ins from bed files..."
@@ -71,7 +72,7 @@ main() {
 
     echo "* Converting bed to bigBed..."
     set -x
-    bedToBigBed ${idr_root}.bed -type=bed6+ -as=/usr/bin/rampage_idr_peaks.as chromSizes.txt ${idr_root}.bb
+    bedToBigBed ${idr_root}.bed -type=bed6+ -as=/usr/bin/idr_peak.as chromSizes.txt ${idr_root}.bb
     set +x
 
     echo "* Prepare metadata..."

@@ -1,9 +1,9 @@
 {
   "name": "rampage-peaks",
-  "title": "Call Rampage peaks (v1.1.1)",
+  "title": "Call Rampage peaks (v2.0.0)",
   "summary": "Uses genome BAM marked for Rampage to calls peaks and produce 5' signals",
   "dxapi": "1.0.0",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -60,6 +60,12 @@
       "label": "GFF2 file of rampage called peaks",
       "class": "file",
       "patterns": ["*_rampage_peaks.gff"]
+    },
+    {
+      "name": "rampage_peak_quants",
+      "label": "TSV file of rampage peak quantifications",
+      "class": "file",
+      "patterns": ["*_rampage_peaks_quants.tsv"]
     }
   ],
   "runSpec": {

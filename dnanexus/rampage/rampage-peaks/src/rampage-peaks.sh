@@ -7,11 +7,9 @@ main() {
     echo "* Installing pysam..."
     sudo easy_install pysam >> install.log 2>&1
     echo "* Installing grit..."
-    wget https://github.com/nboley/grit/archive/2.0.4.tar.gz -O grit.tgz
+    wget https://github.com/nboley/grit/archive/2.0.5beta4.tar.gz -O grit.tgz
     mkdir grit_local
     tar -xzf grit.tgz -C grit_local --strip-components=1
-    #git clone https://github.com/nboley/grit.git
-    #mv grit grit_local
     cd grit_local
     sudo python setup.py install >> ../install.log 2>&1
     cd ..
@@ -22,11 +20,11 @@ main() {
         versions=`tool_versions.py --dxjson dnanexus-executable.json`
     fi
 
-    echo "Value of rampage bam: '$rampage_marked_bam'"
-    echo "Value of control bam: '$control_bam'"
-    echo "Value of annotation:  '$gene_annotation'"
-    echo "Value of chrom_sizes: '$chrom_sizes'"
-    echo "* Value of nthreads:  '$nthreads'"
+    echo "* Value of rampage bam: '$rampage_marked_bam'"
+    echo "* Value of control bam: '$control_bam'"
+    echo "* Value of annotation:  '$gene_annotation'"
+    echo "* Value of chrom_sizes: '$chrom_sizes'"
+    echo "* Value of nthreads:    '$nthreads'"
 
     echo "* Download files..."
     bam_fn=`dx describe "$rampage_marked_bam" --name`
@@ -51,8 +49,6 @@ main() {
     peaks_root=${bam_fn}_rampage_peaks
     echo "* Rampage peaks root: '${peaks_root}'"
     
-    # TODO:
-    # Should we remove the ERCC spike-in peaks first?
     echo "* Indexing bams..."
     set -x
     samtools index ${bam_fn}.bam 
@@ -64,14 +60,14 @@ main() {
     call_peaks --rampage-reads ${bam_fn}.bam --rnaseq-reads ${control_fn}.bam --threads $nthreads \
                --reference ${annotation_fn}.gtf --exp-filter-fraction 0.05 --trim-fraction 0.01 \
                 --ucsc --outfname ${peaks_root}.gff --outfname-type gff \
-               --bed-peaks-ofname ${peaks_root}.bed
+               --bed-peaks-ofname ${peaks_root}.bed \
+               --annotation-quantifications-ofname ${peaks_root}_quant.tsv
     set +x
     echo `ls`
  
     echo "* Converting bed to bigBed..."
     set -x
     grep "^chr" ${peaks_root}.bed | sort -k1,1 -k2,2n > peaks_polished.bed
-    #cp peaks_polished.bed ${peaks_root}.bb
     bedToBigBed peaks_polished.bed -type=bed6+ -as=/usr/bin/tss_peak.as chromSizes.txt ${peaks_root}.bb
     set +x
 
@@ -79,10 +75,12 @@ main() {
     rampage_peaks_bed=$(dx upload ${peaks_root}.bed --property SW="$versions" --brief)
     rampage_peaks_bb=$(dx upload ${peaks_root}.bb   --property SW="$versions" --brief)
     rampage_peaks_gff=$(dx upload ${peaks_root}.gff --property SW="$versions" --brief)
+    rampage_peak_quants=$(dx upload ${peaks_root}_quant.tsv --property SW="$versions" --brief)
 
     dx-jobutil-add-output rampage_peaks_bed "$rampage_peaks_bed" --class=file
     dx-jobutil-add-output rampage_peaks_bb "$rampage_peaks_bb" --class=file
     dx-jobutil-add-output rampage_peaks_gff "$rampage_peaks_gff" --class=file
+    dx-jobutil-add-output rampage_peak_quants "$rampage_peak_quants" --class=file
     
     echo "* Finished."
 }
