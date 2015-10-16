@@ -53,7 +53,7 @@ main() {
     set -x
     mkdir out
     STAR --runMode genomeGenerate --genomeFastaFiles ${genome_fn}.fa ${spike_in_fn}.fa \
-         --sjdbOverhang 100 --sjdbGTFfile ${annotation_fn}.gtf --runThreadN 6 --genomeDir out/ \
+         --sjdbOverhang 100 --sjdbGTFfile ${annotation_fn}.gtf --runThreadN 8 --genomeDir out/ \
          --outFileNamePrefix out
     set +x
 

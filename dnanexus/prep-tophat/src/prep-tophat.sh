@@ -15,8 +15,9 @@ main() {
     fi
 
     echo "* Value of annotations: '$annotations'"
-    echo "* Value of genome: '$genome'"
+    echo "* Value of genome:   '$genome'"
     echo "* Value of spike_in: '$spike_in'"
+    echo "* Value of tiny_fq:  '$tiny_fq'"
 
     echo "* Download files..."
     annotation_fn=`dx describe "$annotations" --name`
@@ -33,7 +34,7 @@ main() {
     ref="$genome_fn".fa
     geno_prefix=${genome_fn}
 
-    dx download file-BKyfb080ZZ0P4jQFVGB01966 -o tiny.fq.gz
+    dx download "$tiny_fq" -o tiny.fq.gz
     gunzip tiny.fq.gz
 
     if [ -n "$spike_in" ]; then

@@ -53,7 +53,7 @@ main() {
     echo "* Prepare reference..."
     set -x
     mkdir out
-    rsem-prepare-reference --no-polyA --gtf ${annotation_fn}.gtf ${ref} out/rsem
+    rsem-prepare-reference --gtf ${annotation_fn}.gtf ${ref} out/rsem
     set +x
 
     # Attempt to make bamCommentLines.txt, which should be reviewed. NOTE tabs handled by assignment.

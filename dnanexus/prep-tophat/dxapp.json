@@ -26,6 +26,13 @@
       "name": "spike_in",
       "label": "Spike-in RNA sequences (fasta)",
       "patterns": ["*.fasta.gz", "*.fa.gz"]
+    },
+    {
+      "class": "file",
+      "optional": false,
+      "name": "tiny_fq",
+      "label": "Tiny fastq use to fake an alignment, required for complete build.",
+      "patterns": ["*.fastq.gz", "*.fq.gz"]
     }
   ],
   "outputSpec": [

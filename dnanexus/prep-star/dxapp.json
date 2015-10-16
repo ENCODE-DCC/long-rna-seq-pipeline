@@ -1,9 +1,9 @@
 {
   "name": "prep-star",
-  "title": "STAR genome indexing (v2.0.2)",
+  "title": "STAR genome indexing (v2.0.3)",
   "summary": "Prepare reference genome and transcriptome indexes for STAR used in the ENCODE long-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -40,10 +40,10 @@
     "file": "src/prep-star.sh",
     "systemRequirements": {
       "main": {
-        "instanceType": "mem3_hdd2_x4"
+        "instanceType": "mem3_hdd2_x8"
       },
       "myEntryPoint": {
-        "instanceType": "mem3_hdd2_x4"
+        "instanceType": "mem3_hdd2_x8"
       }
     }
   },
