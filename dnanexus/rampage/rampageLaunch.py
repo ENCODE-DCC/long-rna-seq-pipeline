@@ -151,9 +151,9 @@ class RampageLaunch(Launch):
                                 },
                         "mm10": {
                                 "female":   {
-                                            "M2":  "mm10_female_M2_ERCC_starIndex.tgz",
-                                            "M3":  "mm10_female_M3_ERCC_starIndex.tgz",
-                                            "M4":  "mm10_female_M4_ERCC_starIndex.tgz"
+                                            "M2":  "mm10_male_M2_ERCC_starIndex.tgz",
+                                            "M3":  "mm10_male_M3_ERCC_starIndex.tgz",
+                                            "M4":  "mm10_male_M4_ERCC_starIndex.tgz"
                                             },
                                 "male":     {
                                             "M2":  "mm10_male_M2_ERCC_starIndex.tgz",
@@ -176,7 +176,7 @@ class RampageLaunch(Launch):
                                 "male":     "male.hg19.chrom.sizes"
                                 },
                         "mm10": {
-                                "female":   "female.mm10.chrom.sizes",
+                                "female":   "male.mm10.chrom.sizes",
                                 "male":     "male.mm10.chrom.sizes"
                                 }
                         }

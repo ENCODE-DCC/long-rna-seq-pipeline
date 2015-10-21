@@ -17,9 +17,14 @@ class LrnaLaunch(Launch):
     PIPELINE_HELP = "Launches '"+PIPELINE_NAME+"' pipeline analysis for one replicate. "
     ''' This pipline does not support combined replicates.'''
                     
-    ANNO_DEFAULTS = {'hg19': 'v19', 'mm10': 'M4' }
-    ANNO_ALLOWED = { 'hg19': [ ANNO_DEFAULTS['hg19'] ],
-                     'mm10': [ ANNO_DEFAULTS['mm10'], 'M2', 'M3' ] }
+    GENOMES_SUPPORTED = ['hg19', 'GRCh38', 'GRCh38s', 'mm10']
+    ANNO_DEFAULTS = {'hg19': 'v19', 'GRCh38': 'v23', 'GRCh38s': 'v23', 'mm10': 'M4' }
+    ANNO_ALLOWED = { 'hg19':   [ ANNO_DEFAULTS['hg19'] ],
+                     'GRCh38': [ ANNO_DEFAULTS['GRCh38'] ],
+        # FIXME: special case while evaluating the sponge
+                     'GRCh38s': [ ANNO_DEFAULTS['GRCh38s'] ],
+        # FIXME: special case while evaluating the sponge
+                     'mm10':   [ ANNO_DEFAULTS['mm10'], 'M2', 'M3' ] }
     ANNO_DEFAULT = ANNO_DEFAULTS[Launch.GENOME_DEFAULT]
     ''' Multiple annotations might be supported for each genome.'''
 
@@ -185,11 +190,21 @@ class LrnaLaunch(Launch):
                                             "v19": "hg19_male_v19_ERCC_tophatIndex.tgz"
                                             }
                                 },
+                        "GRCh38": {
+                                "female":   {"v23": "GRCh38_ns_male_v23_ERCC_tophatIndex.tgz"},
+                                "male":     {"v23": "GRCh38_ns_male_v23_ERCC_tophatIndex.tgz"}
+                                },
+        # FIXME: special case while evaluating the sponge
+                        "GRCh38s": {
+                                "female":   {"v23": "GRCh38_sponge_male_v23_ERCC_tophatIndex.tgz"},
+                                "male":     {"v23": "GRCh38_sponge_male_v23_ERCC_tophatIndex.tgz"}
+                                },
+        # FIXME: special case while evaluating the sponge
                         "mm10": {
                                 "female":   {
-                                            "M2":  "mm10_female_M2_ERCC_tophatIndex.tgz",
-                                            "M3":  "mm10_female_M3_ERCC_tophatIndex.tgz",
-                                            "M4":  "mm10_female_M4_ERCC_tophatIndex.tgz"
+                                            "M2":  "mm10_male_M2_ERCC_tophatIndex.tgz",
+                                            "M3":  "mm10_male_M3_ERCC_tophatIndex.tgz",
+                                            "M4":  "mm10_male_M4_ERCC_tophatIndex.tgz"
                                             },
                                 "male":     {
                                             "M2":  "mm10_male_M2_ERCC_tophatIndex.tgz",
@@ -207,11 +222,21 @@ class LrnaLaunch(Launch):
                                             "v19": "hg19_male_v19_ERCC_starIndex.tgz"
                                             }
                                 },
+                        "GRCh38": {
+                                "female":   {"v23": "GRCh38_ns_male_v23_ERCC_starIndex.tgz"},
+                                "male":     {"v23": "GRCh38_ns_male_v23_ERCC_starIndex.tgz"}
+                                },
+        # FIXME: special case while evaluating the sponge
+                        "GRCh38s": {
+                                "female":   {"v23": "GRCh38_sponge_concat_male_v23_ERCC_starIndex.tgz"},
+                                "male":     {"v23": "GRCh38_sponge_concat_male_v23_ERCC_starIndex.tgz"}
+                                },
+        # FIXME: special case while evaluating the sponge
                         "mm10": {
                                 "female":   {
-                                            "M2":  "mm10_female_M2_ERCC_starIndex.tgz",
-                                            "M3":  "mm10_female_M3_ERCC_starIndex.tgz",
-                                            "M4":  "mm10_female_M4_ERCC_starIndex.tgz"
+                                            "M2":  "mm10_male_M2_ERCC_starIndex.tgz",
+                                            "M3":  "mm10_male_M3_ERCC_starIndex.tgz",
+                                            "M4":  "mm10_male_M4_ERCC_starIndex.tgz"
                                             },
                                 "male":     {
                                             "M2":  "mm10_male_M2_ERCC_starIndex.tgz",
@@ -224,6 +249,10 @@ class LrnaLaunch(Launch):
                         "hg19": {
                                 "v19": "hg19_male_v19_ERCC_rsemIndex.tgz"
                                 },
+                        "GRCh38":  {"v23": "GRCh38_ns_male_v23_ERCC_rsemIndex.tgz"},
+        # FIXME: special case while evaluating the sponge
+                        "GRCh38s": {"v23": "GRCh38_sponge_concat_male_v23_ERCC_rsemIndex.tgz"},
+        # FIXME: special case while evaluating the sponge
                         "mm10": {
                                 "M2":  "mm10_male_M2_ERCC_rsemIndex.tgz",
                                 "M3":  "mm10_male_M3_ERCC_rsemIndex.tgz",
@@ -235,8 +264,14 @@ class LrnaLaunch(Launch):
                                 "female":   "female.hg19.chrom.sizes",
                                 "male":     "male.hg19.chrom.sizes"
                                 },
+                        "GRCh38":  {"female":   "GRCh38_min_male.chrom.sizes",
+                                    "male":     "GRCh38_min_male.chrom.sizes"  },
+        # FIXME: special case while evaluating the sponge
+                        "GRCh38s": {"female":   "GRCh38_min_male.chrom.sizes",
+                                    "male":     "GRCh38_min_male.chrom.sizes"  },
+        # FIXME: special case while evaluating the sponge
                         "mm10": {
-                                "female":   "female.mm10.chrom.sizes",
+                                "female":   "male.mm10.chrom.sizes",
                                 "male":     "male.mm10.chrom.sizes"
                                 }
                         }
@@ -301,6 +336,10 @@ class LrnaLaunch(Launch):
 
     def find_ref_files(self,priors):
         '''Locates all reference files based upon gender, organism and annotation.'''
+        # FIXME: special case while evaluating the sponge
+        if self.psv['refLoc'] == "/GRCh38s/": 
+            self.psv['refLoc'] = "/GRCh38/"
+        # FIXME: special case while evaluating the sponge
         topIx = self.psv['refLoc']+self.REFERENCE_FILES['tophat_index'][self.psv['genome']][self.psv['gender']][self.psv['annotation']]
         topIxFid = dxencode.find_file(topIx,dxencode.REF_PROJECT_DEFAULT)
         if topIxFid == None:

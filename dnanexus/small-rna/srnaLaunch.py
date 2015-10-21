@@ -90,7 +90,7 @@ class SrnaLaunch(Launch):
                                 "male":     "hg19_male_v19_ERCC_sRNA_starIndex.tgz",
                                 },
                         #"mm10": {
-                        #        "female":   "mm10_female_sRNA_starIndex.tgz",
+                        #        "female":   "mm10_male_sRNA_starIndex.tgz",
                         #        "male":     "mm10_male_sRNA_starIndex.tgz",
                         #        },
                         },
@@ -108,7 +108,7 @@ class SrnaLaunch(Launch):
                                 "male":     "male.hg19.chrom.sizes",
                                 },
                         "mm10": {
-                                "female":   "female.mm10.chrom.sizes",
+                                "female":   "male.mm10.chrom.sizes",
                                 "male":     "male.mm10.chrom.sizes",
                                 },
                         },
