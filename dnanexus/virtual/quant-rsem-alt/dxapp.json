@@ -1,9 +1,9 @@
 {
   "name": "quant-rsem-alt",
-  "title": " RSEM quantify genes (virtual-1.0.4)",
+  "title": " RSEM quantify genes - se (virtual-1.1.0)",
   "summary": "Do genome and transcription quantitations with RSEM from STAR alignments",
   "dxapi": "1.0.0",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -31,6 +31,7 @@
       "name": "paired_end",
       "label": "Library was paired ended",
       "class": "boolean",
+      "default": false,
       "optional": false
     },
     {

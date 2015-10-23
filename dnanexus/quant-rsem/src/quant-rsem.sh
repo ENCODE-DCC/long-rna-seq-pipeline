@@ -4,20 +4,27 @@
 main() {
     # Now in resources/usr/bin
     # echo "* Dowload and install RSEM..."
-    # git clone https://github.com/bli25wisc/RSEM.git
-    # (cd RSEM; git checkout tags/v1.2.19)
-    # #### get correct commit bit from submodule
-    # (cd RSEM; make)
+    # git clone https://github.com/bli25wisc/RSEM.git    
+    #wget https://github.com/deweylab/RSEM/archive/v1.2.23.tar.gz -O rsem.tgz >> install.log 2>&1
+    #mkdir rsem
+    #tar -xzf rsem.tgz -C rsem --strip-components=1
+    #cd rsem
+    #make >> install.log 2>&1
+    #mv rsem-build-read-index /usr/bin/ >> install.log 2>&1
+    #mv rsem-calculate-credibility-intervals /usr/bin/ >> install.log 2>&1
+    #mv rsem-calculate-expression /usr/bin/ >> install.log 2>&1
+    #mv rsem-parse-alignments /usr/bin/ >> install.log 2>&1
+    #mv rsem-prepare-reference /usr/bin/ >> install.log 2>&1
+    #mv rsem-run-em /usr/bin/ >> install.log 2>&1
+    #mv rsem-run-gibbs /usr/bin/ >> install.log 2>&1
+    #mv rsem_perl_utils.pm /usr/bin/ >> install.log 2>&1
+    #cd .. 
 
     # If available, will print tool versions to stderr and json string to stdout
     versions=''
     if [ -f /usr/bin/tool_versions.py ]; then 
         versions=`tool_versions.py --dxjson dnanexus-executable.json`
     fi
-    #echo "*****"
-    #echo "* Running: quant_rsem.sh [v1.0.2]"
-    #echo "* RSEM version: "`rsem-calculate-expression --version | awk '{print $5}'`
-    #echo "*****"
 
     echo "* Value of annotation_bam: '$star_anno_bam'"
     echo "* Value of rsem_index: '$rsem_index'"

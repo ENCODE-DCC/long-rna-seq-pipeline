@@ -58,7 +58,7 @@ ALL_TOOLS = {
             "MAD.R":                     "grep version /usr/bin/MAD.R | awk '{print $3}'",
             "extract_gene_ids.awk":      "grep version /usr/bin/extract_gene_ids.awk | awk '{print $3}'",
             "sum_srna_expression.awk":   "grep version /usr/bin/sum_srna_expression.awk | awk '{print $3}'",
-            "RSEM":                      "rsem-calculate-expression --version | awk '{print $5}'",
+            "RSEM":                      "rsem-calculate-expression --version | awk '{print $4}'",
             "samtools":                  "samtools 2>&1 | grep Version | awk '{print $2}'",
             "STAR":                      "STAR --version | awk '{print $1}' | cut -d _ -f 2-",
             "TopHat":                    "tophat -v | awk '{print $2}'",
@@ -71,7 +71,7 @@ def parse_dxjson(dxjson):
         dxapp = json.load(data_file)
 
     appver = "unknown"    
-    applet = dxapp.get("name")
+    applet = dxapp.get("name").split()[0]
     if "version" in dxapp:
         appver = dxapp.get("version")
     else:
