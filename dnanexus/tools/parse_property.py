@@ -167,7 +167,7 @@ def file_find_rep(filePath,project=None,verbose=False,quiet=False):
     rep = ''
     for part in folder.split('/'):
         if part.startswith('rep'):
-            exp = part
+            rep = part
             break
     if rep == '':
         # Very limited success with file names
