@@ -4,9 +4,8 @@
 import argparse,os, sys, json
 
 import dxpy
-#from dxencode import dxencode as dxencode
-import dxencode as dxencode
 from launch import Launch
+#from template import Launch # (does not use dxencode at all)
 
 class SrnaLaunch(Launch):
     '''Descendent from Launch class with 'small-rna-seq' methods'''
@@ -157,9 +156,14 @@ class SrnaLaunch(Launch):
             psv['name']  += '_' + psv['annotation']
 
         # Must override results location because of annotation
-        psv['resultsLoc'] = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name,psv['exp_type'], \
-                                                                                            psv['genome'],psv['annotation'])
-        psv['resultsFolder'] = psv['resultsLoc'] + psv['experiment'] + '/'
+        genome = psv['genome']
+        if self.no_refs: # (no_refs is only True when templating)
+            genome = None # If templating with no refs then this will hide genome and annotation
+        psv['resultsLoc'] = self.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name,psv['exp_type'], \
+                                                                                        psv['genome'],psv['annotation'])
+        psv['resultsFolder'] = psv['resultsLoc']
+        if not self.template:
+            psv['resultsFolder'] += psv['experiment'] + '/'
         self.update_rep_result_folders(psv)
 
         if verbose:
@@ -170,27 +174,28 @@ class SrnaLaunch(Launch):
 
     def find_ref_files(self,priors):
         '''Locates all reference files based upon organism and gender.'''
-        star_ix = self.psv['refLoc']+self.REFERENCE_FILES['star_index'][self.psv['genome']][self.psv['gender']]
-        star_ix_fid = dxencode.find_file(star_ix,dxencode.REF_PROJECT_DEFAULT)
-        if star_ix_fid == None:
-            sys.exit("ERROR: Unable to locate STAR index file '" + star_ix + "'")
+        star_path = self.psv['refLoc']+self.REFERENCE_FILES['star_index'][self.psv['genome']][self.psv['gender']]
+        star_fid = self.find_file(star_path,self.REF_PROJECT_DEFAULT)
+        if star_fid == None:
+            sys.exit("ERROR: Unable to locate STAR index file '" + star_path + "'")
         else:
-            priors['star_index'] = star_ix_fid
+            priors['star_index'] = star_fid
 
-        anno_ix = self.psv['refLoc']+self.REFERENCE_FILES['annotations'][self.psv['genome']][self.psv['annotation']]
-        anno_ix_fid = dxencode.find_file(anno_ix,dxencode.REF_PROJECT_DEFAULT)
-        if anno_ix_fid == None:
-            sys.exit("ERROR: Unable to locate Annotation file '" + anno_ix + "'")
+        anno_path = self.psv['refLoc']+self.REFERENCE_FILES['annotations'][self.psv['genome']][self.psv['annotation']]
+        anno_fid = self.find_file(anno_path,self.REF_PROJECT_DEFAULT)
+        if anno_fid == None:
+            sys.exit("ERROR: Unable to locate Annotation file '" + anno_path + "'")
         else:
-            priors['annotations'] = anno_ix_fid
+            priors['annotations'] = anno_fid
 
         chrom_sizes = self.psv['refLoc']+self.REFERENCE_FILES['chrom_sizes'][self.psv['genome']][self.psv['gender']]
-        chrom_sizes_fid = dxencode.find_file(chrom_sizes,dxencode.REF_PROJECT_DEFAULT)
+        chrom_sizes_fid = self.find_file(chrom_sizes,self.REF_PROJECT_DEFAULT)
         if chrom_sizes_fid == None:
             sys.exit("ERROR: Unable to locate Chrom Sizes file '" + chrom_sizes + "'")
         else:
             priors['chrom_sizes'] = chrom_sizes_fid
         self.psv['ref_files'] = self.REFERENCE_FILES.keys()
+        return priors
 
     #######################
 

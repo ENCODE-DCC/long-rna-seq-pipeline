@@ -4,9 +4,8 @@
 import argparse,os, sys, json
 
 import dxpy
-#from dxencode import dxencode as dxencode
-import dxencode as dxencode
 from launch import Launch
+#from template import Launch # (does not use dxencode at all)
 
 class LrnaLaunch(Launch):
     '''Descendent from Launch class with 'long-rna-seq' methods'''
@@ -21,9 +20,6 @@ class LrnaLaunch(Launch):
     ANNO_DEFAULTS = {'hg19': 'v19', 'GRCh38': 'v23', 'GRCh38s': 'v23', 'mm10': 'M4' }
     ANNO_ALLOWED = { 'hg19':   [ ANNO_DEFAULTS['hg19'] ],
                      'GRCh38': [ ANNO_DEFAULTS['GRCh38'] ],
-        # FIXME: special case while evaluating the sponge
-                     'GRCh38s': [ ANNO_DEFAULTS['GRCh38s'] ],
-        # FIXME: special case while evaluating the sponge
                      'mm10':   [ ANNO_DEFAULTS['mm10'], 'M2', 'M3' ] }
     ANNO_DEFAULT = ANNO_DEFAULTS[Launch.GENOME_DEFAULT]
     ''' Multiple annotations might be supported for each genome.'''
@@ -152,8 +148,6 @@ class LrnaLaunch(Launch):
 
     FILE_GLOBS = {
         # For looking up previous result files, use wild-cards
-        #"reads1":               "/*_reads_concat.fq.gz",
-        #"reads2":               "/*_reads2_concat.fq.gz",
         "tophat_bam":           "/*_tophat.bam",
         "tophat_minus_all_bw":  "/*_tophat_minusAll.bw",
         "tophat_minus_uniq_bw": "/*_tophat_minusUniq.bw",
@@ -194,12 +188,6 @@ class LrnaLaunch(Launch):
                                 "female":   {"v23": "GRCh38_ns_male_v23_ERCC_tophatIndex.tgz"},
                                 "male":     {"v23": "GRCh38_ns_male_v23_ERCC_tophatIndex.tgz"}
                                 },
-        # FIXME: special case while evaluating the sponge
-                        "GRCh38s": {
-                                "female":   {"v23": "GRCh38_sponge_male_v23_ERCC_tophatIndex.tgz"},
-                                "male":     {"v23": "GRCh38_sponge_male_v23_ERCC_tophatIndex.tgz"}
-                                },
-        # FIXME: special case while evaluating the sponge
                         "mm10": {
                                 "female":   {
                                             "M2":  "mm10_male_M2_ERCC_tophatIndex.tgz",
@@ -226,12 +214,6 @@ class LrnaLaunch(Launch):
                                 "female":   {"v23": "GRCh38_ns_male_v23_ERCC_starIndex.tgz"},
                                 "male":     {"v23": "GRCh38_ns_male_v23_ERCC_starIndex.tgz"}
                                 },
-        # FIXME: special case while evaluating the sponge
-                        "GRCh38s": {
-                                "female":   {"v23": "GRCh38_sponge_concat_male_v23_ERCC_starIndex.tgz"},
-                                "male":     {"v23": "GRCh38_sponge_concat_male_v23_ERCC_starIndex.tgz"}
-                                },
-        # FIXME: special case while evaluating the sponge
                         "mm10": {
                                 "female":   {
                                             "M2":  "mm10_male_M2_ERCC_starIndex.tgz",
@@ -250,9 +232,6 @@ class LrnaLaunch(Launch):
                                 "v19": "hg19_male_v19_ERCC_rsemIndex.tgz"
                                 },
                         "GRCh38":  {"v23": "GRCh38_ns_male_v23_ERCC_rsemIndex.tgz"},
-        # FIXME: special case while evaluating the sponge
-                        "GRCh38s": {"v23": "GRCh38_sponge_concat_male_v23_ERCC_rsemIndex.tgz"},
-        # FIXME: special case while evaluating the sponge
                         "mm10": {
                                 "M2":  "mm10_male_M2_ERCC_rsemIndex.tgz",
                                 "M3":  "mm10_male_M3_ERCC_rsemIndex.tgz",
@@ -266,10 +245,6 @@ class LrnaLaunch(Launch):
                                 },
                         "GRCh38":  {"female":   "GRCh38_min_male.chrom.sizes",
                                     "male":     "GRCh38_min_male.chrom.sizes"  },
-        # FIXME: special case while evaluating the sponge
-                        "GRCh38s": {"female":   "GRCh38_min_male.chrom.sizes",
-                                    "male":     "GRCh38_min_male.chrom.sizes"  },
-        # FIXME: special case while evaluating the sponge
                         "mm10": {
                                 "female":   "male.mm10.chrom.sizes",
                                 "male":     "male.mm10.chrom.sizes"
@@ -323,9 +298,11 @@ class LrnaLaunch(Launch):
             self.PRUNE_STEPS = []
 
         # Must override results location because of annotation
-        psv['resultsLoc'] = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name,psv['exp_type'], \
-                                                                                            psv['genome'],psv['annotation'])
-        psv['resultsFolder'] = psv['resultsLoc'] + psv['experiment'] + '/'
+        psv['resultsLoc'] = self.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name,psv['exp_type'], \
+                                                                                        psv['genome'],psv['annotation'])
+        psv['resultsFolder'] = psv['resultsLoc']
+        if not self.template:
+            psv['resultsFolder'] += psv['experiment'] + '/'
         self.update_rep_result_folders(psv)
 
         if verbose:
@@ -336,38 +313,35 @@ class LrnaLaunch(Launch):
 
     def find_ref_files(self,priors):
         '''Locates all reference files based upon gender, organism and annotation.'''
-        # FIXME: special case while evaluating the sponge
-        if self.psv['refLoc'] == "/GRCh38s/": 
-            self.psv['refLoc'] = "/GRCh38/"
-        # FIXME: special case while evaluating the sponge
-        topIx = self.psv['refLoc']+self.REFERENCE_FILES['tophat_index'][self.psv['genome']][self.psv['gender']][self.psv['annotation']]
-        topIxFid = dxencode.find_file(topIx,dxencode.REF_PROJECT_DEFAULT)
-        if topIxFid == None:
-            sys.exit("ERROR: Unable to locate TopHat index file '" + topIx + "'")
+        top_path = self.psv['refLoc']+self.REFERENCE_FILES['tophat_index'][self.psv['genome']][self.psv['gender']][self.psv['annotation']]
+        top_fid = self.find_file(top_path,self.REF_PROJECT_DEFAULT)
+        if top_fid == None:
+            sys.exit("ERROR: Unable to locate TopHat index file '" + top_path + "'")
         else:
-            priors['tophat_index'] = topIxFid
+            priors['tophat_index'] = top_fid
 
-        starIx = self.psv['refLoc']+self.REFERENCE_FILES['star_index'][self.psv['genome']][self.psv['gender']][self.psv['annotation']]
-        starIxFid = dxencode.find_file(starIx,dxencode.REF_PROJECT_DEFAULT)
-        if starIxFid == None:
-            sys.exit("ERROR: Unable to locate STAR index file '" + starIx + "'")
+        star_path = self.psv['refLoc']+self.REFERENCE_FILES['star_index'][self.psv['genome']][self.psv['gender']][self.psv['annotation']]
+        star_fid = self.find_file(star_path,self.REF_PROJECT_DEFAULT)
+        if star_fid == None:
+            sys.exit("ERROR: Unable to locate STAR index file '" + star_path + "'")
         else:
-            priors['star_index'] = starIxFid
+            priors['star_index'] = star_fid
 
-        rsemIx = self.psv['refLoc']+self.REFERENCE_FILES['rsem_index'][self.psv['genome']][self.psv['annotation']]
-        rsemIxFid = dxencode.find_file(rsemIx,dxencode.REF_PROJECT_DEFAULT)
-        if rsemIxFid == None:
-            sys.exit("ERROR: Unable to locate RSEM index file '" + rsemIx + "'")
+        rsem_path = self.psv['refLoc']+self.REFERENCE_FILES['rsem_index'][self.psv['genome']][self.psv['annotation']]
+        rsem_fid = self.find_file(rsem_path,self.REF_PROJECT_DEFAULT)
+        if rsem_fid == None:
+            sys.exit("ERROR: Unable to locate RSEM index file '" + rsem_path + "'")
         else:
-            priors['rsem_index'] = rsemIxFid
+            priors['rsem_index'] = rsem_fid
 
-        chromSizes = self.psv['refLoc']+self.REFERENCE_FILES['chrom_sizes'][self.psv['genome']][self.psv['gender']]
-        chromSizesFid = dxencode.find_file(chromSizes,dxencode.REF_PROJECT_DEFAULT)
-        if chromSizesFid == None:
-            sys.exit("ERROR: Unable to locate Chrom Sizes file '" + chromSizes + "'")
+        chrom_sizes = self.psv['refLoc']+self.REFERENCE_FILES['chrom_sizes'][self.psv['genome']][self.psv['gender']]
+        chrom_sizes_fid = self.find_file(chrom_sizes,self.REF_PROJECT_DEFAULT)
+        if chrom_sizes_fid == None:
+            sys.exit("ERROR: Unable to locate Chrom Sizes file '" + chrom_sizes + "'")
         else:
-            priors['chrom_sizes'] = chromSizesFid
+            priors['chrom_sizes'] = chrom_sizes_fid
         self.psv['ref_files'] = self.REFERENCE_FILES.keys()
+        return priors
 
 
     #######################

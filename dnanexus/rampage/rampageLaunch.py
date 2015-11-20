@@ -4,9 +4,8 @@
 import argparse,os, sys, json
 
 import dxpy
-#from dxencode import dxencode as dxencode
-import dxencode as dxencode
 from launch import Launch
+#from template import Launch # (does not use dxencode at all)
 
 class RampageLaunch(Launch):
     '''Descendent from Launch class with 'rampage' methods'''
@@ -38,25 +37,13 @@ class RampageLaunch(Launch):
     PIPELINE_BRANCHES = {
     #'''Each branch must define the 'steps' and their (artificially) linear order.'''
          "REP": {
-                "ORDER": [ "concatR1", "concatR2", "rampage-align-pe", "rampage-signals", "rampage-peaks" ],
+                "ORDER": [ "rampage-align-pe", "rampage-signals", "rampage-peaks" ],
                 "STEPS": {
-                            "concatR1": {
-                                        "app":     "concat-fastqs",
-                                        "params":  { "concat_id":  "concat_id" },
-                                        "inputs":  { "reads1_set": "reads_set" },
-                                        "results": { "reads1":     "reads"     }
-                            },
-                            "concatR2": {
-                                        "app":     "concat-fastqs",
-                                        "params":  { "concat_id2": "concat_id" },
-                                        "inputs":  { "reads2_set": "reads_set" },
-                                        "results": { "reads2":     "reads"     }
-                            },
                             "rampage-align-pe": {
                                 "app":     "rampage-align-pe",
                                 "params":  { "library_id": "library_id", "nthreads": "nthreads" },
-                                "inputs":  { "reads1": "reads_1", 
-                                             "reads2": "reads_2", 
+                                "inputs":  { "reads1":       "reads1",
+                                             "reads2":       "reads2",
                                              "star_index": "star_index" },
                                 "results": { "rampage_marked_bam": "rampage_marked_bam", 
                                              "rampage_star_log": "rampage_star_log" }
@@ -110,8 +97,6 @@ class RampageLaunch(Launch):
     }
 
     FILE_GLOBS = {
-        "reads1":             "/*_reads_concat.fq.gz",
-        "reads2":             "/*_reads2_concat.fq.gz",
         "all_plus_bw":        "/*_rampage_5p_plusAll.bw",
         "rampage_marked_bam": "/*_rampage_star_marked.bam",
         "all_minus_bg":       "/*_rampage_5p_minusAll.bg",
@@ -205,6 +190,7 @@ class RampageLaunch(Launch):
 
     def pipeline_specific_vars(self,args,verbose=False):
         '''Adds pipeline specific variables to a dict, for use building the workflow.'''
+        args.pe = True # This is necessary to ensure templating does what it must.
         psv = Launch.pipeline_specific_vars(self,args)
         
         # Could be multiple annotations supported per genome
@@ -221,7 +207,8 @@ class RampageLaunch(Launch):
 
         # Some specific settings
         psv['nthreads']   = 8
-        psv['control'] = args.control
+        if not self.template:
+            psv['control'] = args.control
         
         # run will either be for combined or single rep.
         if not self.combined_reps:
@@ -235,9 +222,11 @@ class RampageLaunch(Launch):
             psv['name']  += '_' + psv['annotation']
 
         # Must override results location because of annotation
-        psv['resultsLoc'] = dxencode.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name,psv['exp_type'], \
-                                                                                            psv['genome'],psv['annotation'])
-        psv['resultsFolder'] = psv['resultsLoc'] + psv['experiment'] + '/'
+        psv['resultsLoc'] = self.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name,psv['exp_type'], \
+                                                                                        psv['genome'],psv['annotation'])
+        psv['resultsFolder'] = psv['resultsLoc']
+        if not self.template:
+            psv['resultsFolder'] += psv['experiment'] + '/'
         self.update_rep_result_folders(psv)
 
         if verbose:
@@ -248,64 +237,29 @@ class RampageLaunch(Launch):
 
     def find_ref_files(self,priors):
         '''Locates all reference files based upon organism and gender.'''
-        starIx = self.psv['refLoc']+self.REFERENCE_FILES['star_index'][self.psv['genome']][self.psv['gender']][self.psv['annotation']]
-        starIxFid = dxencode.find_file(starIx,dxencode.REF_PROJECT_DEFAULT)
-        if starIxFid == None:
-            sys.exit("ERROR: Unable to locate STAR index file '" + starIx + "'")
+        star_path = self.psv['refLoc']+self.REFERENCE_FILES['star_index'][self.psv['genome']][self.psv['gender']][self.psv['annotation']]
+        star_fid = self.find_file(star_path,self.REF_PROJECT_DEFAULT)
+        if star_fid == None:
+            sys.exit("ERROR: Unable to locate STAR index file '" + star_path + "'")
         else:
-            priors['star_index'] = starIxFid
+            priors['star_index'] = star_fid
 
-        anno = self.psv['refLoc']+self.REFERENCE_FILES['gene_annotation'][self.psv['genome']][self.psv['annotation']]
-        anno_fid = dxencode.find_file(anno,dxencode.REF_PROJECT_DEFAULT)
+        anno_path = self.psv['refLoc']+self.REFERENCE_FILES['gene_annotation'][self.psv['genome']][self.psv['annotation']]
+        anno_fid = self.find_file(anno_path,self.REF_PROJECT_DEFAULT)
         if anno_fid == None:
-            sys.exit("ERROR: Unable to locate Gene Annotation file '" + anno + "'")
+            sys.exit("ERROR: Unable to locate Gene Annotation file '" + anno_path + "'")
         else:
             priors['gene_annotation'] = anno_fid
 
-        chromSizes = self.psv['refLoc']+self.REFERENCE_FILES['chrom_sizes'][self.psv['genome']][self.psv['gender']]
-        chromSizesFid = dxencode.find_file(chromSizes,dxencode.REF_PROJECT_DEFAULT)
-        if chromSizesFid == None:
-            sys.exit("ERROR: Unable to locate Chrom Sizes file '" + chromSizes + "'")
+        chrom_sizes = self.psv['refLoc']+self.REFERENCE_FILES['chrom_sizes'][self.psv['genome']][self.psv['gender']]
+        chrom_sizes_fid = self.find_file(chrom_sizes,self.REF_PROJECT_DEFAULT)
+        if chrom_sizes_fid == None:
+            sys.exit("ERROR: Unable to locate Chrom Sizes file '" + chrom_sizes + "'")
         else:
-            priors['chrom_sizes'] = chromSizesFid
+            priors['chrom_sizes'] = chrom_sizes_fid
         self.psv['ref_files'] = self.REFERENCE_FILES.keys()
-    
+        return priors
 
-    def find_control_file(self,rep,default=None):
-        '''Attempts to find an appropriate control file.'''
-        # TODO Make more generic and move to dxencode.py when needed.
-        
-        (AUTHID,AUTHPW,SERVER) = dxencode.processkey(self.server_key)
-        if 'controls' not in rep:
-            return None
-        for file_key in rep['controls']:
-            if isinstance(file_key,list):
-                file_key = file_key[0]
-            file_obj = dxencode.enc_lookup_json(file_key,self.server_key,frame='embedded')
-            rep_id = file_obj["replicate"]['@id']
-            rep_obj = dxencode.enc_lookup_json(rep_id,self.server_key,frame='embedded')
-            exp_id = rep_obj['experiment']['@id'].split('/')[2]
-            rep_tech = "rep%s_%s" % \
-                    (rep_obj['biological_replicate_number'], rep_obj['technical_replicate_number'])
-            control_root = self.psv['control_path']
-            # Cheating:
-            if self.proj_name == "scratchPad" and self.psv['control_path'] == self.CONTROL_ROOT_FOLDER:
-                control_root = "/lrna"
-            path_n_glob = control_root + exp_id + '/' + rep_tech + '/' + self.CONTROL_FILE_GLOB
-            target_folder = dxencode.find_folder(exp_id + '/' + rep_tech,self.project,control_root)
-            #print "Target found [%s]" % target_folder
-            if target_folder != None:
-                path_n_glob = target_folder + '/' + self.CONTROL_FILE_GLOB
-            fid = dxencode.find_file(path_n_glob,self.proj_id,multiple=False,recurse=False)
-            if fid != None:
-                return dxencode.file_path_from_fid(fid)
-                
-        if default != None:
-            return default
-        #print json.dumps(rep,indent=4)
-        print "Unable to find control in search of %s" % rep['controls']
-        sys.exit(1)
-            
 
     #######################
 
