@@ -47,70 +47,61 @@ main() {
     echo "* Fastq${concat} file: '${outfile_name}.fq.gz'"
     reads_root=${outfile_name}
     ls -l ${reads_root}.fq.gz 
-    bam_root="${reads_root}_star"
+    bam_root="${reads_root}"
     if [ -f /usr/bin/parse_property.py ]; then
         new_root=`parse_property.py -f "'${reads[0]}'" --project "${DX_PROJECT_CONTEXT_ID}" --root_name --quiet`
         if [ "$new_root" != "" ]; then
-            bam_root="${new_root}_star"
+            bam_root="${new_root}"
         fi
     fi
-    echo "* Alignments file will be: '${bam_root}_genome.bam' and '${bam_root}_anno.bam'"
 
     echo "* Downloading and extracting star index archive..."
     dx download "$star_index" -o star_index.tgz
     tar zxvf star_index.tgz
     # unzips into "out/"
 
-    # Fill in your application code here.
-
-    echo "* Set up headers..."
+    echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    libraryComment="@CO\tLIBID:${library_id}"
-    echo -e ${libraryComment} > COfile.txt
-    cat out/*_bamCommentLines.txt >> COfile.txt
-    echo `cat COfile.txt`
+    lrna-align-star-se.sh star_index.tgz ${reads_root}.fq.gz "$library_id" $nthreads $bam_root
     set +x
-
-    echo "* Map reads..."
-    set -x
-    STAR --genomeDir out --readFilesIn ${reads_root}.fq.gz                          \
-        --readFilesCommand zcat --runThreadN ${nthreads} --genomeLoad NoSharedMemory \
-        --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1    \
-        --outFilterMismatchNmax 999 --outFilterMismatchNoverReadLmax 0.04              \
-        --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000         \
-        --outSAMheaderCommentFile COfile.txt --outSAMheaderHD @HD VN:1.4 SO:coordinate   \
-        --outSAMunmapped Within --outFilterType BySJout --outSAMattributes NH HI AS NM MD \
-        --outSAMstrandField intronMotif --outSAMtype BAM SortedByCoordinate                \
-        --quantMode TranscriptomeSAM --sjdbScore 1 --limitBAMsortRAM 60000000000
-
-    mv Aligned.sortedByCoord.out.bam ${bam_root}_genome.bam
-    mv Log.final.out ${bam_root}_Log.final.out
-    set +x
-    ls -l ${bam_root}_genome.bam
-
-    echo "* Sorting annotation bam..."
-    set -x
-    cat <( samtools view -H Aligned.toTranscriptome.out.bam ) \
-        <( samtools view -@ ${nthreads} Aligned.toTranscriptome.out.bam | sort -S 60G -T ./ ) | \
-        samtools view -@ ${nthreads} -bS - > ${bam_root}_anno.bam
-    set +x
-    ls -l ${bam_root}_anno.bam
+    echo "* ===== Returned from dnanexus and encodeD independent script ====="
+    bam_root="${bam_root}_star"
 
     echo "* Prepare metadata..."
-    meta=''
+    qc_genome_stats=''
+    qc_anno_stats=''
+    reads=0
+    anno_reads=0
     if [ -f /usr/bin/qc_metrics.py ]; then
-        meta=`qc_metrics.py -n STAR_log_final -f ${bam_root}_Log.final.out`
+        qc_genome_stats=`qc_metrics.py -n STAR_log_final -f ${bam_root}_Log.final.out`
+        qc_anno_stats=$qc_genome_stats
+        meta=`qc_metrics.py -n samtools_flagstats -f ${bam_root}_genome_flagstat.txt`
+        reads=`qc_metrics.py -n samtools_flagstats -f ${bam_root}_genome_flagstat.txt -k total`
+        qc_genome_stats=`echo $qc_genome_stats, $meta`
+        meta=`qc_metrics.py -n samtools_flagstats -f ${bam_root}_anno_flagstat.txt`
+        anno_reads=`qc_metrics.py -n samtools_flagstats -f ${bam_root}_anno_flagstat.txt -k total`
+        qc_anno_stats=`echo $qc_anno_stats, $meta`
     fi
 
     echo "* Upload results..."
-    star_genome_bam=$(dx upload ${bam_root}_genome.bam --details "{ $meta }" --property SW="$versions" --brief)
-    star_anno_bam=$(dx upload ${bam_root}_anno.bam     --details "{ $meta }" --property SW="$versions" --brief)
-    star_log=$(dx upload ${bam_root}_Log.final.out --property SW="$versions" --brief)
+    star_genome_bam=$(dx upload ${bam_root}_genome.bam --details="{ $qc_genome_stats }" --property reads="$reads" \
+                                                                                        --property SW="$versions" --brief)
+    star_anno_bam=$(dx upload ${bam_root}_anno.bam     --details="{ $qc_anno_stats }"   --property reads="$anno_reads" \
+                                                                                        --property SW="$versions" --brief)
+    star_log=$(dx upload ${bam_root}_Log.final.out --details="{ $qc_genome_stats }" --property SW="$versions" --brief)
+    genome_flagstat=$(dx upload ${bam_root}_genome_flagstat.txt --details="{ $qc_genome_stats }" \
+                                                                --property reads="$reads" --property SW="$versions" --brief)
+    anno_flagstat=$(dx upload ${bam_root}_anno_flagstat.txt --details="{ $qc_anno_stats }" \
+                                                            --property reads="$anno_reads" --property SW="$versions" --brief)
 
     dx-jobutil-add-output star_genome_bam "$star_genome_bam" --class=file
     dx-jobutil-add-output star_anno_bam "$star_anno_bam" --class=file
     dx-jobutil-add-output star_log "$star_log" --class=file
-    dx-jobutil-add-output metadata "$meta" --class=string
+    dx-jobutil-add-output genome_flagstat "$genome_flagstat" --class=file
+    dx-jobutil-add-output anno_flagstat "$anno_flagstat" --class=file
+
+    dx-jobutil-add-output reads "$reads" --class=string
+    dx-jobutil-add-output metadata "{ $qc_genome_stats }" --class=string
 
     echo "* Finished."
 }

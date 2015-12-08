@@ -1,9 +1,9 @@
 {
   "name": "quant-rsem",
-  "title": " RSEM quantify genes - pe (v1.1.0)",
+  "title": " RSEM quantify genes - pe (v1.1.1)",
   "summary": "Do genome and transcription quantitations with RSEM from STAR alignments",
   "dxapi": "1.0.0",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -18,7 +18,7 @@
       "label": "Genome indexed for RSEM (tar.gz file)",
       "class": "file",
       "optional": false,
-      "patterns": ["*.tgz"]
+      "patterns": ["*_rsemIndex.tgz"]
     },
     {
       "name": "rnd_seed",

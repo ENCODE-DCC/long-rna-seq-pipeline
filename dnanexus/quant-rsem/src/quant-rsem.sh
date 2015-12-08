@@ -34,45 +34,21 @@ main() {
     echo "* Value of nthreads: '$nthreads'"
 
     echo "* Download files..."
-    bam_fn=`dx describe "$star_anno_bam" --name`
-    bam_fn=${bam_fn%_star_anno.bam}
-    bam_fn=${bam_fn%.bam}
-    dx download "$star_anno_bam" -o ${bam_fn}.bam
+    bam_root=`dx describe "$star_anno_bam" --name`
+    bam_root=${bam_root%_star_anno.bam}
+    bam_root=${bam_root%.bam}
+    dx download "$star_anno_bam" -o ${bam_root}.bam
     dx download "$rsem_index" -o rsem_index.tgz
-    tar zxvf rsem_index.tgz
 
-    # should be 'out/rsem'
-    grp=`ls out/*.grp`
-    index_prefix=${grp%.grp}
-    echo "* Found index_prefix: '$index_prefix'"
-
-    extraFlags=""
-    if [ "$paired_end" == "true" ]; then
-        echo '* Running for paired-end, stranded'
-        extraFlags="--paired-end --forward-prob 0"
-    else
-        echo '* Running for unpaired, unstranded'
-    fi
-
-    #if [ "$stranded" == "true" ]
-    #then
-    #    echo '* Using stranded flag'
-    #    extraFlags=${extraFlags}"--forward-prob 0"
-    #fi
-
-    # Fill in your application code here.
-
-    echo "* Quantitate with extra flags: [${extraFlags}]..."
+    echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    rsem-calculate-expression --bam --estimate-rspd --calc-ci --seed ${rnd_seed} -p ${nthreads} \
-        --no-bam-output --ci-memory 30000 ${extraFlags} ${bam_fn}.bam ${index_prefix} ${bam_fn}_rsem
+    lrna-rsem-quantification.sh rsem_index.tgz ${bam_root}.bam $paired_end $rnd_seed $nthreads
     set +x
-
-    echo `ls ${bam_fn}*`
+    echo "* ===== Returned from dnanexus and encodeD independent script ====="
 
     echo "* Upload results..."
-    rsem_gene_results=$(dx upload ${bam_fn}_rsem.genes.results   --property SW="$versions" --brief)
-    rsem_iso_results=$(dx upload ${bam_fn}_rsem.isoforms.results --property SW="$versions" --brief)
+    rsem_gene_results=$(dx upload ${bam_root}_rsem.genes.results   --property SW="$versions" --brief)
+    rsem_iso_results=$(dx upload ${bam_root}_rsem.isoforms.results --property SW="$versions" --brief)
 
     dx-jobutil-add-output rsem_gene_results "$rsem_gene_results" --class=file
     dx-jobutil-add-output rsem_iso_results "$rsem_iso_results" --class=file

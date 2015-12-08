@@ -1,9 +1,9 @@
 {
   "name": "bam-to-bigwig-stranded-tophat",
-  "title": "bam to stranded signals - TopHat (virtual-2.0.2)",
+  "title": "bam to stranded signals - TopHat (virtual-2.0.3)",
   "summary": "Converts BAMs from alignments from stranded libraries to bigwig format",
   "dxapi": "1.0.0",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "authorizedUsers": [],
   "inputSpec": [
     {

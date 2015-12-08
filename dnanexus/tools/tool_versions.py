@@ -7,13 +7,13 @@ import sys, os, argparse, json, commands
 # APP_TOOLS is a dict keyed by applet script name with a list of tools that it uses.
 APP_TOOLS = {
     # lrna:    
-    "align-star-pe":            [ "STAR", "samtools" ],
-    "align-star-se":            [ "STAR", "samtools" ],
-    "align-tophat-pe":          [ "TopHat", "bowtie2", "samtools", "tophat_bam_xsA_tag_fix.pl" ],
-    "align-tophat-se":          [ "TopHat", "bowtie2", "samtools" ],
-    "bam-to-bigwig-stranded":   [ "STAR","bedGraphToBigWig" ],
-    "bam-to-bigwig-unstranded": [ "STAR","bedGraphToBigWig" ],
-    "quant-rsem":               [ "RSEM" ],
+    "align-star-pe":            [ "lrna-align-star-pe.sh", "STAR", "samtools" ],
+    "align-star-se":            [ "lrna-align-star-se.sh", "STAR", "samtools" ],
+    "align-tophat-pe":          [ "lrna-align-tophat-pe.sh", "TopHat", "bowtie2", "samtools", "tophat_bam_xsA_tag_fix.pl" ],
+    "align-tophat-se":          [ "lrna-align-tophat-se.sh", "TopHat", "bowtie2", "samtools" ],
+    "bam-to-bigwig-stranded":   [ "lrna-bam-to-stranded-signals.sh", "STAR","bedGraphToBigWig" ],
+    "bam-to-bigwig-unstranded": [ "lrna-bam-to-unstranded-signals.sh", "STAR","bedGraphToBigWig" ],
+    "quant-rsem":               [ "lrna-rsem-quantification.sh", "RSEM" ],
     "mad-qc":                   [ "MAD.R" ],
 
     # srna:    
@@ -62,7 +62,14 @@ ALL_TOOLS = {
             "samtools":                  "samtools 2>&1 | grep Version | awk '{print $2}'",
             "STAR":                      "STAR --version | awk '{print $1}' | cut -d _ -f 2-",
             "TopHat":                    "tophat -v | awk '{print $2}'",
-            "tophat_bam_xsA_tag_fix.pl": "perl /usr/bin/tophat_bam_xsA_tag_fix.pl --version 2>&1"
+            "tophat_bam_xsA_tag_fix.pl": "perl /usr/bin/tophat_bam_xsA_tag_fix.pl --version 2>&1",
+            "lrna-align-star-pe.sh":             "lrna-align-star-pe.sh | grep usage | awk '{print $2}' | tr -d :",
+            "lrna-align-star-se.sh":             "lrna-align-star-se.sh | grep usage | awk '{print $2}' | tr -d :",
+            "lrna-align-tophat-pe.sh":           "lrna-align-tophat-pe.sh | grep usage | awk '{print $2}' | tr -d :",
+            "lrna-align-tophat-se.sh":           "lrna-align-tophat-se.sh | grep usage | awk '{print $2}' | tr -d :",
+            "lrna-bam-to-stranded-signals.sh":   "lrna-bam-to-stranded-signals.sh | grep usage | awk '{print $2}' | tr -d :",
+            "lrna-bam-to-unstranded-signals.sh": "lrna-bam-to-unstranded-signals.sh | grep usage | awk '{print $2}' | tr -d :",
+            "lrna-rsem-quantification.sh":       "lrna-rsem-quantification.sh | grep usage | awk '{print $2}' | tr -d :",
             }
 
 def parse_dxjson(dxjson):

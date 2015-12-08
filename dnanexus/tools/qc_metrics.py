@@ -11,7 +11,9 @@ EXPECTED_PARSING = {
     "horizontal":     {"type": "horizontal", "lines": "", "columns": "", "delimit": None},
     "singleton":      {"type": "singleton", "delimit": None},
     "STAR_log_final": {"type": "vertical",   "lines": "1-4,6,7,9-22,24-27,29-31", "columns": "", "delimit": "|"},
-    "IDR_summary":    {"type": "idr"}
+    "IDR_summary":    {"type": "idr"},
+    "samtools_flagstats":     {"type": "flagstats"},
+    "samtools_stats":         {"type": "samstats"},
 }
 
 def strip_comments(line,ws_too=False):
@@ -315,6 +317,97 @@ def read_idr(filePath,verbose=False):
     fh.close()
     return pairs
 
+def read_flagstats(filePath,verbose=False):
+    '''
+    SPECIAL CASE for samtools flagstats. 
+    '''
+    pairs = {}
+
+    fh = open(filePath, 'r')
+    while True:
+        line = readline_may_continue( fh )
+        if line == None:
+            break
+        if verbose:
+            print "["+line+"]"
+        line = strip_comments(line,True)
+        if line == '':
+            continue
+        # 2826233 + 0 in total (QC-passed reads + QC-failed reads)
+        if line.find("QC-passed reads") > 0:
+        # 2826233 + 0 in total (QC-passed reads + QC-failed reads)
+            parts = line.split()
+            pairs["total"] = string_or_number(parts[0]) 
+            pairs["total_qc_failed"] = string_or_number(parts[2]) 
+        # 0 + 0 duplicates
+        elif line.find("duplicates") > 0:
+            parts = line.split()
+            pairs["duplicates"] = string_or_number(parts[0]) 
+            pairs["duplicates_qc_failed"] = string_or_number(parts[2]) 
+        # 2826233 + 0 mapped (100.00%:-nan%)
+        elif "mapped" not in pairs and line.find("mapped") > 0:
+            parts = line.split()
+            pairs["mapped"] = string_or_number(parts[0]) 
+            pairs["mapped_qc_failed"] = string_or_number(parts[2])
+            val = parts[4][1:].split(':')[0] 
+            pairs["mapped_pct"] = string_or_number(val) 
+        # 2142 + 0 paired in sequencing
+        elif line.find("paired in sequencing") > 0:
+            parts = line.split()
+            if int(parts[0]) <= 0: # Not paired-end, so nothing more needed
+                break
+            pairs["paired"] = string_or_number(parts[0]) 
+            pairs["paired_qc_failed"] = string_or_number(parts[2]) 
+        # 107149 + 0 read1
+        elif line.find("read1") > 0:
+            parts = line.split()
+            pairs["read1"] = string_or_number(parts[0]) 
+            pairs["read1_qc_failed"] = string_or_number(parts[2]) 
+        # 107149 + 0 read2
+        elif line.find("read2") > 0:
+            parts = line.split()
+            pairs["read2"] = string_or_number(parts[0]) 
+            pairs["read2_qc_failed"] = string_or_number(parts[2]) 
+        # 2046 + 0 properly paired (95.48%:-nan%)
+        elif line.find("properly paired") > 0:
+            parts = line.split()
+            pairs["paired_properly"] = string_or_number(parts[0]) 
+            pairs["paired_properly_qc_failed"] = string_or_number(parts[2]) 
+            val = parts[5][1:].split(':')[0] 
+            pairs["paired_properly_pct"] = string_or_number(val) 
+        # 0 + 0      singletons (0.00%:-nan%)
+        elif line.find("singletons") > 0:
+            parts = line.split()
+            pairs["singletons"] = string_or_number(parts[0]) 
+            pairs["singletons_qc_failed"] = string_or_number(parts[2]) 
+            val = parts[4][1:].split(':')[0] 
+            pairs["singletons_pct"] = string_or_number(val) 
+        # 2046212 + 0 with itself and mate mapped
+        elif line.find("with itself and mate mapped") > 0:
+            parts = line.split()
+            pairs["with_itself"] = string_or_number(parts[0]) 
+            pairs["with_itself_qc_failed"] = string_or_number(parts[2]) 
+        # 0 + 0 with mate mapped to a different chr (mapQ>=5)
+        elif line.find("with mate mapped to a different chr") > 0:
+            parts = line.split()
+            pairs["diff_chroms"] = string_or_number(parts[0]) 
+            pairs["diff_chroms_qc_failed"] = string_or_number(parts[2])
+            break
+
+    fh.close()
+    return pairs
+    
+def read_samstats(filePath,verbose=False):
+    '''
+    SPECIAL CASE of samtools stats 
+    '''
+    pairs = read_vertical(filePath,delimit=':',verbose=verbose)
+    val = pairs['reads MQ0']
+    if isinstance(val,str):
+        val = val.split('\t')
+        pairs['reads MQ0'] = string_or_number(val[0])
+    return pairs
+
             
 def main():
     parser = argparse.ArgumentParser(description =  "Creates a json string of qc_metrics for a given applet. " + \
@@ -383,6 +476,16 @@ def main():
         metrics = read_samstats(args.file,args.verbose)
     elif parsing["type"] == 'idr':
         metrics = read_idr(args.file,args.verbose)
+    elif parsing["type"] == "fastqstats":
+        metrics = read_fastqstats(args.file,args.verbose)
+    elif parsing["type"] == 'flagstats':
+        metrics = read_flagstats(args.file,args.verbose)
+    elif parsing["type"] == 'samstats':
+        metrics = read_samstats(args.file,args.verbose)
+    else:
+        sys.stderr.write('Unknown metric request\n')
+        parser.print_usage()
+        return
 
     # Print out the metrics
     if args.key != None and parsing["type"] != 'singleton':

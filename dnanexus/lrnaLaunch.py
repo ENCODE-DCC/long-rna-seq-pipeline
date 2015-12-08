@@ -185,8 +185,8 @@ class LrnaLaunch(Launch):
                                             }
                                 },
                         "GRCh38": {
-                                "female":   {"v23": "GRCh38_ns_male_v23_ERCC_tophatIndex.tgz"},
-                                "male":     {"v23": "GRCh38_ns_male_v23_ERCC_tophatIndex.tgz"}
+                                "female":   {"v23": "GRCh38_v24pri_tRNAs_ERCC_phiX_tophatIndex.tgz"},
+                                "male":     {"v23": "GRCh38_v24pri_tRNAs_ERCC_phiX_tophatIndex.tgz"}
                                 },
                         "mm10": {
                                 "female":   {
@@ -211,8 +211,8 @@ class LrnaLaunch(Launch):
                                             }
                                 },
                         "GRCh38": {
-                                "female":   {"v23": "GRCh38_ns_male_v23_ERCC_starIndex.tgz"},
-                                "male":     {"v23": "GRCh38_ns_male_v23_ERCC_starIndex.tgz"}
+                                "female":   {"v23": "GRCh38_v24pri_tRNAs_ERCC_phiX_starIndex.tgz"},
+                                "male":     {"v23": "GRCh38_v24pri_tRNAs_ERCC_phiX_starIndex.tgz"}
                                 },
                         "mm10": {
                                 "female":   {
@@ -231,7 +231,7 @@ class LrnaLaunch(Launch):
                         "hg19": {
                                 "v19": "hg19_male_v19_ERCC_rsemIndex.tgz"
                                 },
-                        "GRCh38":  {"v23": "GRCh38_ns_male_v23_ERCC_rsemIndex.tgz"},
+                        "GRCh38":  {"v23": "GRCh38_v24pri_tRNAs_ERCC_phiX_rsemIndex.tgz"},
                         "mm10": {
                                 "M2":  "mm10_male_M2_ERCC_rsemIndex.tgz",
                                 "M3":  "mm10_male_M3_ERCC_rsemIndex.tgz",
@@ -243,8 +243,8 @@ class LrnaLaunch(Launch):
                                 "female":   "female.hg19.chrom.sizes",
                                 "male":     "male.hg19.chrom.sizes"
                                 },
-                        "GRCh38":  {"female":   "GRCh38_min_male.chrom.sizes",
-                                    "male":     "GRCh38_min_male.chrom.sizes"  },
+                        "GRCh38":  {"female":   "GRCh38_EBV.chrom.sizes",
+                                    "male":     "GRCh38_EBV.chrom.sizes"  },
                         "mm10": {
                                 "female":   "male.mm10.chrom.sizes",
                                 "male":     "male.mm10.chrom.sizes"
