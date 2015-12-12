@@ -23,10 +23,10 @@ APP_TOOLS = {
     "small-rna-mad-qc":         [ "MAD.R", "extract_gene_ids.awk", "sum_srna_expression.awk" ],
 
     # rampage:    
-    "rampage-align-pe":         [ "STAR" ],
-    "rampage-signals":          [ "STAR", "bedGraphToBigWig" ],
-    "rampage-peaks":            [ "call_peaks (grit)", "bedToBigBed", "samtools" ],
-    "rampage-idr":              [ "Anaconda3", "idr", "bedToBigBed" ],
+    "rampage-align-pe":         [ "ram-align-star-pe.sh", "STAR" ],
+    "rampage-signals":          [ "ram-signal.sh", "STAR", "bedGraphToBigWig" ],
+    "rampage-peaks":            [ "ram-peaks.sh", "call_peaks (grit)", "bedToBigBed", "pigz", "samtools" ],
+    "rampage-idr":              [ "ram-idr.sh", "Anaconda3", "idr", "bedToBigBed", "pigz" ],
     "rampage-mad-qc":           [ "MAD.R" ],
 
     # utility:    
@@ -63,6 +63,7 @@ ALL_TOOLS = {
             "STAR":                      "STAR --version | awk '{print $1}' | cut -d _ -f 2-",
             "TopHat":                    "tophat -v | awk '{print $2}'",
             "tophat_bam_xsA_tag_fix.pl": "perl /usr/bin/tophat_bam_xsA_tag_fix.pl --version 2>&1",
+            "pigz":                      "pigz --version 2>&1 | awk '{print $2}'",
             "lrna-align-star-pe.sh":             "lrna-align-star-pe.sh | grep usage | awk '{print $2}' | tr -d :",
             "lrna-align-star-se.sh":             "lrna-align-star-se.sh | grep usage | awk '{print $2}' | tr -d :",
             "lrna-align-tophat-pe.sh":           "lrna-align-tophat-pe.sh | grep usage | awk '{print $2}' | tr -d :",
@@ -70,6 +71,10 @@ ALL_TOOLS = {
             "lrna-bam-to-stranded-signals.sh":   "lrna-bam-to-stranded-signals.sh | grep usage | awk '{print $2}' | tr -d :",
             "lrna-bam-to-unstranded-signals.sh": "lrna-bam-to-unstranded-signals.sh | grep usage | awk '{print $2}' | tr -d :",
             "lrna-rsem-quantification.sh":       "lrna-rsem-quantification.sh | grep usage | awk '{print $2}' | tr -d :",
+            "ram-align-star-pe.sh":     "ram-align-star-pe.sh | grep usage | awk '{print $2}' | tr -d :",
+            "ram-signal.sh":            "ram-signal.sh | grep usage | awk '{print $2}' | tr -d :",
+            "ram-peaks.sh":             "ram-peaks.sh | grep usage | awk '{print $2}' | tr -d :",
+            "ram-idr.sh":               "ram-idr.sh | grep usage | awk '{print $2}' | tr -d :",
             }
 
 def parse_dxjson(dxjson):
