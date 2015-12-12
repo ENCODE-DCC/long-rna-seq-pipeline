@@ -27,11 +27,10 @@ main() {
     fi
 
     echo "* Value of annotation_bam: '$star_anno_bam'"
-    echo "* Value of rsem_index: '$rsem_index'"
-    echo "* Value of paired: '$paired_end'"
-    #echo "* Value of stranded: '$stranded'"
-    echo "* Random number seed: '$rnd_seed'"
-    echo "* Value of nthreads: '$nthreads'"
+    echo "* Value of rsem_index:     '$rsem_index'"
+    echo "* Value of paired:         '$paired_end'"
+    echo "* Random number seed:      '$rnd_seed'"
+    echo "* Value of nthreads:       '$nthreads'"
 
     echo "* Download files..."
     bam_root=`dx describe "$star_anno_bam" --name`
@@ -40,6 +39,7 @@ main() {
     dx download "$star_anno_bam" -o ${bam_root}.bam
     dx download "$rsem_index" -o rsem_index.tgz
 
+    # DX/ENCODE independent script is found in resources/usr/bin
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
     lrna-rsem-quantification.sh rsem_index.tgz ${bam_root}.bam $paired_end $rnd_seed $nthreads

@@ -26,6 +26,7 @@ main() {
 
     dx download "$chrom_sizes" -o chromSizes.txt
 
+    # DX/ENCODE independent script is found in resources/usr/bin
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
     lrna-bam-to-stranded-signals.sh ${bam_root}.bam chromSizes.txt

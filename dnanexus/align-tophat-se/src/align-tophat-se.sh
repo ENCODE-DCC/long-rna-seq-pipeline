@@ -59,6 +59,7 @@ main() {
     echo "* Downloading and extracting TopHat index archive..."
     dx download "$tophat_index" -o tophat_index.tgz
   
+    # DX/ENCODE independent script is found in resources/usr/bin
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
     lrna-align-tophat-se.sh tophat_index.tgz ${reads_root}.fq.gz "$library_id" $nthreads $bam_root

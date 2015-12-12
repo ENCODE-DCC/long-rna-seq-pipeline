@@ -60,6 +60,7 @@ main() {
     tar zxvf star_index.tgz
     # unzips into "out/"
 
+    # DX/ENCODE independent script is found in resources/usr/bin
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
     lrna-align-star-se.sh star_index.tgz ${reads_root}.fq.gz "$library_id" $nthreads $bam_root

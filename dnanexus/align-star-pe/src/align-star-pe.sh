@@ -78,7 +78,7 @@ main() {
     ls -l ${reads2_root}.fq.gz
     bam_root="${reads1_root}_${reads2_root}"
     if [ -f /usr/bin/parse_property.py ]; then
-        new_root=`parse_property.py -f "'${reads1[0]}'" --project "${DX_PROJECT_CONTEXT_ID}" --root_name --quiet`
+        new_root=`parse_property.py --job "${DX_JOB_ID}" --root_name --quiet`
         if [ "$new_root" != "" ]; then
             bam_root="${new_root}"
         fi
@@ -87,6 +87,7 @@ main() {
     echo "* Downloading star index archive..."
     dx download "$star_index" -o star_index.tgz
 
+    # DX/ENCODE independent script is found in resources/usr/bin
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
     lrna-align-star-pe.sh star_index.tgz ${reads1_root}.fq.gz ${reads2_root}.fq.gz "$library_id" $nthreads $bam_root
