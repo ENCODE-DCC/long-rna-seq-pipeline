@@ -19,32 +19,21 @@ main() {
     echo "Value of chrom_sizes: '$chrom_sizes'"
 
     echo "* Download files..."
-    bam_fn=`dx describe "$rampage_marked_bam" --name`
-    bam_fn=${bam_fn%_rampage_star_marked.bam}
-    bam_fn=${bam_fn%.bam}
-    dx download "$rampage_marked_bam" -o "$bam_fn".bam
-    echo "* Bam file: '${bam_fn}.bam'"
+    bam_root=`dx describe "$rampage_marked_bam" --name`
+    bam_root=${bam_root%.bam}
+    bam_root=${bam_root%_rampage_star_marked}
+    dx download "$rampage_marked_bam" -o "$bam_root".bam
+    echo "* Bam file: '${bam_root}.bam'"
 
-    dx download "$chrom_sizes" -o chromSizes.txt
+    dx download "$chrom_sizes" -o chrom.sizes
     
-    signal_root=${bam_fn}_rampage_5p
-    echo "* Signal files root: '${signal_root}'"
-
-    echo "* Make signals..."
+    # DX/ENCODE independent script is found in resources/usr/bin
+    echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    mkdir -p Signal
-    STAR --runMode inputAlignmentsFromBAM --inputBAMfile ${bam_fn}.bam --outWigType bedGraph read1_5p \
-         --outWigStrand Stranded --outFileNamePrefix read1_5p. --outWigReferencesPrefix chr
+    ram-signal.sh ${bam_root}.bam chrom.sizes 
     set +x
-
-    echo "* Convert bedGraph to bigWigs..."
-    set -x
-    bedGraphToBigWig read1_5p.Signal.UniqueMultiple.str2.out.bg chromSizes.txt ${signal_root}_minusAll.bw
-    bedGraphToBigWig read1_5p.Signal.Unique.str2.out.bg         chromSizes.txt ${signal_root}_minusUniq.bw
-    bedGraphToBigWig read1_5p.Signal.UniqueMultiple.str1.out.bg chromSizes.txt ${signal_root}_plusAll.bw
-    bedGraphToBigWig read1_5p.Signal.Unique.str1.out.bg         chromSizes.txt ${signal_root}_plusUniq.bw
-    set +x
-    echo `ls`
+    echo "* ===== Returned from dnanexus and encodeD independent script ====="
+    signal_root=${bam_root}_rampage_5p
 
     echo "* Upload results..."
     all_minus_bw=$(dx upload ${signal_root}_minusAll.bw     --property SW="$versions" --brief)

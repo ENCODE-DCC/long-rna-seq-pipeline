@@ -76,66 +76,47 @@ main() {
     ls -l ${outfile_name}.fq.gz
     reads2_root=${outfile_name}
     ls -l ${reads2_root}.fq.gz
-    bam_root="${reads1_root}_${reads2_root}_rampage_star"
+    bam_root="${reads1_root}_${reads2_root}"
     if [ -f /usr/bin/parse_property.py ]; then
-        new_root=`parse_property.py -f "'${reads1[0]}'" --project "${DX_PROJECT_CONTEXT_ID}" --root_name --quiet`
+        new_root=`parse_property.py --job "${DX_JOB_ID}" --root_name --quiet`
         if [ "$new_root" != "" ]; then
-            bam_root="${new_root}_rampage_star"
+            bam_root="${new_root}"
         fi
     fi
-    echo "* Alignments file will be: '${bam_root}.bam'"
 
-    echo "* Downloading and extracting star index archive..."
+    echo "* Downloading star index archive..."
     dx download "$star_index" -o star_index.tgz
-    tar zxvf star_index.tgz
-    # unzips into "out/"
     
-    echo "* Set up headers..."
+    # DX/ENCODE independent script is found in resources/usr/bin
+    echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    libraryComment="@CO\tLIBID:${library_id}"
-    echo -e ${libraryComment} > COfile.txt
-    cat out/*_bamCommentLines.txt >> COfile.txt
+    ram-align-star-pe.sh star_index.tgz ${reads1_root}.fq.gz ${reads2_root}.fq.gz "$library_id" $nthreads $bam_root
     set +x
-    echo `cat COfile.txt`
-
-    echo "* Map reads..."
-    set -x
-    STAR --genomeDir out --readFilesIn ${reads1_root}.fq.gz ${reads2_root}.fq.gz         \
-        --readFilesCommand zcat --runThreadN ${nthreads} --genomeLoad NoSharedMemory      \
-        --outFilterMultimapNmax 500 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1        \
-        --outFilterMismatchNmax 999 --outFilterMismatchNoverReadLmax 0.04                   \
-        --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000              \
-        --outSAMheaderCommentFile COfile.txt --outSAMheaderHD @HD VN:1.4 SO:coordinate        \
-        --outSAMunmapped Within --outFilterType BySJout --outSAMattributes NH HI AS NM MD      \
-        --outFilterScoreMinOverLread 0.85 --outFilterIntronMotifs RemoveNoncanonicalUnannotated \
-        --clip5pNbases 6 15 --seedSearchStartLmax 30 --outSAMtype BAM SortedByCoordinate         \
-        --limitBAMsortRAM 60000000000
-    set +x
-    ls -l Aligned.sortedByCoord.out.bam
-
-    echo "* Marking PCR duplicates..."
-    set -x
-    STAR --inputBAMfile Aligned.sortedByCoord.out.bam --bamRemoveDuplicatesType UniqueIdentical \
-        --runMode inputAlignmentsFromBAM --bamRemoveDuplicatesMate2basesN 15 \
-        --outFileNamePrefix markdup. --limitBAMsortRAM 60000000000
-
-    mv markdup.Processed.out.bam ${bam_root}_marked.bam
-    mv Log.final.out ${bam_root}_Log.final.out
-    set +x
-    ls -l ${bam_root}_marked.bam
+    echo "* ===== Returned from dnanexus and encodeD independent script ====="
+    bam_root="${bam_root}_rampage_star"
 
     echo "* Prepare metadata..."
-    meta=''
+    qc_stats=''
+    reads=0
     if [ -f /usr/bin/qc_metrics.py ]; then
-        meta=`qc_metrics.py -n STAR_log_final -f ${bam_root}_Log.final.out`
+        qc_stats=`qc_metrics.py -n STAR_log_final -f ${bam_root}_Log.final.out`
+        meta=`qc_metrics.py -n samtools_flagstats -f ${bam_root}_marked_flagstat.txt`
+        reads=`qc_metrics.py -n samtools_flagstats -f ${bam_root}_marked_flagstat.txt -k total`
+        qc_stats=`echo $qc_stats, $meta`
     fi
 
     echo "* Upload results..."
-    rampage_marked_bam=$(dx upload ${bam_root}_marked.bam --details "{ $meta }" --property SW="$versions" --brief)
-    rampage_star_log=$(dx upload ${bam_root}_Log.final.out --property SW="$versions" --brief)
+    rampage_marked_bam=$(dx upload ${bam_root}_marked.bam --details "{ $qc_stats }" --property reads="$reads" \
+                                                                                    --property SW="$versions" --brief)
+    rampage_star_log=$(dx upload ${bam_root}_Log.final.out --details "{ $qc_stats }" --property SW="$versions" --brief)
+    rampage_flagstat=$(dx upload ${bam_root}_marked_flagstat.txt --details="{ $qc_stats }" --property reads="$reads" \
+                                                                                           --property SW="$versions" --brief)
 
     dx-jobutil-add-output rampage_marked_bam "$rampage_marked_bam" --class=file
     dx-jobutil-add-output rampage_star_log "$rampage_star_log" --class=file
-    dx-jobutil-add-output metadata "{ $meta }" --class=string
+    dx-jobutil-add-output rampage_flagstat "$rampage_flagstat" --class=file
+
+    dx-jobutil-add-output reads "$reads" --class=string
+    dx-jobutil-add-output metadata "{ $qc_stats }" --class=string
     echo "* Finished."
 }

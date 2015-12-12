@@ -31,9 +31,9 @@
   "outputSpec": [
     {
       "name": "rampage_idr_bed",
-      "label": "Bed file of rampage idr peaks",
+      "label": "Gzipped bed file of rampage idr peaks",
       "class": "file",
-      "patterns": ["*_rampage_idr.bed"]
+      "patterns": ["*_rampage_idr.bed.gz"]
     },
     {
       "name": "rampage_idr_bb",
@@ -56,6 +56,7 @@
   "runSpec": {
     "interpreter": "bash",
     "file": "src/rampage-idr.sh",
+    "execDepends": [{"name": "pigz"}],
     "systemRequirements": {
       "main": {
         "instanceType": "mem3_hdd2_x8"

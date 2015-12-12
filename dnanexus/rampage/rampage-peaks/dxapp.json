@@ -1,9 +1,9 @@
 {
   "name": "rampage-peaks",
-  "title": "Call Rampage peaks (v2.0.0)",
+  "title": "Call Rampage peaks (v2.0.1)",
   "summary": "Uses genome BAM marked for Rampage to calls peaks and produce 5' signals",
   "dxapi": "1.0.0",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -11,14 +11,14 @@
       "label": "Input BAM file marked for Rampage",
       "class": "file",
       "optional": false,
-      "patterns": ["*.bam"]
+      "patterns": ["*_rampage_star_marked.bam"]
     },
     {
       "name": "control_bam",
       "label": "Control BAM file for Rampage",
       "class": "file",
       "optional": false,
-      "patterns": ["*.bam"]
+      "patterns": ["*_star_genome.bam"]
     },
     {
       "name": "gene_annotation",
@@ -45,9 +45,9 @@
   "outputSpec": [
     {
       "name": "rampage_peaks_bed",
-      "label": "Bed file of rampage called peaks",
+      "label": "Gzipped bed file of rampage called peaks",
       "class": "file",
-      "patterns": ["*_rampage_peaks.bed"]
+      "patterns": ["*_rampage_peaks.bed.gz"]
     },
     {
       "name": "rampage_peaks_bb",
@@ -57,9 +57,9 @@
     },
     {
       "name": "rampage_peaks_gff",
-      "label": "GFF2 file of rampage called peaks",
+      "label": "Gzipped gff file of rampage called peaks",
       "class": "file",
-      "patterns": ["*_rampage_peaks.gff"]
+      "patterns": ["*_rampage_peaks.gff.gz"]
     },
     {
       "name": "rampage_peak_quants",
@@ -71,6 +71,7 @@
   "runSpec": {
     "interpreter": "bash",
     "file": "src/rampage-peaks.sh",
+    "execDepends": [{"name": "pigz"}],
     "systemRequirements": {
       "main": {
         "instanceType": "mem3_hdd2_x8"

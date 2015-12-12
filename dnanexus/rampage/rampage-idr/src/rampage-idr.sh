@@ -40,56 +40,48 @@ main() {
     echo "Value of chrom_sizes: '$chrom_sizes'"
 
     echo "* Download files..."
-    peaks_a_fn=`dx describe "$peaks_a" --name`
-    peaks_a_fn=${peaks_a_fn%_rampage_peaks.bed}
-    peaks_a_fn=${peaks_a_fn%.bed}
-    dx download "$peaks_a" -o peaks_a.bed
-    echo "* First bed: '"$peaks_a_fn".bed'"
+    peaks_a_file=`dx describe "$peaks_a" --name`
+    peaks_a_root=${peaks_a_file%.gz}
+    peaks_a_root=${peaks_a_root%.bed}
+    peaks_a_root=${peaks_a_root%_rampage_peaks}
+    dx download "$peaks_a" -o $peaks_a_file
+    echo "* First bed: '${peaks_a_file}'"
 
-    peaks_b_fn=`dx describe "$peaks_b" --name`
-    peaks_b_fn=${peaks_b_fn%_rampage_peaks.bed}
-    peaks_b_fn=${peaks_b_fn%.bed}
-    dx download "$peaks_b" -o peaks_b.bed
-    echo "* Second bed: '"$peaks_b_fn".bed'"
+    peaks_b_file=`dx describe "$peaks_b" --name`
+    peaks_b_root=${peaks_a_file%.gz}
+    peaks_b_root=${peaks_b_root%.bed}
+    peaks_b_root=${peaks_b_root%_rampage_peaks}
+    dx download "$peaks_b" -o $peaks_b_file
+    echo "* Second bed: '${peaks_b_file}'"
 
-    dx download "$chrom_sizes" -o chromSizes.txt
+    dx download "$chrom_sizes" -o chrom.sizes
 
-    idr_root=${peaks_a_fn}_${peaks_b_fn}_rampage_idr
+    idr_root=${peaks_a_root}_${peaks_b_root}
     echo "* Rampage IDR root: '"$idr_root"'"
 
-    echo "* Removing any spike-ins from bed files..."
+    # DX/ENCODE independent script is found in resources/usr/bin
+    echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    grep "^chr" peaks_a.bed > peaks_a_clean.bed
-    grep "^chr" peaks_b.bed > peaks_b_clean.bed
-    set -x
-
-    echo "* Running IDR..."
-    set -x
-    idr/bin/idr --input-file-type bed --rank 7 --plot --verbose --samples peaks_a_clean.bed peaks_b_clean.bed 2>&1 | tee idr_summary.txt
-    sort -k1,1 -k2,2n < idrValues.txt > ${idr_root}.bed
-    mv idrValues.txt.png ${idr_root}.png
+    ram-idr.sh $peaks_a_file $peaks_b_file chrom.sizes $idr_root
     set +x
-
-    echo "* Converting bed to bigBed..."
-    set -x
-    bedToBigBed ${idr_root}.bed -type=bed6+ -as=/usr/bin/idr_peak.as chromSizes.txt ${idr_root}.bb
-    set +x
-
+    echo "* ===== Returned from dnanexus and encodeD independent script ====="
+    idr_root=${idr_root}_rampage_peaks
+    
     echo "* Prepare metadata..."
-    meta=''
+    qc_stats=''
     if [ -f /usr/bin/qc_metrics.py ]; then
-        meta=`qc_metrics.py -n IDR_summary -f idr_summary.txt`
+        qc_stats=`qc_metrics.py -n IDR_summary -f idr_summary.txt`
     fi
     
     echo "* Upload results..."
-    rampage_idr_bed=$(dx upload ${idr_root}.bed --details="{ $meta }" --property SW="$versions" --brief)
-    rampage_idr_bb=$(dx upload ${idr_root}.bb   --details="{ $meta }" --property SW="$versions" --brief)
-    rampage_idr_png=$(dx upload ${idr_root}.png --details="{ $meta }" --property SW="$versions" --brief)
+    rampage_idr_bed=$(dx upload ${idr_root}.bed --details="{ $qc_stats }" --property SW="$versions" --brief)
+    rampage_idr_bb=$(dx upload ${idr_root}.bb   --details="{ $qc_stats }" --property SW="$versions" --brief)
+    rampage_idr_png=$(dx upload ${idr_root}.png --details="{ $qc_stats }" --property SW="$versions" --brief)
 
     dx-jobutil-add-output rampage_idr_bed "$rampage_idr_bed" --class=file
     dx-jobutil-add-output rampage_idr_bb "$rampage_idr_bb" --class=file
     dx-jobutil-add-output rampage_idr_png "$rampage_idr_png" --class=file
-    dx-jobutil-add-output metadata "$meta" --class=string
+    dx-jobutil-add-output metadata "{ $qc_stats }" --class=string
 
     echo "* Finished."
 }

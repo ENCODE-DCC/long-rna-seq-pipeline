@@ -1,9 +1,9 @@
 {
   "name": "rampage-align-pe",
-  "title": "STAR align - Rampage (v1.0.4)",
+  "title": "STAR align - Rampage (v1.0.5)",
   "summary": "Align paired-end reads to genome and transcriptome using STAR for the ENCODE rampage-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -25,7 +25,7 @@
       "label": "Genome indexed for STAR",
       "class": "file",
       "optional": false,
-      "patterns": ["*.tgz"]
+      "patterns": ["*_starIndex.tgz"]
     },
     {
       "name": "library_id",
@@ -53,6 +53,19 @@
       "label": "BAM file of alignment to whole genome, dups marked for rampage",
       "class": "file",
       "patterns": ["*_rampage_star_marked.bam"]
+    },
+    {
+      "name": "rampage_flagstat",
+      "label": "Samtools flagstats report for star_genome_bam",
+      "class": "file",
+      "optional": true,
+      "patterns": ["*_star_genome_flagstat.txt"]
+    },
+    {
+      "name": "reads",
+      "label": "Count of reads in the rampage_marked_bam",
+      "optional": true,
+      "class": "string"
     },
     {
       "name": "metadata",
