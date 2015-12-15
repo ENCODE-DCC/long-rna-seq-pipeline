@@ -19,6 +19,8 @@ def main(quants_a, quants_b, annotations):
     dxpy.download_dxfile(dxfile_b.get_id(), "quants_b.tsv")
     dxpy.download_dxfile(dxfile_anno.get_id(), "annotations.gtf.gz")
     
+    # TODO: make DX/ENCODE independent script is found in resources/usr/bin
+    
     print "* Extracting gene ids from annotation..."
     subprocess.check_call(['gunzip', 'annotations.gtf.gz'])
     subprocess.check_call(['gawk', '-f', '/usr/bin/extract_gene_ids.awk', 'annotations.gtf', 'out=srna_gene_ids.txt'])

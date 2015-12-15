@@ -1,9 +1,9 @@
 {
   "name": "small-rna-align",
-  "title": "STAR align - small-RNA-seq (v2.0.1)",
+  "title": "STAR align - small-RNA-seq (v2.0.2)",
   "summary": "Align single-end (stranded) reads to genome using STAR for the ENCODE small-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -52,6 +52,19 @@
       "label": "BAM file of alignment to whole genome",
       "class": "file",
       "patterns": ["*_srna_star_quant.tsv"]
+    },
+    {
+      "name": "srna_flagstat",
+      "label": "Samtools flagstats report for srna_bam",
+      "class": "file",
+      "optional": true,
+      "patterns": ["*_srna_star_flagstat.txt"]
+    },
+    {
+      "name": "reads",
+      "label": "Count of reads in the srna_bam",
+      "optional": true,
+      "class": "string"
     },
     {
       "name": "metadata",

@@ -17,13 +17,13 @@ APP_TOOLS = {
     "mad-qc":                   [ "MAD.R" ],
 
     # srna:    
-    "small-rna-prep-star":      [ "STAR" ], 
-    "small-rna-align":          [ "STAR" ], 
-    "small-rna-signals":        [ "STAR","bedGraphToBigWig" ], 
+    "small-rna-prep-star":      [ "srna-index.sh", "STAR", "extract_gene_ids.awk" ], 
+    "small-rna-align":          [ "srna-align.sh", "STAR", "samtools" ], 
+    "small-rna-signals":        [ "srna-signals.sh", "STAR","bedGraphToBigWig" ], 
     "small-rna-mad-qc":         [ "MAD.R", "extract_gene_ids.awk", "sum_srna_expression.awk" ],
 
     # rampage:    
-    "rampage-align-pe":         [ "ram-align-star-pe.sh", "STAR" ],
+    "rampage-align-pe":         [ "ram-align-star-pe.sh", "STAR", "samtools" ],
     "rampage-signals":          [ "ram-signal.sh", "STAR", "bedGraphToBigWig" ],
     "rampage-peaks":            [ "ram-peaks.sh", "call_peaks (grit)", "bedToBigBed", "pigz", "samtools" ],
     "rampage-idr":              [ "ram-idr.sh", "Anaconda3", "idr", "bedToBigBed", "pigz" ],
@@ -75,6 +75,9 @@ ALL_TOOLS = {
             "ram-signal.sh":            "ram-signal.sh | grep usage | awk '{print $2}' | tr -d :",
             "ram-peaks.sh":             "ram-peaks.sh | grep usage | awk '{print $2}' | tr -d :",
             "ram-idr.sh":               "ram-idr.sh | grep usage | awk '{print $2}' | tr -d :",
+            "srna-index.sh":            "srna-index.sh | grep usage | awk '{print $2}' | tr -d :",
+            "srna-align.sh":            "srna-align.sh | grep usage | awk '{print $2}' | tr -d :",
+            "srna-signals.sh":          "srna-signals.sh | grep usage | awk '{print $2}' | tr -d :",
             }
 
 def parse_dxjson(dxjson):

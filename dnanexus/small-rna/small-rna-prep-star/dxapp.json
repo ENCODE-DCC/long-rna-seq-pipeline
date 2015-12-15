@@ -1,9 +1,9 @@
 {
   "name": "small-rna-prep-star",
-  "title": "STAR genome indexing - small-RNA-seq (v2.0.1)",
+  "title": "STAR genome indexing - small-RNA-seq (v2.0.2)",
   "summary": "Prepare reference genome index for STAR used in the ENCODE small-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -19,6 +19,27 @@
       "name": "annotations",
       "label": "transcript and other annotations (GTF)",
       "patterns": ["*.gtf.gz"]
+    },
+    {
+      "name": "genome",
+      "label": "Genome assembly (e.g. GRCh38, hg19, mm10)",
+      "class": "string",
+      "optional": true,
+      "default": ""
+    },
+    {
+      "name": "gender",
+      "label": "Gender (e.g. XX, XY)",
+      "class": "string",
+      "optional": true,
+      "default": ""
+    },
+    {
+      "name": "anno",
+      "label": "Annotation version (e.g. v24, v19, M4)",
+      "class": "string",
+      "optional": true,
+      "default": ""
     }
   ],
   "outputSpec": [
@@ -38,6 +59,7 @@
   "runSpec": {
     "interpreter": "bash",
     "file": "src/small-rna-prep-star.sh",
+    "execDepends": [{ "name": "gawk" }],
     "systemRequirements": {
       "main": {
         "instanceType": "mem3_hdd2_x4"
