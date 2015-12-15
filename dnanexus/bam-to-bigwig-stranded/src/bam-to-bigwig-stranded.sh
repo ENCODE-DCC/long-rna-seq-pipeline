@@ -24,12 +24,12 @@ main() {
     echo "* Bam file: '"$bam_root".bam'"
     dx download "$bam_file" -o "$bam_root".bam
 
-    dx download "$chrom_sizes" -o chromSizes.txt
+    dx download "$chrom_sizes" -o chrom.sizes
 
     # DX/ENCODE independent script is found in resources/usr/bin
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    lrna-bam-to-stranded-signals.sh ${bam_root}.bam chromSizes.txt
+    lrna-bam-to-stranded-signals.sh ${bam_root}.bam chrom.sizes
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
 

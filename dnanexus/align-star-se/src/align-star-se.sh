@@ -55,9 +55,8 @@ main() {
         fi
     fi
 
-    echo "* Downloading and extracting star index archive..."
+    echo "* Downloading star index archive..."
     dx download "$star_index" -o star_index.tgz
-    tar zxvf star_index.tgz
     # unzips into "out/"
 
     # DX/ENCODE independent script is found in resources/usr/bin

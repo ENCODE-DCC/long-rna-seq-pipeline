@@ -2,9 +2,9 @@
 # rampage-idr.sh
 
 main() {
-    echo "* Installing Anaconda3 (python3.4.3, numpy-1.9.2 matplotlib-1.4.3..."
+    echo "* Installing Anaconda3-2.2.0 (python3.4.3, numpy-1.9.2 matplotlib-1.4.3..."
     set -x
-    wget https://3230d63b5fc54e62148e-c95ac804525aac4b6dba79b00b39d1d3.ssl.cf1.rackcdn.com/Anaconda3-2.2.0-Linux-x86_64.sh >> ../install.log 2>&1
+    wget https://repo.continuum.io/archive/Anaconda3-2.2.0-Linux-x86_64.sh >> ../install.log 2>&1
     bash Anaconda3-2.2.0-Linux-x86_64.sh -b
     ana_bin=`echo ~/anaconda3/bin`
     # python symlink will interfere with python2.7
@@ -65,7 +65,7 @@ main() {
     ram-idr.sh $peaks_a_file $peaks_b_file chrom.sizes $idr_root
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
-    idr_root=${idr_root}_rampage_peaks
+    idr_root=${idr_root}_rampage_idr
     
     echo "* Prepare metadata..."
     qc_stats=''
@@ -74,9 +74,9 @@ main() {
     fi
     
     echo "* Upload results..."
-    rampage_idr_bed=$(dx upload ${idr_root}.bed --details="{ $qc_stats }" --property SW="$versions" --brief)
-    rampage_idr_bb=$(dx upload ${idr_root}.bb   --details="{ $qc_stats }" --property SW="$versions" --brief)
-    rampage_idr_png=$(dx upload ${idr_root}.png --details="{ $qc_stats }" --property SW="$versions" --brief)
+    rampage_idr_bed=$(dx upload ${idr_root}.bed.gz --details="{ $qc_stats }" --property SW="$versions" --brief)
+    rampage_idr_bb=$(dx upload ${idr_root}.bb      --details="{ $qc_stats }" --property SW="$versions" --brief)
+    rampage_idr_png=$(dx upload ${idr_root}.png    --details="{ $qc_stats }" --property SW="$versions" --brief)
 
     dx-jobutil-add-output rampage_idr_bed "$rampage_idr_bed" --class=file
     dx-jobutil-add-output rampage_idr_bb "$rampage_idr_bb" --class=file

@@ -16,8 +16,8 @@ class LrnaLaunch(Launch):
     PIPELINE_HELP = "Launches '"+PIPELINE_NAME+"' pipeline analysis for one replicate. "
     ''' This pipline does not support combined replicates.'''
                     
-    GENOMES_SUPPORTED = ['hg19', 'GRCh38', 'GRCh38s', 'mm10']
-    ANNO_DEFAULTS = {'hg19': 'v19', 'GRCh38': 'v23', 'GRCh38s': 'v23', 'mm10': 'M4' }
+    GENOMES_SUPPORTED = ['hg19', 'GRCh38', 'mm10']
+    ANNO_DEFAULTS = {'hg19': 'v19', 'GRCh38': 'v24', 'mm10': 'M4' }
     ANNO_ALLOWED = { 'hg19':   [ ANNO_DEFAULTS['hg19'] ],
                      'GRCh38': [ ANNO_DEFAULTS['GRCh38'] ],
                      'mm10':   [ ANNO_DEFAULTS['mm10'], 'M2', 'M3' ] }
@@ -176,17 +176,13 @@ class LrnaLaunch(Launch):
         # TODO: should remove annotation if only one per genome
         # TODO: should use ACCESSION based fileNames
         "tophat_index":  {
-                        "hg19": {
-                                "female":   {
-                                            "v19": "hg19_female_v19_ERCC_tophatIndex.tgz"
-                                            },
-                                "male":     {
-                                            "v19": "hg19_male_v19_ERCC_tophatIndex.tgz"
-                                            }
-                                },
                         "GRCh38": {
-                                "female":   {"v23": "GRCh38_v24pri_tRNAs_ERCC_phiX_tophatIndex.tgz"},
-                                "male":     {"v23": "GRCh38_v24pri_tRNAs_ERCC_phiX_tophatIndex.tgz"}
+                                "female":   {"v24": "GRCh38_v24pri_tRNAs_ERCC_phiX_tophatIndex.tgz"},
+                                "male":     {"v24": "GRCh38_v24pri_tRNAs_ERCC_phiX_tophatIndex.tgz"}
+                                },
+                        "hg19": {
+                                "female":   {"v19": "hg19_female_v19_ERCC_tophatIndex.tgz"},
+                                "male":     {"v19": "hg19_male_v19_ERCC_tophatIndex.tgz"  }
                                 },
                         "mm10": {
                                 "female":   {
@@ -202,17 +198,13 @@ class LrnaLaunch(Launch):
                                 }
                         },
         "star_index":    {
-                        "hg19": {
-                                "female":   {
-                                            "v19": "hg19_female_v19_ERCC_starIndex.tgz"
-                                            },
-                                "male":     {
-                                            "v19": "hg19_male_v19_ERCC_starIndex.tgz"
-                                            }
-                                },
                         "GRCh38": {
-                                "female":   {"v23": "GRCh38_v24pri_tRNAs_ERCC_phiX_starIndex.tgz"},
-                                "male":     {"v23": "GRCh38_v24pri_tRNAs_ERCC_phiX_starIndex.tgz"}
+                                "female":   {"v24": "GRCh38_v24pri_tRNAs_ERCC_phiX_starIndex.tgz"},
+                                "male":     {"v24": "GRCh38_v24pri_tRNAs_ERCC_phiX_starIndex.tgz"}
+                                },
+                        "hg19": {
+                                "female":   {"v19": "hg19_female_v19_ERCC_starIndex.tgz"},
+                                "male":     {"v19": "hg19_male_v19_ERCC_starIndex.tgz"  }
                                 },
                         "mm10": {
                                 "female":   {
@@ -228,27 +220,21 @@ class LrnaLaunch(Launch):
                                 }
                         },
         "rsem_index":    {
-                        "hg19": {
-                                "v19": "hg19_male_v19_ERCC_rsemIndex.tgz"
-                                },
-                        "GRCh38":  {"v23": "GRCh38_v24pri_tRNAs_ERCC_phiX_rsemIndex.tgz"},
-                        "mm10": {
-                                "M2":  "mm10_male_M2_ERCC_rsemIndex.tgz",
-                                "M3":  "mm10_male_M3_ERCC_rsemIndex.tgz",
-                                "M4":  "mm10_male_M4_ERCC_rsemIndex.tgz"
-                                }
+                        "GRCh38":   {"v24": "GRCh38_v24pri_tRNAs_ERCC_phiX_rsemIndex.tgz"},
+                        "hg19":     {"v19": "hg19_male_v19_ERCC_rsemIndex.tgz"           },
+                        "mm10":     {
+                                    "M2":  "mm10_male_M2_ERCC_rsemIndex.tgz",
+                                    "M3":  "mm10_male_M3_ERCC_rsemIndex.tgz",
+                                    "M4":  "mm10_male_M4_ERCC_rsemIndex.tgz"
+                                    }
                         },
         "chrom_sizes":   {
-                        "hg19": {
-                                "female":   "female.hg19.chrom.sizes",
-                                "male":     "male.hg19.chrom.sizes"
-                                },
-                        "GRCh38":  {"female":   "GRCh38_EBV.chrom.sizes",
-                                    "male":     "GRCh38_EBV.chrom.sizes"  },
-                        "mm10": {
-                                "female":   "male.mm10.chrom.sizes",
-                                "male":     "male.mm10.chrom.sizes"
-                                }
+                        "GRCh38":   {"female":   "GRCh38_EBV.chrom.sizes",
+                                     "male":     "GRCh38_EBV.chrom.sizes"  },
+                        "hg19":     {"female":   "female.hg19.chrom.sizes",
+                                     "male":     "male.hg19.chrom.sizes"   },
+                        "mm10":     {"female":   "male.mm10.chrom.sizes",
+                                     "male":     "male.mm10.chrom.sizes"   }
                         }
         }
 

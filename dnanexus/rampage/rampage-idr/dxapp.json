@@ -11,14 +11,14 @@
       "label": "Peaks produced by one replicate",
       "class": "file",
       "optional": false,
-      "patterns": ["*.bed"]
+      "patterns": ["*_rampage_peaks.bed.gz","*_rampage_peaks.bed"]
     },
     {
       "name": "peaks_b",
       "label": "Peaks produced by another replicate",
       "class": "file",
       "optional": false,
-      "patterns": ["*.bed"]
+      "patterns": ["*_rampage_peaks.bed.gz","*_rampage_peaks.bed"]
     },
     {
       "name": "chrom_sizes",
