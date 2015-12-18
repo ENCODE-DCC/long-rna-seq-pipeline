@@ -1,31 +1,52 @@
 {
   "name": "prep-rsem",
-  "title": "RSEM genome indexing (v1.0.4)",
+  "title": "RSEM genome indexing (v1.0.5)",
   "summary": "Prepare reference genome and transcriptome indexes for RSEM used in the ENCODE long-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "authorizedUsers": [],
   "inputSpec": [
     {
-      "name": "annotations",
-      "label": "transcript and other annotations (GTF)",
+      "name": "ref_genome",
       "class": "file",
       "optional": false,
+      "label": "Reference genome (.fa.gz)",
+      "patterns": ["*.fasta.gz", "*.fa.gz"]
+    },
+    {
+      "name": "annotations",
+      "class": "file",
+      "optional": false,
+      "label": "transcript and other annotations (GTF)",
       "patterns": ["*.gtf.gz"]
     },
     {
-      "name": "genome",
-      "label": "Reference genome (.fa.gz)",
+      "name": "spike_in",
       "class": "file",
       "optional": false,
+      "label": "Spike-in RNA sequences (fasta)",
       "patterns": ["*.fasta.gz", "*.fa.gz"]
     },
     {
-      "name": "spike_in",
-      "label": "Spike-in RNA sequences (fasta)",
-      "class": "file",
+      "name": "genome",
+      "label": "Genome assembly (e.g. GRCh38, hg19, mm10)",
+      "class": "string",
       "optional": true,
-      "patterns": ["*.fasta.gz", "*.fa.gz"]
+      "default": ""
+    },
+    {
+      "name": "gender",
+      "label": "Gender (e.g. XX, XY)",
+      "class": "string",
+      "optional": true,
+      "default": ""
+    },
+    {
+      "name": "anno",
+      "label": "Annotation version (e.g. v24, v19, M4)",
+      "class": "string",
+      "optional": true,
+      "default": ""
     }
   ],
   "outputSpec": [
