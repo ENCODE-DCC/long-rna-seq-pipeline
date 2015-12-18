@@ -19,14 +19,13 @@ STAR --runMode inputAlignmentsFromBAM --inputBAMfile $bam_file --outWigType bedG
 set +x
 
 echo "-- Convert bedGraph to bigWigs..."
+# ??? mv Signal/Signal*bg .
 set -x
 bedGraphToBigWig Signal.UniqueMultiple.str2.out.bg $chrom_sizes ${bam_root}_minusAll.bw
 bedGraphToBigWig Signal.Unique.str2.out.bg         $chrom_sizes ${bam_root}_minusUniq.bw
 bedGraphToBigWig Signal.UniqueMultiple.str1.out.bg $chrom_sizes ${bam_root}_plusAll.bw
 bedGraphToBigWig Signal.Unique.str1.out.bg         $chrom_sizes ${bam_root}_plusUniq.bw
-echo `ls`
 set +x
-# ??? mv Signal/Signal*bg .
 
 echo "-- The results..."
 ls -l ${bam_root}*.bw

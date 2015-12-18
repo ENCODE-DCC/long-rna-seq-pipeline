@@ -16,8 +16,10 @@ class SrnaLaunch(Launch):
     PIPELINE_HELP = "Launches '"+PIPELINE_NAME+"' pipeline analysis for one replicate. "
     ''' This pipline does not support combined replicates.'''
                     
-    ANNO_DEFAULTS = {'hg19': 'v19', 'mm10': 'M4' }
+    GENOMES_SUPPORTED = ['hg19', 'GRCh38', 'mm10']
+    ANNO_DEFAULTS = {'hg19': 'v19', 'GRCh38': 'v24', 'mm10': 'M4' }
     ANNO_ALLOWED = { 'hg19': [ ANNO_DEFAULTS['hg19'] ],
+                     'GRCh38': [ ANNO_DEFAULTS['GRCh38'] ],
                      'mm10': [ ANNO_DEFAULTS['mm10'] ] }
     ANNO_DEFAULT = ANNO_DEFAULTS[Launch.GENOME_DEFAULT]
     ''' Multiple annotations might be supported for each genome.'''
@@ -82,34 +84,26 @@ class SrnaLaunch(Launch):
 
     REFERENCE_FILES = {
         # For looking up reference file names.
-        # TODO: should use ACCESSION based fileNames
         "star_index":   {
-                        "hg19": {
-                                "female":   "hg19_female_v19_ERCC_sRNA_starIndex.tgz",
-                                "male":     "hg19_male_v19_ERCC_sRNA_starIndex.tgz",
-                                },
-                        #"mm10": {
-                        #        "female":   "mm10_male_sRNA_starIndex.tgz",
-                        #        "male":     "mm10_male_sRNA_starIndex.tgz",
-                        #        },
+                        "GRCh38": {"female":   "GRCh38_v24pri_tRNAs_ERCC_phiX_sRNA_starIndex.tgz",
+                                   "male":     "GRCh38_v24pri_tRNAs_ERCC_phiX_sRNA_starIndex.tgz"},
+                        "hg19":   {"female":   "hg19_female_v19_ERCC_sRNA_starIndex.tgz",
+                                   "male":     "hg19_male_v19_ERCC_sRNA_starIndex.tgz"  },
+                        #"mm10": {"female":   "mm10_male_sRNA_starIndex.tgz",
+                        #         "male":     "mm10_male_sRNA_starIndex.tgz", },
                         },
-        "annotations":  {   # TODO: gender??  annotation??
-                        "hg19": {
-                                "v19":      "gencodeV19-tRNAs-ERCC.gtf.gz",
-                                },
-                        #"mm10": {
-                        #        "M4":       "gencode.vM4-tRNAs-ERCC.gtf.gz",
-                        #        },
+        "annotations":  {
+                        "GRCh38": {"v24": "gencodeV24pri-tRNAs-ERCC-phiX.gtf.gz"},
+                        "hg19":   {"v19": "gencodeV19-tRNAs-ERCC.gtf.gz"        },
+                        #"mm10":  {"M4":  "gencode.vM4-tRNAs-ERCC.gtf.gz"       },
                         },
         "chrom_sizes":  {
-                        "hg19": {
-                                "female":   "female.hg19.chrom.sizes",
-                                "male":     "male.hg19.chrom.sizes",
-                                },
-                        "mm10": {
-                                "female":   "male.mm10.chrom.sizes",
-                                "male":     "male.mm10.chrom.sizes",
-                                },
+                        "GRCh38":   {"female":   "GRCh38_EBV.chrom.sizes",
+                                     "male":     "GRCh38_EBV.chrom.sizes"  },
+                        "hg19":     {"female":   "female.hg19.chrom.sizes",
+                                     "male":     "male.hg19.chrom.sizes"   },
+                        "mm10":     {"female":   "male.mm10.chrom.sizes",
+                                     "male":     "male.mm10.chrom.sizes"   }
                         },
         }
 

@@ -18,7 +18,7 @@
       "label": "Genome indexed for STAR",
       "class": "file",
       "optional": false,
-      "patterns": ["*.tgz"]
+      "patterns": ["*_sRNA_starIndex.tgz"]
     },
     {
       "name": "library_id",

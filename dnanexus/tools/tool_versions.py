@@ -31,9 +31,9 @@ APP_TOOLS = {
 
     # utility:    
     "merge-annotation":         [ "GTF.awk" ],
-    "prep-rsem":                [ "RSEM" ], 
-    "prep-star":                [ "STAR" ], 
-    "prep-tophat":              [ "TopHat", "bowtie2" ], 
+    "prep-rsem":                [ "lrna-index-rsem.sh", "RSEM" ], 
+    "prep-star":                [ "lrna-index-star.sh", "STAR" ], 
+    "prep-tophat":              [ "lrna-index-tophat.sh", "TopHat", "bowtie2" ], 
     }
 # Virtual apps only differ from their parent by name/version. 
 VIRTUAL_APPS = {
@@ -58,7 +58,7 @@ ALL_TOOLS = {
             "MAD.R":                     "grep version /usr/bin/MAD.R | awk '{print $3}'",
             "extract_gene_ids.awk":      "grep version /usr/bin/extract_gene_ids.awk | awk '{print $3}'",
             "sum_srna_expression.awk":   "grep version /usr/bin/sum_srna_expression.awk | awk '{print $3}'",
-            "RSEM":                      "rsem-calculate-expression --version | awk '{print $4}'",
+            "RSEM":                      "rsem-calculate-expression --version | awk '{print $5}'",
             "samtools":                  "samtools 2>&1 | grep Version | awk '{print $2}'",
             "STAR":                      "STAR --version | awk '{print $1}' | cut -d _ -f 2-",
             "TopHat":                    "tophat -v | awk '{print $2}'",
@@ -71,6 +71,9 @@ ALL_TOOLS = {
             "lrna-bam-to-stranded-signals.sh":   "lrna-bam-to-stranded-signals.sh | grep usage | awk '{print $2}' | tr -d :",
             "lrna-bam-to-unstranded-signals.sh": "lrna-bam-to-unstranded-signals.sh | grep usage | awk '{print $2}' | tr -d :",
             "lrna-rsem-quantification.sh":       "lrna-rsem-quantification.sh | grep usage | awk '{print $2}' | tr -d :",
+            "lrna-index-rsem.sh":                "lrna-index-rsem.sh | grep usage | awk '{print $2}' | tr -d :",
+            "lrna-index-star.sh":                "lrna-index-star.sh | grep usage | awk '{print $2}' | tr -d :",
+            "lrna-index-tophat.sh":              "lrna-index-tophat.sh | grep usage | awk '{print $2}' | tr -d :",
             "ram-align-star-pe.sh":     "ram-align-star-pe.sh | grep usage | awk '{print $2}' | tr -d :",
             "ram-signal.sh":            "ram-signal.sh | grep usage | awk '{print $2}' | tr -d :",
             "ram-peaks.sh":             "ram-peaks.sh | grep usage | awk '{print $2}' | tr -d :",

@@ -23,12 +23,12 @@ main() {
     ref_root=${ref_root%.fa.gz}
     dx download "$ref_genome" -o ${ref_root}.fa.gz
 
-    annotation_root=`dx describe "$annotations" --name`
-    annotation_root=${annotation_root%.gtf.gz}
-    dx download "$annotations" -o ${annotation_root}.gtf.gz
+    anno_root=`dx describe "$annotations" --name`
+    anno_root=${anno_root%.gtf.gz}
+    dx download "$annotations" -o ${anno_root}.gtf.gz
 
     echo "* Reference file: '${ref_root}.fa.gz'"
-    echo "* Annotation file: '${annotation_root}.gtf.gz'"
+    echo "* Annotation file: '${anno_root}.gtf.gz'"
     
     # hg19/mm10 and male/female?
     if [ -f /usr/bin/parse_property.py ]; then
@@ -37,11 +37,11 @@ main() {
         anno=`parse_property.py -f "$annotations" -p annotation`
     fi
     if [ "$genome" == "" ]; then
-        if [[ $genome_root == *"hg19"* ]]; then
+        if [[ $ref_root == *"hg19"* ]]; then
             genome="hg19"
-        elif [[ $genome_root == *"GRCh38"* ]]; then
+        elif [[ $ref_root == *"GRCh38"* ]]; then
             genome="GRCh38"
-        elif [[ $genome_root == *"mm10"* ]]; then
+        elif [[ $ref_root == *"mm10"* ]]; then
             genome="mm10"
         fi
     fi
@@ -52,9 +52,9 @@ main() {
         echo "* genome: '$genome'" 
     fi
     if [ "$gender" == "" ]; then
-        if [[ $genome_root == *"female"* ]] || [[ $genome_root == *"XX"* ]]; then
+        if [[ $ref_root == *"female"* ]] || [[ $ref_root == *"XX"* ]]; then
             gender="XX"
-        elif [[ $genome_root == *"male"* ]] || [[ $genome_root == *"XY"* ]]; then
+        elif [[ $ref_root == *"male"* ]] || [[ $ref_root == *"XY"* ]]; then
             gender="XY"
         fi
     fi
@@ -62,16 +62,16 @@ main() {
         echo "* gender: '$gender'" 
     fi
     if [ "$anno" == "" ]; then
-        if [[ $annotation_root == *"v19"* ]] || [[ $annotation_root == *"V19"* ]]; then
+        if [[ $anno_root == *"v19"* ]] || [[ $anno_root == *"V19"* ]]; then
             anno="v19"
             echo "* WARNING annotation version: '$anno'" 
-        elif [[ $annotation_root == *"v24"* ]] || [[ $annotation_root == *"V24"* ]]; then
+        elif [[ $anno_root == *"v24"* ]] || [[ $anno_root == *"V24"* ]]; then
             anno="v24"
-        elif [[ $annotation_root == *"M4"* ]]; then
+        elif [[ $anno_root == *"M4"* ]]; then
             anno="M4"
-        elif [[ $annotation_root == *"M3"* ]]; then
+        elif [[ $anno_root == *"M3"* ]]; then
             anno="M3"
-        elif [[ $annotation_root == *"M2"* ]]; then
+        elif [[ $anno_root == *"M2"* ]]; then
             anno="M2"
         fi
     fi
@@ -87,7 +87,7 @@ main() {
     # DX/ENCODE independent script is found in resources/usr/bin
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    srna-index.sh ${ref_root}.fa.gz ${annotation_root}.gtf.gz $anno $genome $gender
+    srna-index.sh ${ref_root}.fa.gz ${anno_root}.gtf.gz $anno $genome $gender
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
     archive_root="${genome}_${anno}_sRNA_starIndex"

@@ -57,7 +57,6 @@ main() {
 
     echo "* Downloading star index archive..."
     dx download "$star_index" -o star_index.tgz
-    # unzips into "out/"
 
     # DX/ENCODE independent script is found in resources/usr/bin
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
