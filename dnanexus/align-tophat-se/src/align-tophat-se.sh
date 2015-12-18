@@ -56,7 +56,7 @@ main() {
         fi
     fi
 
-    echo "* Downloading and extracting TopHat index archive..."
+    echo "* Downloading TopHat index archive..."
     dx download "$tophat_index" -o tophat_index.tgz
   
     # DX/ENCODE independent script is found in resources/usr/bin
