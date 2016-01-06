@@ -42,7 +42,7 @@ main() {
     # DX/ENCODE independent script is found in resources/usr/bin
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    lrna-rsem-quantification.sh rsem_index.tgz ${bam_root}.bam $paired_end $rnd_seed $nthreads
+    lrna_rsem_quantification.sh rsem_index.tgz ${bam_root}.bam $paired_end $rnd_seed $nthreads
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
 

@@ -90,7 +90,7 @@ main() {
     # DX/ENCODE independent script is found in resources/usr/bin
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    lrna-align-star-pe.sh star_index.tgz ${reads1_root}.fq.gz ${reads2_root}.fq.gz "$library_id" $nthreads $bam_root
+    lrna_align_star_pe.sh star_index.tgz ${reads1_root}.fq.gz ${reads2_root}.fq.gz "$library_id" $nthreads $bam_root
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
     bam_root="${bam_root}_star"

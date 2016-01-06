@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 if [ $# -ne 5 ]; then
-    echo "usage v1: srna-align.sh <star_index.tgz> <reads.fq.gz> <library_id> <ncpus> <bam_root>"
+    echo "usage v1: srna_align.sh <star_index.tgz> <reads.fq.gz> <library_id> <ncpus> <bam_root>"
     echo "Align single-end short-RNA-seq reads with STAR.  Is independent of DX and encodeD."
     exit -1; 
 fi

@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 if [ $# -lt 4 ] || [ $# -gt 5 ]; then
-    echo "usage v1: srna-index.sh <ref_fasta_gz> <annotation_gtf_gz> <annotation_version> <genome> [<gender>]"
+    echo "usage v1: srna_index.sh <ref_fasta_gz> <annotation_gtf_gz> <annotation_version> <genome> [<gender>]"
     echo "Creates STAR index of reference genome and annotation for small-RNA-seq. Is independent of DX and encodeD."
     exit -1; 
 fi

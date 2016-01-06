@@ -1,9 +1,9 @@
 {
   "name": "align-tophat-pe",
-  "title": "TopHat align - pe (v1.0.6)",
+  "title": "TopHat align - pe (v1.0.7)",
   "summary": "Align paired-end (stranded) reads to genome and transcriptome using tophat for the ENCODE long-rna-peq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "authorizedUsers": [],
   "inputSpec": [
     {

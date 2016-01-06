@@ -89,7 +89,7 @@ main() {
     # DX/ENCODE independent script is found in resources/usr/bin
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    lrna-index-rsem.sh ${ref_root}.fa.gz ${spike_root}.fa.gz ${anno_root}.gtf.gz $anno $genome $gender
+    lrna_index_rsem.sh ${ref_root}.fa.gz ${spike_root}.fa.gz ${anno_root}.gtf.gz $anno $genome $gender
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
     archive_file="${genome}_${anno}_${spike_root}_rsemIndex.tgz"

@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 if [ $# -ne 4 ]; then
-    echo "usage v1: ram-idr.sh <peaks_a_bed> <peaks_b_bed> <chrom_sizes> <idr_root>"
+    echo "usage v1: rampage_idr.sh <peaks_a_bed> <peaks_b_bed> <chrom_sizes> <idr_root>"
     echo "Compares two sets of peaks and generates an Irreproducible Discovery Rate report. Is independent of DX and encodeD."
     exit -1; 
 fi

@@ -1,9 +1,9 @@
 {
   "name": "small-rna-prep-star",
-  "title": "STAR genome indexing - small-RNA-seq (v2.0.2)",
+  "title": "STAR genome indexing - small-RNA-seq (v2.0.3)",
   "summary": "Prepare reference genome index for STAR used in the ENCODE small-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "authorizedUsers": [],
   "inputSpec": [
     {

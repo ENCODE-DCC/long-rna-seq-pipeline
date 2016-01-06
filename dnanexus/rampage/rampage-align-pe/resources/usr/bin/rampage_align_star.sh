@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 if [ $# -ne 6 ]; then
-    echo "usage v1: ram-align-star-pe.sh <star_index.tgz> <read1.fq.gz> <read2.fq.gz> <library_id> <ncpus> <bam_root>"
+    echo "usage v1: rampage_align_star.sh <star_index.tgz> <read1.fq.gz> <read2.fq.gz> <library_id> <ncpus> <bam_root>"
     echo "Align paired-end reads with STAR for Rampage.  Is independent of DX and encodeD."
     exit -1; 
 fi

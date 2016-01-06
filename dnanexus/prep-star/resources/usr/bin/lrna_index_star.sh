@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 if [ $# -lt 5 ] || [ $# -gt 6 ]; then
-    echo "usage v1: lrna-index-star.sh <ref_fasta_gz> <spike_in_fasta_gz> <annotation_gtf_gz> <annotation_version> <genome> [<gender>]"
+    echo "usage v1: lrna_index_star.sh <ref_fasta_gz> <spike_in_fasta_gz> <annotation_gtf_gz> <annotation_version> <genome> [<gender>]"
     echo "Creates STAR index of reference genome, annotation and spike-ins for long-RNA-seq. Is independent of DX and encodeD."
     exit -1; 
 fi

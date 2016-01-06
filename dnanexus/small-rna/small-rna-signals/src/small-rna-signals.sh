@@ -29,7 +29,7 @@ main() {
     # DX/ENCODE independent script is found in resources/usr/bin
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    srna-signals.sh ${bam_root}.bam chrom.sizes
+    srna_signals.sh ${bam_root}.bam chrom.sizes
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
 

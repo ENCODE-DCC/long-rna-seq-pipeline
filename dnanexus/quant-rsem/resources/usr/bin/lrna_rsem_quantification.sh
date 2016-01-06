@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 if [ $# -ne 5 ]; then
-    echo "usage v1: lrna-rsem-quantification.sh <rsem_index.tgz> <anno_bam> <paired_end> <rnd_seed> <ncpus>"
+    echo "usage v1: lrna_rsem_quantification.sh <rsem_index.tgz> <anno_bam> <paired_end> <rnd_seed> <ncpus>"
     echo "Align single-end reads with STAR.  Is independent of DX and encodeD."
     exit -1; 
 fi

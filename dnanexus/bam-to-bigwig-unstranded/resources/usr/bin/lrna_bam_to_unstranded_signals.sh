@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 if [ $# -ne 2 ]; then
-    echo "usage v1: lrna-bam-to-unstranded-signals.sh <bam_file> <chrom_sizes>"
+    echo "usage v1: lrna_bam_to_unstranded_signals.sh <bam_file> <chrom_sizes>"
     echo "Converts BAMs from alignments from unstranded libraries to bigwig format. Is independent of DX and encodeD."
     exit -1; 
 fi

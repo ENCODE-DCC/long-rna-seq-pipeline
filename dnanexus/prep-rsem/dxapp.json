@@ -1,9 +1,9 @@
 {
   "name": "prep-rsem",
-  "title": "RSEM genome indexing (v1.0.5)",
+  "title": "RSEM genome indexing (v1.0.6)",
   "summary": "Prepare reference genome and transcriptome indexes for RSEM used in the ENCODE long-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "authorizedUsers": [],
   "inputSpec": [
     {

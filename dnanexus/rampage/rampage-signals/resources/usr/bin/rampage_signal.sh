@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 if [ $# -ne 2 ]; then
-    echo "usage v1: ram-signal.sh <bam_file> <chrom_sizes>"
+    echo "usage v1: rampage_signal.sh <bam_file> <chrom_sizes>"
     echo "Converts BAMs from rampage alignments to signal files: *._rampage_5p.bw. Is independent of DX and encodeD."
     exit -1; 
 fi

@@ -62,7 +62,7 @@ main() {
     # DX/ENCODE independent script is found in resources/usr/bin
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    ram-idr.sh $peaks_a_file $peaks_b_file chrom.sizes $idr_root
+    rampage_idr.sh $peaks_a_file $peaks_b_file chrom.sizes $idr_root
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
     idr_root=${idr_root}_rampage_idr

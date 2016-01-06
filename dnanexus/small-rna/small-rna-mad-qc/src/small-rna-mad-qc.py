@@ -59,7 +59,7 @@ def main(quants_a, quants_b, annotations):
     
     # DX/ENCODE independent script is found in resources/usr/bin
     print "* ===== Calling DNAnexus and ENCODE independent script... ====="
-    subprocess.check_call(['srna-mad-qc.sh','annotations.gtf.gz','quants_a.tsv','quants_b.tsv',out_root])
+    subprocess.check_call(['srna_mad_qc.sh','annotations.gtf.gz','quants_a.tsv','quants_b.tsv',out_root])
     print "* ===== Returned from dnanexus and encodeD independent script ====="
     mad_plot_file = out_root + '_mad_plot.png'
     mad_qc_file = out_root + '_mad_qc.txt'

@@ -48,7 +48,7 @@ main() {
     # DX/ENCODE independent script is found in resources/usr/bin
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    ram-peaks.sh ${bam_root}.bam ${control_root}.bam ${annotation_root}.gtf.gz chrom.sizes $nthreads 
+    rampage_peaks.sh ${bam_root}.bam ${control_root}.bam ${annotation_root}.gtf.gz chrom.sizes $nthreads 
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
     peaks_root=${bam_root}_rampage_peaks

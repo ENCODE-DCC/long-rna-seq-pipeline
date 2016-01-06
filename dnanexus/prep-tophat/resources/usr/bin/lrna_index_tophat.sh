@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 if [ $# -lt 6 ] || [ $# -gt 7 ]; then
-    echo "usage v1: lrna-index-tophat.sh <ref_fasta_gz> <spike_in_fasta_gz> <annotation_gtf_gz> <tiny_fq_gz> <annotation_version> <genome> [<gender>]"
+    echo "usage v1: lrna_index_tophat.sh <ref_fasta_gz> <spike_in_fasta_gz> <annotation_gtf_gz> <tiny_fq_gz> <annotation_version> <genome> [<gender>]"
     echo "Creates TopHat index of reference genome, annotation and spike-ins for long-RNA-seq. Is independent of DX and encodeD."
     exit -1; 
 fi

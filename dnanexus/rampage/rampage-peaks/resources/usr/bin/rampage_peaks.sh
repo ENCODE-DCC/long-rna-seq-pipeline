@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 if [ $# -ne 5 ]; then
-    echo "usage v1: ram-peaks.sh <rampage_bam> <control_bam> <annotation_gtf_gz> <chrom_sizes> <ncpus>"
+    echo "usage v1: rampage_peaks.sh <rampage_bam> <control_bam> <annotation_gtf_gz> <chrom_sizes> <ncpus>"
     echo "Generages Rampage Peaks from marked bam, producing files: *._rampage_peaks.bed/.bb. Is independent of DX and encodeD."
     exit -1; 
 fi
