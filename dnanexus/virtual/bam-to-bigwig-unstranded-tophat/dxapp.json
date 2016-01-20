@@ -1,9 +1,9 @@
 {
   "name": "bam-to-bigwig-unstranded-tophat",
-  "title": "bam to unstranded signals - TopHat (virtual-2.0.4)",
+  "title": "bam to unstranded signals - TopHat (virtual-2.1.0)",
   "summary": "Converts BAMs from alignments from unstranded libraries to bigwig format",
   "dxapi": "1.0.0",
-  "version": "2.0.4",
+  "version": "2.1.0",
   "authorizedUsers": [],
   "inputSpec": [
     {

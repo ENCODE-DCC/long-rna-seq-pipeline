@@ -90,19 +90,16 @@ main() {
     srna_index.sh ${ref_root}.fa.gz ${anno_root}.gtf.gz $anno $genome $gender
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
-    archive_root="${genome}_${anno}_sRNA_starIndex"
+    archive_file="${genome}_${anno}_sRNA_starIndex.tgz"
     if [ "$gender" == "famale" ] || [ "$gender" == "male" ] || [ "$gender" == "XX" ] || [ "$gender" == "XY" ]; then
-        archive_root="${genome}_${gender}_${anno}_sRNA_starIndex"
+        archive_file="${genome}_${gender}_${anno}_sRNA_starIndex.tgz"
     fi
     gene_id_root="${genome}_${anno}_gene_ids"
 
     echo "Upload results..."
-    star_index=$(dx upload ${archive_root}.tgz --property genome="$genome"   --property gender="$gender" \
-                                               --property annotation="$anno" --property SW="$versions" --brief)
-    star_genes=$(dx upload ${gene_id_root}.txt --property genome="$genome"  --property annotation="$anno" \
-                                                                            --property SW="$versions" --brief)
+    star_index=$(dx upload $archive_file --property genome="$genome"   --property gender="$gender" \
+                                         --property annotation="$anno" --property SW="$versions" --brief)
     dx-jobutil-add-output star_index $star_index --class=file
-    dx-jobutil-add-output star_genes $star_genes --class=file
 
     echo "* Finished."
 }

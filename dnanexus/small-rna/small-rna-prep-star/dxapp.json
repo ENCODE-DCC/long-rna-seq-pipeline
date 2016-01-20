@@ -1,9 +1,9 @@
 {
   "name": "small-rna-prep-star",
-  "title": "STAR genome indexing - small-RNA-seq (v2.0.3)",
+  "title": "STAR genome indexing - small-RNA-seq (v2.1.0)",
   "summary": "Prepare reference genome index for STAR used in the ENCODE small-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "2.0.3",
+  "version": "2.1.0",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -48,12 +48,6 @@
       "label": "Reference files indexed for STAR",
       "class": "file",
       "patterns": ["*_sRNA_starIndex.tgz"]
-    },
-    {
-      "name": "star_genes",
-      "label": "Text file list of gene ids",
-      "class": "file",
-      "patterns": ["*_gene_ids.txt"]
     }
   ],
   "runSpec": {

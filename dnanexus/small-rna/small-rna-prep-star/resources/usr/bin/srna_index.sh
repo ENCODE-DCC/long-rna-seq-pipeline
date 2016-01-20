@@ -15,10 +15,9 @@ fi
 
 archive_file="${genome}_${anno}_sRNA_starIndex.tgz"
 if [ "$gender" == "famale" ] || [ "$gender" == "male" ] || [ "$gender" == "XX" ] || [ "$gender" == "XY" ]; then
-    archive_root="${genome}_${gender}_${anno}_sRNA_starIndex.tgz"
+    archive_file="${genome}_${gender}_${anno}_sRNA_starIndex.tgz"
 fi
-gene_id_file="${genome}_${anno}_gene_ids.txt"
-echo "-- Results will be: '${archive_file}' and '${gene_id_file}'."
+echo "-- Results will be: '${archive_file}'."
 
 echo "-- Unzipping reference files..."
 ref_fasta=${ref_fasta_gz%.gz}
@@ -35,12 +34,6 @@ STAR --runMode genomeGenerate --genomeFastaFiles $ref_fasta --sjdbGTFfile $anno_
         --sjdbOverhang 1 --runThreadN 8 --genomeDir out/ --outFileNamePrefix out
 set +x
     
-echo "-- Build gene ID file from the annotation for later use..."
-# Create a geneID file and put it in the index archive for later use:
-set -x
-gawk -f extract_gene_ids.awk $anno_gtf out=${gene_id_file}
-set +x
-
 # Attempt to make bamCommentLines.txt, which should be reviewed. NOTE tabs handled by assignment.
 echo "-- Create bam header..."
 set -x

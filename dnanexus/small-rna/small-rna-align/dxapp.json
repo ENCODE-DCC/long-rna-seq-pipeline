@@ -1,9 +1,9 @@
 {
   "name": "small-rna-align",
-  "title": "STAR align - small-RNA-seq (v2.0.3)",
+  "title": "STAR align - small-RNA-seq (v2.1.0)",
   "summary": "Align single-end (stranded) reads to genome using STAR for the ENCODE small-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "2.0.3",
+  "version": "2.1.0",
   "authorizedUsers": [],
   "inputSpec": [
     {

@@ -1,9 +1,9 @@
 {
   "name": "bam-to-bigwig-stranded",
-  "title": "bam to stranded signals (v2.0.4)",
+  "title": "bam to stranded signals (v2.1.0)",
   "summary": "Converts BAMs from alignments from stranded libraries to bigwig format",
   "dxapi": "1.0.0",
-  "version": "2.0.4",
+  "version": "2.1.0",
   "authorizedUsers": [],
   "inputSpec": [
     {
