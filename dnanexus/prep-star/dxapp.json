@@ -1,9 +1,9 @@
 {
   "name": "prep-star",
-  "title": "STAR genome indexing (v2.0.5)",
+  "title": "STAR genome indexing (v2.1.0)",
   "summary": "Prepare reference genome and transcriptome indexes for STAR used in the ENCODE long-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "2.0.5",
+  "version": "2.1.0",
   "authorizedUsers": [],
   "inputSpec": [
     {
