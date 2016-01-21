@@ -177,7 +177,7 @@ class LrnaLaunch(Launch):
         # TODO: should use ACCESSION based fileNames
         "tophat_index":  {
                         "GRCh38": {
-                                "female":   {"v24": "GRCh38_v24_tRNAs_ERCC_phiX_tophatIndex.tgz"},
+                                "female":   {"v24": "GRCh38_v24pri_tRNAs_ERCC_phiX_tophatIndex.tgz"},
                                 "male":     {"v24": "GRCh38_v24pri_tRNAs_ERCC_phiX_tophatIndex.tgz"}
                                 },
                         "hg19": {
