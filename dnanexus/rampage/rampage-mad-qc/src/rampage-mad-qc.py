@@ -64,7 +64,7 @@ def main(quants_a, quants_b):
     props["SW"] = sw_versions
 
     print "* Upload Plot..."
-    plot_dxfile = dxpy.upload_local_file(out_plot_file,properties=props,details=qc_metrics)
+    plot_dxfile = dxpy.upload_local_file(mad_plot_file,properties=props,details=qc_metrics)
     
     return { "metadata": meta_string, "mad_plot": plot_dxfile }
 
