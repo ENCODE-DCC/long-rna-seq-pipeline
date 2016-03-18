@@ -47,8 +47,9 @@ set +x
  
 echo "-- Converting bed to bigBed..."
 set -x
-grep "^chr" ${peaks_root}.bed | sort -k1,1 -k2,2n > peaks_polished.bed
+grep "^chr" ${peaks_root}.bed | grep -v "^chrphiX" | sort -k1,1 -k2,2n > peaks_polished.bed
 bedToBigBed peaks_polished.bed -type=bed6+ -as=/usr/bin/tss_peak.as $chrom_sizes ${peaks_root}.bb
+mv peaks_polished.bed ${peaks_root}.bed # NEcessary to avoid validation error
 set +x
 
 echo "-- Compressing bed and gff..."
