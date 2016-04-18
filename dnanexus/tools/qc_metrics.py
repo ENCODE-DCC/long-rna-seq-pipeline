@@ -274,7 +274,7 @@ def read_samstats(filePath,verbose=False):
 
 def read_idr(filePath,verbose=False):
     '''
-    SPECIAL CASE for phantompeakqualtools spp. 
+    SPECIAL CASE for NBoley's IDR summary. 
     '''
     pairs = {}
 
