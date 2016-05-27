@@ -45,11 +45,11 @@ call_peaks --rampage-reads $rampage_bam --rnaseq-reads $control_bam --threads $n
            --annotation-quantifications-ofname ${peaks_root}_quant.tsv
 set +x
  
-#echo "-- Removing 'chrphiX' from bed..."
-#set -x
-#grep -v "^track" ${peaks_root}.bed | grep -v "^chrphiX" | sort -k1,1 -k2,2n > peaks.bed
-#mv peaks.bed ${peaks_root}.bed # Necessary to avoid validation error
-#set +x
+echo "-- Removing 'chrphiX' from bed..."
+set -x
+grep -v "^track" ${peaks_root}.bed | sort -k1,1 -k2,2n > peaks.bed
+mv peaks.bed ${peaks_root}.bed # Necessary to avoid validation error
+set +x
 
 echo "-- Converting bed to bigBed..."
 set -x
