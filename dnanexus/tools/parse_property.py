@@ -168,6 +168,8 @@ def folder_create_root(folder,verbose=False):
     exp = ''
     rep = ''
     for one_folder in reversed(folders):
+        if one_folder.count(' ') > 0:
+            continue
         if rep == '' and one_folder.startswith('rep'):
             rep = one_folder
         elif exp == '' and one_folder.startswith('ENCSR'):
