@@ -1,9 +1,9 @@
 {
   "name": "rampage-peaks",
-  "title": "Call Rampage peaks (v2.2.1)",
+  "title": "Call Rampage/Cage peaks (v2.2.2)",
   "summary": "Uses genome BAM marked for Rampage to calls peaks and produce 5' signals",
   "dxapi": "1.0.0",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -11,7 +11,7 @@
       "label": "Input BAM file marked for Rampage",
       "class": "file",
       "optional": false,
-      "patterns": ["*_rampage_star_marked.bam"]
+      "patterns": ["*_star_marked.bam"]
     },
     {
       "name": "control_bam",
@@ -35,6 +35,14 @@
       "patterns": ["*chrom.sizes","*.txt"]
     },
     {
+      "name": "assay_type",
+      "label": "'rampage' or 'cage' experiment (default is 'rampage')",
+      "class": "string",
+      "choices": [ "rampage", "cage" ],
+      "default": "rampage",
+      "optional": true
+    },
+    {
       "name": "nthreads",
       "label": "Number of threads to use",
       "class": "int",
@@ -47,25 +55,25 @@
       "name": "rampage_peaks_bed",
       "label": "Gzipped bed file of rampage called peaks",
       "class": "file",
-      "patterns": ["*_rampage_peaks.bed.gz"]
+      "patterns": ["*_peaks.bed.gz"]
     },
     {
       "name": "rampage_peaks_bb",
       "label": "BigBed file of rampage called peaks",
       "class": "file",
-      "patterns": ["*_rampage_peaks.bb"]
+      "patterns": ["*_peaks.bb"]
     },
     {
       "name": "rampage_peaks_gff",
       "label": "Gzipped gff file of rampage called peaks",
       "class": "file",
-      "patterns": ["*_rampage_peaks.gff.gz"]
+      "patterns": ["*_peaks.gff.gz"]
     },
     {
       "name": "rampage_peak_quants",
       "label": "TSV file of rampage peak quantifications",
       "class": "file",
-      "patterns": ["*_rampage_peaks_quants.tsv"]
+      "patterns": ["*_peaks_quants.tsv"]
     }
   ],
   "runSpec": {

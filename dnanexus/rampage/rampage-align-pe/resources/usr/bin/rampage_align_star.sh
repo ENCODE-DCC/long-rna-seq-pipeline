@@ -1,16 +1,23 @@
 #!/bin/bash -e
 
-if [ $# -ne 6 ]; then
-    echo "usage v1: rampage_align_star.sh <star_index.tgz> <read1.fq.gz> <read2.fq.gz> <library_id> <ncpus> <bam_root>"
+if [ $# -lt 5 ] || [ $# -gt 6 ]; then
+    echo "usage v1: rampage_align_star.sh <star_index.tgz> <read1.fq.gz> [<read2.fq.gz>] <library_id> <ncpus> <bam_root>"
     echo "Align paired-end reads with STAR for Rampage.  Is independent of DX and encodeD."
     exit -1; 
 fi
 star_index_tgz=$1  # STAR Index archive.
 read1_fq_gz=$2     # gzipped fastq of of paired-end read1.
-read2_fq_gz=$3     # gzipped fastq of of paired-end read2.
-library_id=$4      # Library identifier which will be added to bam header.
-ncpus=$5            # Number of cpus available.
-bam_root="$6_rampage_star" # root name for output bam (e.g. "out_bam" will create "out_bam_rampage_star_marked.bam") 
+if [ $# -eq 6 ]; then
+    read2_fq_gz=$3     # gzipped fastq of of paired-end read2.
+    library_id=$4      # Library identifier which will be added to bam header.
+    ncpus=$5           # Number of cpus available.
+    bam_root=$6        # root name for output bam (e.g. "alignment" will create "alignment_marked.bam")
+elif [ $# -eq 5 ]; then 
+    read2_fq_gz=""     # single-end has only read1
+    library_id=$3
+    ncpus=$4
+    bam_root=$5
+fi
 
 echo "-- Alignments file will be: '${bam_root}_marked.bam'"
 

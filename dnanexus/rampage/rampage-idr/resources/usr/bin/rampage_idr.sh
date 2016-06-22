@@ -8,7 +8,7 @@ fi
 peaks_a_bed=$1  # Rampage dumplicates marked bam file.
 peaks_b_bed=$2  # long-RNA-seq control bam file.
 chrom_sizes=$3  # chrom_sizes file that matches the genome used to create bam_root.
-idr_root="${4}_rampage_idr" # root name for output bb and png files (e.g. "out" will create "out_rampage_idr.bb" and "out_rampage_idr.png") 
+idr_root="$4"   # root name for output bb and png files (e.g. "out" will create "out.bb" and "out.png") 
 
 peaks_a_file=$peaks_a_bed
 if [[ "$peaks_a_file" == *.gz ]]; then

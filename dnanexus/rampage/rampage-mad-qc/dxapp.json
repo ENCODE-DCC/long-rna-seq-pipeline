@@ -1,9 +1,9 @@
 {
   "name": "rampage-mad-qc",
-  "title": "Mean Absolute Deviation QC metrics (v1.1.0)",
+  "title": "Mean Absolute Deviation QC metrics (v1.1.1)",
   "summary": "Compares two quantifications and calculates Mean Absolute Deviation",
   "dxapi": "1.0.0",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "categories": [
     "ENCODE"
   ],
@@ -12,14 +12,14 @@
       "name": "quants_a",
       "label": "Quantification file from one rep",
       "class": "file",
-      "patterns": ["*_rampage_peaks_quant.tsv","*.tsv"],
+      "patterns": ["*_peaks_quant.tsv","*.tsv"],
       "optional": false
     },
     {
       "name": "quants_b",
       "label": "Quantification file from another rep",
       "class": "file",
-      "patterns": ["*_rampage_peaks_quant.tsv","*.tsv"],
+      "patterns": ["*_peaks_quant.tsv","*.tsv"],
       "optional": false
     }
   ],

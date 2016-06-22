@@ -8,16 +8,19 @@ def divide_on_common(str_a,str_b):
     '''Divides each string into [common_prefix,variable_middle,common_ending] and returns as set (parts_a,parts_b).'''
     parts_a = ['','','']
     parts_b = ['','','']
+    # The common parts at the start of the 2 strings
     while len(str_a) > 0 and len(str_a) > 0 and str_a[0] == str_b[0]:
         parts_a[0] += str_a[0]
         parts_b[0] += str_b[0]
         str_a = str_a[1:]
         str_b = str_b[1:]
+    # The common parts at the end of the 2 strings
     while len(str_a) > 0 and len(str_a) > 0 and str_a[-1] == str_b[-1]:
         parts_a[2] = str_a[-1] + parts_a[2]
         parts_b[2] = str_b[-1] + parts_b[2]
         str_a = str_a[:-1]
         str_b = str_b[:-1]
+    # These are the different parts in the middle of the 2 strings
     parts_a[1] = str_a
     parts_b[1] = str_b
     return (parts_a,parts_b)
@@ -43,21 +46,28 @@ def main(quants_a, quants_b):
     dxfile_b = dxpy.DXFile(quants_b)
 
     print "* Downloading files..."
-    dxpy.download_dxfile(dxfile_a.get_id(), "quants_a")
-    dxpy.download_dxfile(dxfile_b.get_id(), "quants_b")
+    dxpy.download_dxfile(dxfile_a.get_id(), "quants_a.tsv")
+    dxpy.download_dxfile(dxfile_b.get_id(), "quants_b.tsv")
 
     # Create and appropriate name for output files
     out_root = root_name_from_pair(dxfile_a.name.split('.')[0],dxfile_b.name.split('.')[0])
-    mad_plot_file = out_root + '_mad_plot.png'
+    out_root += '_mad'
+    mad_plot_file = out_root + '_plot.png'
         
     # DX/ENCODE independent script is found in resources/usr/bin
     print "* Runnning MAD.R..."
-    mad_output = subprocess.check_output(['Rscript', '/usr/bin/MAD.R', 'quants_a', 'quants_b'])
-    subprocess.check_call(['mv', "MAplot.png", mad_plot_file ])
+    subprocess.check_call(["ls","-l"])
+    #mad_output = subprocess.check_output(['Rscript', '/usr/bin/MAD.R', 'quants_a.tsv', 'quants_b.tsv'])
+    #subprocess.check_call(['mv', "MAplot.png", mad_plot_file ])
+    subprocess.check_call(['rampage_mad_qc.sh', 'quants_a.tsv', 'quants_b.tsv', out_root ])
+    mad_json_file = out_root + '.json'
     
     print "* package properties..."
     qc_metrics = {}
-    qc_metrics["MAD.R"] = json.loads(mad_output)
+    #qc_metrics["MAD.R"] = json.loads(mad_output)
+    fileH = open(mad_json_file, 'r')
+    qc_metrics["MAD.R"] = json.load(fileH)
+    fileH.close()
     meta_string = json.dumps(qc_metrics)
     print json.dumps(qc_metrics,indent=4)
     props = {}

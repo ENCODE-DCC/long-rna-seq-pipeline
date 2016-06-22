@@ -21,19 +21,22 @@ main() {
     echo "* Download files..."
     bam_root=`dx describe "$rampage_marked_bam" --name`
     bam_root=${bam_root%.bam}
-    bam_root=${bam_root%_rampage_star_marked}
+    bam_root=${bam_root%_star_marked}
+    assay_type=${bam_root##*_}
+    bam_root=${bam_root%_rampage}
+    bam_root=${bam_root%_cage}
     dx download "$rampage_marked_bam" -o "$bam_root".bam
     echo "* Bam file: '${bam_root}.bam'"
 
     dx download "$chrom_sizes" -o chrom.sizes
     
     # DX/ENCODE independent script is found in resources/usr/bin
+    signal_root=${bam_root}_${assay_type}_5p
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    rampage_signal.sh ${bam_root}.bam chrom.sizes 
+    rampage_signal.sh ${bam_root}.bam chrom.sizes $signal_root 
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
-    signal_root=${bam_root}_rampage_5p
 
     echo "* Upload results..."
     all_minus_bw=$(dx upload ${signal_root}_minusAll.bw     --property SW="$versions" --brief)

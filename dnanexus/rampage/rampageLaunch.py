@@ -41,11 +41,19 @@ class RampageLaunch(Launch):
          "REP": {
                 "ORDER": [ "rampage-align-pe", "rampage-signals", "rampage-peaks" ],
                 "STEPS": {
+                            "rampage-align-se": {
+                                "app":     "rampage-align-pe",
+                                "params":  { "library_id": "library_id", "assay_type": "assay_type", "nthreads": "nthreads" },
+                                "inputs":  { "reads1":     "reads",
+                                             "star_index": "star_index" },
+                                "results": { "rampage_marked_bam": "rampage_marked_bam", 
+                                             "rampage_star_log": "rampage_star_log" }
+                            },
                             "rampage-align-pe": {
                                 "app":     "rampage-align-pe",
-                                "params":  { "library_id": "library_id", "nthreads": "nthreads" },
-                                "inputs":  { "reads1":       "reads1",
-                                             "reads2":       "reads2",
+                                "params":  { "library_id": "library_id", "assay_type": "assay_type", "nthreads": "nthreads" },
+                                "inputs":  { "reads1":     "reads1",
+                                             "reads2":     "reads2",
                                              "star_index": "star_index" },
                                 "results": { "rampage_marked_bam": "rampage_marked_bam", 
                                              "rampage_star_log": "rampage_star_log" }
@@ -62,7 +70,7 @@ class RampageLaunch(Launch):
                             },
                             "rampage-peaks": {
                                 "app":     "rampage-peaks",
-                                "params":  { "nthreads": "nthreads" },
+                                "params":  { "assay_type": "assay_type", "nthreads": "nthreads" },
                                 "inputs":  { "control_bam": "control_bam", 
                                              "gene_annotation": "gene_annotation", 
                                              "chrom_sizes": "chrom_sizes",
@@ -99,28 +107,28 @@ class RampageLaunch(Launch):
     }
 
     FILE_GLOBS = {
-        "all_plus_bw":        "/*_rampage_5p_plusAll.bw",
-        "rampage_marked_bam": "/*_rampage_star_marked.bam",
-        "all_minus_bg":       "/*_rampage_5p_minusAll.bg",
-        "unique_plus_bg":     "/*_rampage_5p_plusUniq.bg",
-        "rampage_peaks_bed":  "/*_rampage_peaks.bed.gz",
-        "rampage_peaks_bb":   "/*_rampage_peaks.bb",
-        "rampage_peaks_gff":  "/*_rampage_peaks.gff.gz",
-        "rampage_peak_quants":"/*_rampage_peaks_quant.tsv",
-        "peaks_a":            "/*_rampage_peaks.bed.gz",
-        "peaks_b":            "/*_rampage_peaks.bed.gz",
-        "quants_a":           "/*_rampage_peaks_quant.tsv",
-        "quants_b":           "/*_rampage_peaks_quant.tsv",
-        "all_plus_bg":        "/*_rampage_5p_plusAll.bg",
-        "rampage_star_log":   "/*_rampage_star_Log.final.out",
-        "all_minus_bw":       "/*_rampage_5p_minusAll.bw",
-        "unique_plus_bw":     "/*_rampage_5p_plusUniq.bw",
-        "unique_minus_bg":    "/*_rampage_5p_minusUniq.bg",
-        "unique_minus_bw":    "/*_rampage_5p_minusUniq.bw",
-        "rampage_idr_bed":    "/*_rampage_idr.bed.gz",
-        "rampage_idr_bb":     "/*_rampage_idr.bb",
-        "rampage_idr_png":    "/*_rampage_idr.png",
-        "mad_plot":           "/*_rampage_mad_plot.png",
+        "all_plus_bw":        "/*_5p_plusAll.bw",
+        "rampage_marked_bam": "/*_star_marked.bam",
+        "all_minus_bg":       "/*_5p_minusAll.bg",
+        "unique_plus_bg":     "/*_5p_plusUniq.bg",
+        "rampage_peaks_bed":  "/*_peaks.bed.gz",
+        "rampage_peaks_bb":   "/*_peaks.bb",
+        "rampage_peaks_gff":  "/*_peaks.gff.gz",
+        "rampage_peak_quants":"/*_peaks_quant.tsv",
+        "peaks_a":            "/*_peaks.bed.gz",
+        "peaks_b":            "/*_peaks.bed.gz",
+        "quants_a":           "/*_peaks_quant.tsv",
+        "quants_b":           "/*_peaks_quant.tsv",
+        "all_plus_bg":        "/*_5p_plusAll.bg",
+        "rampage_star_log":   "/*_star_Log.final.out",
+        "all_minus_bw":       "/*_5p_minusAll.bw",
+        "unique_plus_bw":     "/*_5p_plusUniq.bw",
+        "unique_minus_bg":    "/*_5p_minusUniq.bg",
+        "unique_minus_bw":    "/*_5p_minusUniq.bw",
+        "rampage_idr_bed":    "/*_idr.bed.gz",
+        "rampage_idr_bb":     "/*_idr.bb",
+        "rampage_idr_png":    "/*_idr.png",
+        "mad_plot":           "/*_mad_plot.png",
     }
 
     REFERENCE_FILES = {
@@ -191,7 +199,7 @@ class RampageLaunch(Launch):
 
     def pipeline_specific_vars(self,args,verbose=False):
         '''Adds pipeline specific variables to a dict, for use building the workflow.'''
-        args.pe = True # This is necessary to ensure templating does what it must.
+        #args.pe = True # This is necessary to ensure templating does what it must.
         psv = Launch.pipeline_specific_vars(self,args)
         
         # Could be multiple annotations supported per genome
@@ -202,15 +210,21 @@ class RampageLaunch(Launch):
             print psv['genome']+" has no "+psv['annotation']+" annotation."
             sys.exit(1)
 
-        if not psv['paired_end']:
-            print "Rampage is always expected to be paired-end but mapping says otherwise."
-            sys.exit(1)
-
         # Some specific settings
+        psv['assay_type'] = "rampage"
+        if self.exp["assay_term_name"] == "CAGE":
+            psv['assay_type'] = "cage"
         psv['nthreads']   = 8
         if not self.template:
             psv['control'] = args.control
         
+        if psv['paired_end'] and psv['assay_type'] == "cage":
+            print "CAGE is always expected to be single-end but mapping says otherwise."
+            sys.exit(1)
+        elif not psv['paired_end'] and psv['assay_type'] == "rampage":
+            print "Rampage is always expected to be paired-end but mapping says otherwise."
+            sys.exit(1)
+
         # run will either be for combined or single rep.
         if not self.combined_reps:
             run = psv['reps']['a']  # If not combined then run will be for the first (only) replicate
@@ -221,6 +235,10 @@ class RampageLaunch(Launch):
         if psv['annotation'] != self.ANNO_DEFAULTS[psv['genome']]:
             psv['title'] += ', ' + psv['annotation']
             psv['name']  += '_' + psv['annotation']
+
+        if self.exp["assay_term_name"] == "CAGE":
+            psv['name'] = psv['assay_type'] + psv['name'][4:]
+            psv['title'] = "CAGE" + psv['title'][7:]
 
         # Must override results location because of annotation
         psv['resultsLoc'] = self.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name,psv['exp_type'], \

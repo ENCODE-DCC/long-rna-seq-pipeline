@@ -1,14 +1,14 @@
 {
   "name": "rampage-align-pe",
-  "title": "STAR align - Rampage (v1.1.0)",
-  "summary": "Align paired-end reads to genome and transcriptome using STAR for the ENCODE rampage-rna-seq pipeline",
+  "title": "STAR align - Rampage/Cage (v1.1.1)",
+  "summary": "Align paired or single-end reads to genome and transcriptome using STAR for the ENCODE rampage-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "authorizedUsers": [],
   "inputSpec": [
     {
       "name": "reads1",
-      "label": "Read1 of paired-end fastq file(s) (gzipped)",
+      "label": "Read1 of paired/single-end fastq file(s) (gzipped)",
       "class": "array:file",
       "optional": false,
       "patterns": ["*.fq.gz","*.fastq.gz"]
@@ -17,7 +17,7 @@
       "name": "reads2",
       "label": "Read2 of paired-end fastq files (gzipped)",
       "class": "array:file",
-      "optional": false,
+      "optional": true,
       "patterns": ["*.fq.gz","*.fastq.gz"]
     },
     {
@@ -34,6 +34,14 @@
       "optional": false
     },
     {
+      "name": "assay_type",
+      "label": "'rampage' or 'cage' experiment (default is 'rampage')",
+      "class": "string",
+      "choices": [ "rampage", "cage" ],
+      "default": "rampage",
+      "optional": true
+    },
+    {
       "name": "nthreads",
       "label": "Number of threads to use",
       "class": "int",
@@ -46,13 +54,13 @@
       "name": "rampage_star_log",
       "label": "Log file for STAR, contains QC metrics",
       "class": "file",
-      "patterns": ["*_rampage_star_Log.final.out"]
+      "patterns": ["*_star_Log.final.out"]
     },
     {
       "name": "rampage_marked_bam",
       "label": "BAM file of alignment to whole genome, dups marked for rampage",
       "class": "file",
-      "patterns": ["*_rampage_star_marked.bam"]
+      "patterns": ["*_star_marked.bam"]
     },
     {
       "name": "rampage_flagstat",

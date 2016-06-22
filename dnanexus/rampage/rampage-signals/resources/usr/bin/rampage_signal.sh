@@ -1,15 +1,15 @@
 #!/bin/bash -e
 
-if [ $# -ne 2 ]; then
-    echo "usage v1: rampage_signal.sh <bam_file> <chrom_sizes>"
+if [ $# -ne 3 ]; then
+    echo "usage v1: rampage_signal.sh <bam_file> <chrom_sizes> <signal_root_name>"
     echo "Converts BAMs from rampage alignments to signal files: *._rampage_5p.bw. Is independent of DX and encodeD."
     exit -1; 
 fi
 bam_file=$1      # Bam file.
 chrom_sizes=$2   # chrom_sizes file that matches the genome used to create bam_root.
+signal_root=$3   # Root name of signals result files (e.g. 'signal' will result in signal_minusAll.bw, signal_minusUniq.bw, signal_plusAll.bw and signal_plusUniq.bw)
 
 bam_root=${bam_file%.bam}
-signal_root=${bam_root}_rampage_5p
 
 echo "-- Signal files will be: '${signal_root}_*.bw'"
 

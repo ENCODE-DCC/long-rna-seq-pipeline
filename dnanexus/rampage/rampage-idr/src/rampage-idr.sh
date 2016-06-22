@@ -43,20 +43,32 @@ main() {
     peaks_a_file=`dx describe "$peaks_a" --name`
     peaks_a_root=${peaks_a_file%.gz}
     peaks_a_root=${peaks_a_root%.bed}
-    peaks_a_root=${peaks_a_root%_rampage_peaks}
+    peaks_a_root=${peaks_a_root%_peaks}
+    assay_a_type=${peaks_a_root##*_}
+    peaks_a_root=${peaks_a_root%_rampage}
+    peaks_a_root=${peaks_a_root%_cage}
     dx download "$peaks_a" -o $peaks_a_file
     echo "* First bed: '${peaks_a_file}'"
 
     peaks_b_file=`dx describe "$peaks_b" --name`
-    peaks_b_root=${peaks_a_file%.gz}
+    peaks_b_root=${peaks_b_file%.gz}
     peaks_b_root=${peaks_b_root%.bed}
-    peaks_b_root=${peaks_b_root%_rampage_peaks}
+    peaks_b_root=${peaks_b_root%_peaks}
+    assay_b_type=${peaks_b_root##*_}
+    peaks_b_root=${peaks_b_root%_rampage}
+    peaks_b_root=${peaks_b_root%_cage}
     dx download "$peaks_b" -o $peaks_b_file
     echo "* Second bed: '${peaks_b_file}'"
 
     dx download "$chrom_sizes" -o chrom.sizes
 
-    idr_root=${peaks_a_root}_${peaks_b_root}
+    if [ "$assay_a_type" != "$assay_b_type" ]; then
+        echo "* WARNING: assay types do not match: '$assay_a_type' != '$assay_b_type'"
+    else
+        echo "* Discovered assay type: '$assay_a_type'"
+    fi
+    
+    idr_root=${peaks_a_root}_${peaks_b_root}_${assay_a_type}_idr
     echo "* Rampage IDR root: '"$idr_root"'"
 
     # DX/ENCODE independent script is found in resources/usr/bin
@@ -65,7 +77,6 @@ main() {
     rampage_idr.sh $peaks_a_file $peaks_b_file chrom.sizes $idr_root
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
-    idr_root=${idr_root}_rampage_idr
     
     echo "* Prepare metadata..."
     qc_stats=''

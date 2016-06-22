@@ -27,7 +27,7 @@ APP_TOOLS = {
     "rampage-signals":          [ "rampage_signal.sh", "STAR", "bedGraphToBigWig" ],
     "rampage-peaks":            [ "rampage_peaks.sh", "call_peaks (grit)", "bedToBigBed", "pigz", "samtools" ],
     "rampage-idr":              [ "rampage_idr.sh", "Anaconda3", "idr", "bedToBigBed", "pigz" ],
-    "rampage-mad-qc":           [ "MAD.R" ],
+    "rampage-mad-qc":           [ "rampage_mad_qc.sh", "MAD.R" ],
 
     # utility:    
     "merge-annotation":         [ "GTF.awk" ],
@@ -78,6 +78,7 @@ ALL_TOOLS = {
             "rampage_signal.sh":        "rampage_signal.sh | grep usage | awk '{print $2}' | tr -d :",
             "rampage_peaks.sh":         "rampage_peaks.sh | grep usage | awk '{print $2}' | tr -d :",
             "rampage_idr.sh":           "rampage_idr.sh | grep usage | awk '{print $2}' | tr -d :",
+            "rampage_mad_qc.sh":        "rampage_mad_qc.sh | grep usage | awk '{print $2}' | tr -d :",
             "srna_index.sh":            "srna_index.sh | grep usage | awk '{print $2}' | tr -d :",
             "srna_align.sh":            "srna_align.sh | grep usage | awk '{print $2}' | tr -d :",
             "srna_signals.sh":          "srna_signals.sh | grep usage | awk '{print $2}' | tr -d :",

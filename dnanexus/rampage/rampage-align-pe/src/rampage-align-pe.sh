@@ -1,5 +1,5 @@
 #!/bin/bash
-# rampage-align-pe.sh
+# rampage-align-pe.sh  NOTE: This is misnamed as it now works with SE data.
 
 main() {
     # Now in resources/usr/bin
@@ -16,9 +16,12 @@ main() {
     fi
 
     echo "* Value of reads1: '$reads1'"
-    echo "* Value of reads2: '$reads2'"
+    if [ ${#reads2[@]}  -gt 0 ]; then
+        echo "* Value of reads2: '$reads2'"
+    fi
     echo "* Value of star_index: '$star_index'"
     echo "* Value of library_id: '$library_id'"
+    echo "* Value of assay_type: '$assay_type'"
     echo "* Number of threads (default 8): '$nthreads'"
 
     #echo "* Download files..."
@@ -47,36 +50,46 @@ main() {
     gzip ${outfile_name}.fq
     echo "* Reads1 fastq${concat} file: '${outfile_name}.fq.gz'"
     reads1_root=${outfile_name}
-    ls -l ${reads1_root}.fq.gz
+    reads1_fq_gz=${reads1_root}.fq.gz 
+    ls -l $reads1_fq_gz
 
     outfile_name=""
     concat=""
     rm -f concat.fq
-    for ix in ${!reads2[@]}
-    do
-        file_root=`dx describe "${reads2[$ix]}" --name`
-        file_root=${file_root%.fastq.gz}
-        file_root=${file_root%.fq.gz}
-        if [ "${outfile_name}" == "" ]; then
-            outfile_name="${file_root}"
-        else
-            outfile_name="${file_root}_${outfile_name}"
-            if [ "${concat}" == "" ]; then
-                outfile_name="${outfile_name}_concat" 
-                concat="s concatenated as"
+    reads2_fq_gz="" 
+    if [ ${#reads2[@]}  -gt 0 ]; then
+        for ix in ${!reads2[@]}
+        do
+            file_root=`dx describe "${reads2[$ix]}" --name`
+            file_root=${file_root%.fastq.gz}
+            file_root=${file_root%.fq.gz}
+            if [ "${outfile_name}" == "" ]; then
+                outfile_name="${file_root}"
+            else
+                outfile_name="${file_root}_${outfile_name}"
+                if [ "${concat}" == "" ]; then
+                    outfile_name="${outfile_name}_concat" 
+                    concat="s concatenated as"
+                fi
             fi
-        fi
-        echo "* Downloading and concatenating ${file_root}.fq.gz file..."
-        dx download "${reads2[$ix]}" -o - | gunzip >> concat.fq
-    done
-    mv concat.fq ${outfile_name}.fq
-    echo "* Gzipping file..."
-    gzip ${outfile_name}.fq
-    echo "* Reads2 fastq${concat} file: '${outfile_name}.fq.gz'"
-    ls -l ${outfile_name}.fq.gz
-    reads2_root=${outfile_name}
-    ls -l ${reads2_root}.fq.gz
-    bam_root="${reads1_root}_${reads2_root}"
+            echo "* Downloading and concatenating ${file_root}.fq.gz file..."
+            dx download "${reads2[$ix]}" -o - | gunzip >> concat.fq
+        done
+        mv concat.fq ${outfile_name}.fq
+        echo "* Gzipping file..."
+        gzip ${outfile_name}.fq
+        echo "* Reads2 fastq${concat} file: '${outfile_name}.fq.gz'"
+        ls -l ${outfile_name}.fq.gz
+        reads2_root=${outfile_name}
+        reads2_fq_gz=${reads2_root}.fq.gz 
+        ls -l $reads2_fq_gz
+    fi
+        
+    if [ ${#reads2[@]} -gt 0 ]; then
+        bam_root="${reads1_root}_${reads2_root}"
+    else
+        bam_root="${reads1_root}"
+    fi
     if [ -f /usr/bin/parse_property.py ]; then
         new_root=`parse_property.py --job "${DX_JOB_ID}" --root_name --quiet`
         if [ "$new_root" != "" ]; then
@@ -88,12 +101,12 @@ main() {
     dx download "$star_index" -o star_index.tgz
     
     # DX/ENCODE independent script is found in resources/usr/bin
+    bam_root="${bam_root}_${assay_type}_star"
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    rampage_align_star.sh star_index.tgz ${reads1_root}.fq.gz ${reads2_root}.fq.gz "$library_id" $nthreads $bam_root
+    rampage_align_star.sh star_index.tgz $reads1_fq_gz $reads2_fq_gz "$library_id" $nthreads $bam_root
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
-    bam_root="${bam_root}_rampage_star"
 
     echo "* Prepare metadata..."
     qc_stats=''

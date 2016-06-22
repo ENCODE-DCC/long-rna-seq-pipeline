@@ -24,15 +24,33 @@ main() {
     echo "* Value of control bam: '$control_bam'"
     echo "* Value of annotation:  '$gene_annotation'"
     echo "* Value of chrom_sizes: '$chrom_sizes'"
+    echo "* Value of assay_type:  '$assay_type'"
     echo "* Value of nthreads:    '$nthreads'"
 
     echo "* Download files..."
     bam_root=`dx describe "$rampage_marked_bam" --name`
     bam_root=${bam_root%.bam}
-    bam_root=${bam_root%_rampage_star_marked}
+    bam_root=${bam_root%_star_marked}
+    assay_discovered=${bam_root##*_}
+    bam_root=${bam_root%_rampage}
+    bam_root=${bam_root%_cage}
     dx download "$rampage_marked_bam" -o ${bam_root}.bam
     echo "* Bam file: '${bam_root}.bam'"
 
+    # Be sure of assay type
+    if [ "$assay_discovered" == "rampage" ] || [ "$assay_discovered" == "cage" ]; then
+        if [ "$assay_type" != "$assay_type_discovered" ]; then
+            echo "* WARNING: assay type does not match discovered type: '$assay_type' != '$assay_discovered'"
+            if [ "$assay_discovered" == "cage" ]; then
+                # None default discovered, but optyion is default, so override 
+                echo "*          using discovered type: '$assay_discovered'"
+                assay_type=$assay_discovered
+            else
+                echo "*          using chosen type: '$assay_type'"
+            fi
+        fi
+    fi
+    
     control_root=`dx describe "$control_bam" --name`
     control_root=${control_root%.bam}
     dx download "$control_bam" -o "$control_root".bam
@@ -46,12 +64,12 @@ main() {
     dx download "$chrom_sizes" -o chrom.sizes
 
     # DX/ENCODE independent script is found in resources/usr/bin
+    peaks_root=${bam_root}_${assay_type}_peaks
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    rampage_peaks.sh ${bam_root}.bam ${control_root}.bam ${annotation_root}.gtf.gz chrom.sizes $nthreads 
+    rampage_peaks.sh ${bam_root}.bam ${control_root}.bam ${annotation_root}.gtf.gz chrom.sizes $assay_type $nthreads $peaks_root 
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
-    peaks_root=${bam_root}_rampage_peaks
     
     echo "* Upload results..."
     rampage_peaks_bed=$(dx upload ${peaks_root}.bed.gz --property SW="$versions" --brief)

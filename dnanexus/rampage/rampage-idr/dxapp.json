@@ -1,9 +1,9 @@
 {
   "name": "rampage-idr",
-  "title": "IDR on  Rampage peaks (v1.2.0)",
+  "title": "IDR on  Rampage/Cage peaks (v1.2.1)",
   "summary": "Compares two sets of peaks and generates an Irreproducible Discovery Rate report",
   "dxapi": "1.0.0",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -11,14 +11,14 @@
       "label": "Peaks produced by one replicate",
       "class": "file",
       "optional": false,
-      "patterns": ["*_rampage_peaks.bed.gz","*_rampage_peaks.bed"]
+      "patterns": ["*_peaks.bed.gz","*_peaks.bed"]
     },
     {
       "name": "peaks_b",
       "label": "Peaks produced by another replicate",
       "class": "file",
       "optional": false,
-      "patterns": ["*_rampage_peaks.bed.gz","*_rampage_peaks.bed"]
+      "patterns": ["*_peaks.bed.gz","*_peaks.bed"]
     },
     {
       "name": "chrom_sizes",
@@ -33,19 +33,19 @@
       "name": "rampage_idr_bed",
       "label": "Gzipped bed file of rampage idr peaks",
       "class": "file",
-      "patterns": ["*_rampage_idr.bed.gz"]
+      "patterns": ["*_idr.bed.gz"]
     },
     {
       "name": "rampage_idr_bb",
       "label": "BigBed file of rampage idr peaks",
       "class": "file",
-      "patterns": ["*_rampage_idr.bb"]
+      "patterns": ["*_idr.bb"]
     },
     {
       "name": "rampage_idr_png",
       "label": "Plot of rampage idr results",
       "class": "file",
-      "patterns": ["*_rampage_idr.png"]
+      "patterns": ["*_idr.png"]
     },
     {
       "name": "metadata",
