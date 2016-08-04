@@ -41,14 +41,6 @@ class RampageLaunch(Launch):
          "REP": {
                 "ORDER": [ "rampage-align-pe", "rampage-signals", "rampage-peaks" ],
                 "STEPS": {
-                            "rampage-align-se": {
-                                "app":     "rampage-align-pe",
-                                "params":  { "library_id": "library_id", "assay_type": "assay_type", "nthreads": "nthreads" },
-                                "inputs":  { "reads1":     "reads",
-                                             "star_index": "star_index" },
-                                "results": { "rampage_marked_bam": "rampage_marked_bam", 
-                                             "rampage_star_log": "rampage_star_log" }
-                            },
                             "rampage-align-pe": {
                                 "app":     "rampage-align-pe",
                                 "params":  { "library_id": "library_id", "assay_type": "assay_type", "nthreads": "nthreads" },
@@ -148,12 +140,12 @@ class RampageLaunch(Launch):
                                 "female":   {
                                             "M2":  "mm10_male_M2_ERCC_starIndex.tgz",
                                             "M3":  "mm10_male_M3_ERCC_starIndex.tgz",
-                                            "M4":  "mm10_male_M4_ERCC_starIndex.tgz"
+                                            "M4":  "mm10_XY_M4_ERCC_phiX_starIndex.tgz"
                                             },
                                 "male":     {
                                             "M2":  "mm10_male_M2_ERCC_starIndex.tgz",
                                             "M3":  "mm10_male_M3_ERCC_starIndex.tgz",
-                                            "M4":  "mm10_male_M4_ERCC_starIndex.tgz"
+                                            "M4":  "mm10_XY_M4_ERCC_phiX_starIndex.tgz"
                                             }
                                 }
                         },
@@ -171,8 +163,8 @@ class RampageLaunch(Launch):
                                      "male":     "GRCh38_EBV.chrom.sizes"  },
                         "hg19":     {"female":   "female.hg19.chrom.sizes",
                                      "male":     "male.hg19.chrom.sizes"   },
-                        "mm10":     {"female":   "male.mm10.chrom.sizes",
-                                     "male":     "male.mm10.chrom.sizes"   }
+                        "mm10":     {"female":   "mm10_no_alt.chrom.sizes",
+                                     "male":     "mm10_no_alt.chrom.sizes"   }
                         }
         }
 

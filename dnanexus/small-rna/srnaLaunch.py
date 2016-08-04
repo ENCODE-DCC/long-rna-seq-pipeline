@@ -102,8 +102,8 @@ class SrnaLaunch(Launch):
                                      "male":     "GRCh38_EBV.chrom.sizes"  },
                         "hg19":     {"female":   "female.hg19.chrom.sizes",
                                      "male":     "male.hg19.chrom.sizes"   },
-                        "mm10":     {"female":   "male.mm10.chrom.sizes",
-                                     "male":     "male.mm10.chrom.sizes"   }
+                        #"mm10":     {"female":   "male.mm10.chrom.sizes",
+                        #             "male":     "male.mm10.chrom.sizes"   }
                         },
         }
 

@@ -4,8 +4,8 @@
 main() {
     echo "* Installing python-dev cython python-scipy python-networkx..."
     sudo apt-get install -y gcc python-dev cython python-scipy python-networkx >> install.log 2>&1
-    echo "* Installing pysam..."
-    sudo easy_install pysam >> install.log 2>&1
+    #echo "* Installing pysam..."
+    #sudo easy_install pysam >> install.log 2>&1
     echo "* Installing grit..."
     wget https://github.com/nboley/grit/archive/2.0.5.tar.gz -O grit.tgz
     mkdir grit_local
