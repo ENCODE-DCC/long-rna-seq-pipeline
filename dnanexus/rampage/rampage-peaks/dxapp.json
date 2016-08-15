@@ -1,9 +1,9 @@
 {
   "name": "rampage-peaks",
-  "title": "Call Rampage/Cage peaks (v2.2.3)",
+  "title": "Call Rampage/Cage peaks (v2.2.4)",
   "summary": "Uses genome BAM marked for Rampage to calls peaks and produce 5' signals",
   "dxapi": "1.0.0",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "authorizedUsers": [],
   "inputSpec": [
     {
