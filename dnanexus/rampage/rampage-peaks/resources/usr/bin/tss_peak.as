@@ -11,5 +11,5 @@ table tss_peak
     string  gene_id;     "Gene identifier"
     string  gene_name;   "Gene name" 
     string  tss_id;      "TSS identifier"
-    lstring peak_cov;    "base by base read coverage of the peak"
+    lstring peak_cov;    "base by base read coverage of the first 512 bases of peak"
     )
