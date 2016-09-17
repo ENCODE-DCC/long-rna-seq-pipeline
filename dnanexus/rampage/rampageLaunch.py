@@ -43,7 +43,8 @@ class RampageLaunch(Launch):
                 "STEPS": {
                             "rampage-align-pe": {
                                 "app":     "rampage-align-pe",
-                                "params":  { "library_id": "library_id", "assay_type": "assay_type", "nthreads": "nthreads" },
+                                # lrna_221 no assay "params":  { "library_id": "library_id", "assay_type": "assay_type", "nthreads": "nthreads" },
+                                "params":  { "library_id": "library_id", "nthreads": "nthreads" },
                                 "inputs":  { "reads1":     "reads1",
                                              "reads2":     "reads2",
                                              "star_index": "star_index" },
@@ -62,7 +63,8 @@ class RampageLaunch(Launch):
                             },
                             "rampage-peaks": {
                                 "app":     "rampage-peaks",
-                                "params":  { "assay_type": "assay_type", "nthreads": "nthreads" },
+                                # lrna_221 no assay "params":  { "assay_type": "assay_type", "nthreads": "nthreads" },
+                                "params":  { "nthreads": "nthreads" },
                                 "inputs":  { "control_bam": "control_bam", 
                                              "gene_annotation": "gene_annotation", 
                                              "chrom_sizes": "chrom_sizes",
