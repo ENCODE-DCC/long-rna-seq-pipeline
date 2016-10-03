@@ -16,8 +16,10 @@ class RampageLaunch(Launch):
                     "analysis for one replicate or combined replicates. "
     ''' This help title should name pipline and whether combined replicates are supported.'''
                     
-    ANNO_DEFAULTS = {'hg19': 'v19', 'mm10': 'M4' }
+    GENOMES_SUPPORTED = ['hg19', 'GRCh38', 'mm10']
+    ANNO_DEFAULTS = {'hg19': 'v19', 'GRCh38': 'v24', 'mm10': 'M4' }
     ANNO_ALLOWED = { 'hg19': [ ANNO_DEFAULTS['hg19'] ],
+                     'GRCh38': [ ANNO_DEFAULTS['GRCh38'] ],
                      'mm10': [ ANNO_DEFAULTS['mm10'], 'M2', 'M3' ] }
     ANNO_DEFAULT = ANNO_DEFAULTS[Launch.GENOME_DEFAULT]
     ''' Multiple annotations might be supported for each genome.'''
@@ -126,13 +128,13 @@ class RampageLaunch(Launch):
         # TODO: should remove annotation if only one per genome
         # TODO: should use ACCESSION based fileNames
         "star_index":   {
+                        "GRCh38": {
+                                "female":   {"v24": "GRCh38_v24pri_tRNAs_ERCC_phiX_starIndex.tgz"},
+                                "male":     {"v24": "GRCh38_v24pri_tRNAs_ERCC_phiX_starIndex.tgz"}
+                                },
                         "hg19": {
-                                "female":   {
-                                            "v19": "hg19_female_v19_ERCC_starIndex.tgz"
-                                            },
-                                "male":     {
-                                            "v19": "hg19_male_v19_ERCC_starIndex.tgz"
-                                            }
+                                "female":   {"v19": "hg19_female_v19_ERCC_starIndex.tgz"         },
+                                "male":     {"v19": "hg19_male_v19_ERCC_starIndex.tgz"           }
                                 },
                         "mm10": {
                                 "female":   {
@@ -148,22 +150,21 @@ class RampageLaunch(Launch):
                                 }
                         },
         "gene_annotation":   {
-                        "hg19": { "v19": "gencode.v19.annotation.gtf.gz" },
-                        "mm10": {
-                                  "M2":  "gencode.vM2.annotation.gtf.gz",
-                                  "M3":  "gencode.vM3.annotation.gtf.gz",
-                                  "M4":  "gencode.vM4.annotation.gtf.gz"
-                                }
+                        "GRCh38":   {"v24": "gencode.v24.primary_assembly.annotation.gtf.gz"},
+                        "hg19":     {"v19": "gencode.v19.annotation.gtf.gz"                 },
+                        "mm10":     {
+                                    "M2":  "gencode.vM2.annotation.gtf.gz",
+                                    "M3":  "gencode.vM3.annotation.gtf.gz",
+                                    "M4":  "gencode.vM4.annotation.gtf.gz"
+                                    }
                          },
         "chrom_sizes":   {
-                        "hg19": {
-                                "female":   "female.hg19.chrom.sizes",
-                                "male":     "male.hg19.chrom.sizes"
-                                },
-                        "mm10": {
-                                "female":   "male.mm10.chrom.sizes",
-                                "male":     "male.mm10.chrom.sizes"
-                                }
+                        "GRCh38":   {"female":   "GRCh38_EBV.chrom.sizes",
+                                     "male":     "GRCh38_EBV.chrom.sizes"  },
+                        "hg19":     {"female":   "female.hg19.chrom.sizes",
+                                     "male":     "male.hg19.chrom.sizes"   },
+                        "mm10":     {"female":   "male.mm10.chrom.sizes",
+                                     "male":     "male.mm10.chrom.sizes"   }
                         }
         }
 

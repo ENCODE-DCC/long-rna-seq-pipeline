@@ -1,9 +1,9 @@
 {
   "name": "rampage-idr",
-  "title": "IDR on  Rampage peaks (v1.1.0)",
+  "title": "IDR on  Rampage peaks (v1.1.1)",
   "summary": "Compares two sets of peaks and generates an Irreproducible Discovery Rate report",
   "dxapi": "1.0.0",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -11,14 +11,14 @@
       "label": "Peaks produced by one replicate",
       "class": "file",
       "optional": false,
-      "patterns": ["*.bed"]
+      "patterns": ["*_rampage_peaks.bed.gz","*_rampage_peaks.bed"]
     },
     {
       "name": "peaks_b",
       "label": "Peaks produced by another replicate",
       "class": "file",
       "optional": false,
-      "patterns": ["*.bed"]
+      "patterns": ["*_rampage_peaks.bed.gz","*_rampage_peaks.bed"]
     },
     {
       "name": "chrom_sizes",
@@ -31,9 +31,9 @@
   "outputSpec": [
     {
       "name": "rampage_idr_bed",
-      "label": "Bed file of rampage idr peaks",
+      "label": "Gzipped bed file of rampage idr peaks",
       "class": "file",
-      "patterns": ["*_rampage_idr.bed"]
+      "patterns": ["*_rampage_idr.bed.gz"]
     },
     {
       "name": "rampage_idr_bb",
@@ -56,6 +56,7 @@
   "runSpec": {
     "interpreter": "bash",
     "file": "src/rampage-idr.sh",
+    "execDepends": [{"name": "pigz"}],
     "systemRequirements": {
       "main": {
         "instanceType": "mem3_hdd2_x8"

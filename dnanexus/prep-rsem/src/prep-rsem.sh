@@ -15,67 +15,93 @@ main() {
         versions=`tool_versions.py --dxjson dnanexus-executable.json`
     fi
 
+    echo "* Value of ref_genome:  '$ref_genome'"
+    echo "* Value of spike_in:    '$spike_in'"
     echo "* Value of annotations: '$annotations'"
-    echo "* Value of genome: '$genome'"
-    echo "* Value of spike_in: '$spike_in'"
-
-    # The following line(s) use the dx command-line tool to download your file
-    # inputs to the local file system using variable names for the filenames. To
-    # recover the original filenames, you can use the output of "dx describe
-    # "$variable" --name".
 
     echo "* Download files..."
-    annotation_fn=`dx describe "$annotations" --name`
-    annotation_fn=${annotation_fn%.gtf.gz}
-    dx download "$annotations" -o "$annotation_fn".gtf.gz
-    gunzip "$annotation_fn".gtf.gz
+    ref_root=`dx describe "$ref_genome" --name`
+    ref_root=${ref_root%.fasta.gz}
+    ref_root=${ref_root%.fa.gz}
+    dx download "$ref_genome" -o ${ref_root}.fa.gz
 
-    genome_fn=`dx describe "$genome" --name`
-    genome_fn=${genome_fn%.fasta.gz}
-    genome_fn=${genome_fn%.fa.gz}
-    dx download "$genome" -o "$genome_fn".fa.gz
-    gunzip "$genome_fn".fa.gz
-    ref="$genome_fn".fa
+    spike_root=`dx describe "$spike_in" --name`
+    spike_root=${spike_root%.fasta.gz}
+    spike_root=${spike_root%.fa.gz}
+    dx download "$spike_in" -o ${spike_root}.fa.gz
 
-    if [ -n "$spike_in" ]
-    then
-        spike_in_fn=`dx describe "$spike_in" --name`
-        spike_in_fn=${spike_in_fn%.fasta.gz}
-        spike_in_fn=${spike_in_fn%.fa.gz}
-        dx download "$spike_in" -o "$spike_in_fn".fa.gz
-        gunzip "$spike_in_fn".fa.gz
-        ref="${ref},${spike_in_fn}.fa"
+    anno_root=`dx describe "$annotations" --name`
+    anno_root=${anno_root%.gtf.gz}
+    dx download "$annotations" -o ${anno_root}.gtf.gz
+
+    # hg19/mm10 and male/female?
+    if [ -f /usr/bin/parse_property.py ]; then
+        genome=`parse_property.py -f "$ref_genome" -p genome`
+        gender=`parse_property.py -f "$ref_genome" -p gender`
+        anno=`parse_property.py -f "$annotations" -p annotation`
     fi
-    echo "* Reference file(s): '$ref'"
+    if [ "$genome" == "" ]; then
+        if [[ $ref_root == *"hg19"* ]]; then
+            genome="hg19"
+        elif [[ $ref_root == *"GRCh38"* ]]; then
+            genome="GRCh38"
+        elif [[ $ref_root == *"mm10"* ]]; then
+            genome="mm10"
+        fi
+    fi
+    if [ "$genome" == "" ]; then
+        genome="unknown"
+        echo "* WARNING genome: '$genome'" 
+    else
+        echo "* genome: '$genome'" 
+    fi
+    if [ "$gender" == "" ]; then
+        if [[ $ref_root == *"female"* ]] || [[ $ref_root == *"XX"* ]]; then
+            gender="XX"
+        elif [[ $ref_root == *"male"* ]] || [[ $ref_root == *"XY"* ]]; then
+            gender="XY"
+        fi
+    fi
+    if [ "$gender" != "" ]; then
+        echo "* gender: '$gender'" 
+    fi
+    if [ "$anno" == "" ]; then
+        if [[ $anno_root == *"v19"* ]] || [[ $anno_root == *"V19"* ]]; then
+            anno="v19"
+            echo "* WARNING annotation version: '$anno'" 
+        elif [[ $anno_root == *"v24"* ]] || [[ $anno_root == *"V24"* ]]; then
+            anno="v24"
+        elif [[ $anno_root == *"M4"* ]]; then
+            anno="M4"
+        elif [[ $anno_root == *"M3"* ]]; then
+            anno="M3"
+        elif [[ $anno_root == *"M2"* ]]; then
+            anno="M2"
+        fi
+    fi
+    if [ "$anno" == "" ]; then
+        anno="unknown"
+        echo "* WARNING annotation version: '$anno'"
+    else 
+        echo "* annotation version: '$anno'" 
+    fi
 
-    # Fill in your application code here.
-
-    echo "* Prepare reference..."
+    # DX/ENCODE independent script is found in resources/usr/bin
+    echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    mkdir out
-    rsem-prepare-reference --gtf ${annotation_fn}.gtf ${ref} out/rsem
+    lrna_index_rsem.sh ${ref_root}.fa.gz ${spike_root}.fa.gz ${anno_root}.gtf.gz $anno $genome $gender
     set +x
+    echo "* ===== Returned from dnanexus and encodeD independent script ====="
+    archive_file="${genome}_${anno}_${spike_root}_rsemIndex.tgz"
+    if [ "$gender" == "famale" ] || [ "$gender" == "male" ] || [ "$gender" == "XX" ] || [ "$gender" == "XY" ]; then
+        archive_file="${genome}_${gender}_${anno}_${spike_root}_rsemIndex.tgz"
+    fi
 
-    # Attempt to make bamCommentLines.txt, which should be reviewed. NOTE tabs handled by assignment.
-    echo "* Create bam header..."
-    set -x
-    refComment="@CO\tREFID:$(basename ${genome_fn})"
-    annotationComment="@CO\tANNID:$(basename ${annotation_fn})"
-    spikeInComment="@CO\tSPIKEID:${spike_in_fn}"
-    echo -e ${refComment} > out/rsem_bamCommentLines.txt
-    echo -e ${annotationComment} >> out/rsem_bamCommentLines.txt
-    echo -e ${spikeInComment} >> out/rsem_bamCommentLines.txt
+    echo "* Upload results..."
+    rsem_index=$(dx upload $archive_file --property genome="$genome"   --property gender="$gender" \
+                                         --property annotation="$anno" --property spike_in="$spike_root" \
+                                         --property SW="$versions" --brief)
 
-    echo `cat "out/rsem_bamCommentLines.txt"`
-    set +x
-
-    echo "* Tar and upload..."
-    echo `ls out/*`
-    set -x
-    tar -czf ${genome_fn}_${annotation_fn}_rsemIndex.tgz out/*
-    set +x
-
-    rsem_index=$(dx upload ${genome_fn}_${annotation_fn}_rsemIndex.tgz --property SW="$versions" --brief)
     dx-jobutil-add-output rsem_index $rsem_index --class=file
     echo "* Finished."
 }

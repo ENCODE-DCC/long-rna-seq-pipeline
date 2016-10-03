@@ -7,33 +7,33 @@ import sys, os, argparse, json, commands
 # APP_TOOLS is a dict keyed by applet script name with a list of tools that it uses.
 APP_TOOLS = {
     # lrna:    
-    "align-star-pe":            [ "STAR", "samtools" ],
-    "align-star-se":            [ "STAR", "samtools" ],
-    "align-tophat-pe":          [ "TopHat", "bowtie2", "samtools", "tophat_bam_xsA_tag_fix.pl" ],
-    "align-tophat-se":          [ "TopHat", "bowtie2", "samtools" ],
-    "bam-to-bigwig-stranded":   [ "STAR","bedGraphToBigWig" ],
-    "bam-to-bigwig-unstranded": [ "STAR","bedGraphToBigWig" ],
-    "quant-rsem":               [ "RSEM" ],
+    "align-star-pe":            [ "lrna_align_star_pe.sh", "STAR", "samtools" ],
+    "align-star-se":            [ "lrna_align_star_se.sh", "STAR", "samtools" ],
+    "align-tophat-pe":          [ "lrna_align_tophat_pe.sh", "TopHat", "bowtie2", "samtools", "tophat_bam_xsA_tag_fix.pl" ],
+    "align-tophat-se":          [ "lrna_align_tophat_se.sh", "TopHat", "bowtie2", "samtools" ],
+    "bam-to-bigwig-stranded":   [ "lrna_bam_to_stranded_signals.sh", "STAR","bedGraphToBigWig" ],
+    "bam-to-bigwig-unstranded": [ "lrna_bam_to_unstranded_signals.sh", "STAR","bedGraphToBigWig" ],
+    "quant-rsem":               [ "lrna_rsem_quantification.sh", "RSEM" ],
     "mad-qc":                   [ "MAD.R" ],
 
     # srna:    
-    "small-rna-prep-star":      [ "STAR" ], 
-    "small-rna-align":          [ "STAR" ], 
-    "small-rna-signals":        [ "STAR","bedGraphToBigWig" ], 
-    "small-rna-mad-qc":         [ "MAD.R", "extract_gene_ids.awk", "sum_srna_expression.awk" ],
+    "small-rna-prep-star":      [ "srna_index.sh", "STAR", "extract_gene_ids.awk" ], 
+    "small-rna-align":          [ "srna_align.sh", "STAR", "samtools" ], 
+    "small-rna-signals":        [ "srna_signals.sh", "STAR","bedGraphToBigWig" ], 
+    "small-rna-mad-qc":         [ "srna_mad_qc.sh", "MAD.R", "extract_gene_ids.awk", "sum_srna_expression.awk" ],
 
     # rampage:    
-    "rampage-align-pe":         [ "STAR" ],
-    "rampage-signals":          [ "STAR", "bedGraphToBigWig" ],
-    "rampage-peaks":            [ "call_peaks (grit)", "bedToBigBed", "samtools" ],
-    "rampage-idr":              [ "Anaconda3", "idr", "bedToBigBed" ],
+    "rampage-align-pe":         [ "rampage_align_star.sh", "STAR", "samtools" ],
+    "rampage-signals":          [ "rampage_signal.sh", "STAR", "bedGraphToBigWig" ],
+    "rampage-peaks":            [ "rampage_peaks.sh", "call_peaks (grit)", "bedToBigBed", "pigz", "samtools" ],
+    "rampage-idr":              [ "rampage_idr.sh", "Anaconda3", "idr", "bedToBigBed", "pigz" ],
     "rampage-mad-qc":           [ "MAD.R" ],
 
     # utility:    
     "merge-annotation":         [ "GTF.awk" ],
-    "prep-rsem":                [ "RSEM" ], 
-    "prep-star":                [ "STAR" ], 
-    "prep-tophat":              [ "TopHat", "bowtie2" ], 
+    "prep-rsem":                [ "lrna_index_rsem.sh", "RSEM" ], 
+    "prep-star":                [ "lrna_index_star.sh", "STAR" ], 
+    "prep-tophat":              [ "lrna_index_tophat.sh", "TopHat", "bowtie2" ], 
     }
 # Virtual apps only differ from their parent by name/version. 
 VIRTUAL_APPS = {
@@ -58,11 +58,30 @@ ALL_TOOLS = {
             "MAD.R":                     "grep version /usr/bin/MAD.R | awk '{print $3}'",
             "extract_gene_ids.awk":      "grep version /usr/bin/extract_gene_ids.awk | awk '{print $3}'",
             "sum_srna_expression.awk":   "grep version /usr/bin/sum_srna_expression.awk | awk '{print $3}'",
-            "RSEM":                      "rsem-calculate-expression --version | awk '{print $4}'",
+            "RSEM":                      "rsem-calculate-expression --version | awk '{print $5}'",
             "samtools":                  "samtools 2>&1 | grep Version | awk '{print $2}'",
             "STAR":                      "STAR --version | awk '{print $1}' | cut -d _ -f 2-",
             "TopHat":                    "tophat -v | awk '{print $2}'",
-            "tophat_bam_xsA_tag_fix.pl": "perl /usr/bin/tophat_bam_xsA_tag_fix.pl --version 2>&1"
+            "tophat_bam_xsA_tag_fix.pl": "perl /usr/bin/tophat_bam_xsA_tag_fix.pl --version 2>&1",
+            "pigz":                      "pigz --version 2>&1 | awk '{print $2}'",
+            "lrna_align_star_pe.sh":             "lrna_align_star_pe.sh | grep usage | awk '{print $2}' | tr -d :",
+            "lrna_align_star_se.sh":             "lrna_align_star_se.sh | grep usage | awk '{print $2}' | tr -d :",
+            "lrna_align_tophat_pe.sh":           "lrna_align_tophat_pe.sh | grep usage | awk '{print $2}' | tr -d :",
+            "lrna_align_tophat_se.sh":           "lrna_align_tophat_se.sh | grep usage | awk '{print $2}' | tr -d :",
+            "lrna_bam_to_stranded_signals.sh":   "lrna_bam_to_stranded_signals.sh | grep usage | awk '{print $2}' | tr -d :",
+            "lrna_bam_to_unstranded_signals.sh": "lrna_bam_to_unstranded_signals.sh | grep usage | awk '{print $2}' | tr -d :",
+            "lrna_rsem_quantification.sh":       "lrna_rsem_quantification.sh | grep usage | awk '{print $2}' | tr -d :",
+            "lrna_index_rsem.sh":                "lrna_index_rsem.sh | grep usage | awk '{print $2}' | tr -d :",
+            "lrna_index_star.sh":                "lrna_index_star.sh | grep usage | awk '{print $2}' | tr -d :",
+            "lrna_index_tophat.sh":              "lrna_index_tophat.sh | grep usage | awk '{print $2}' | tr -d :",
+            "rampage_align_star.sh":    "rampage_align_star.sh | grep usage | awk '{print $2}' | tr -d :",
+            "rampage_signal.sh":        "rampage_signal.sh | grep usage | awk '{print $2}' | tr -d :",
+            "rampage_peaks.sh":         "rampage_peaks.sh | grep usage | awk '{print $2}' | tr -d :",
+            "rampage_idr.sh":           "rampage_idr.sh | grep usage | awk '{print $2}' | tr -d :",
+            "srna_index.sh":            "srna_index.sh | grep usage | awk '{print $2}' | tr -d :",
+            "srna_align.sh":            "srna_align.sh | grep usage | awk '{print $2}' | tr -d :",
+            "srna_signals.sh":          "srna_signals.sh | grep usage | awk '{print $2}' | tr -d :",
+            "srna_mad_qc.sh":           "srna_mad_qc.sh | grep usage | awk '{print $2}' | tr -d :",
             }
 
 def parse_dxjson(dxjson):

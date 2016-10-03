@@ -84,74 +84,43 @@ main() {
     ls -l ${outfile_name}.fq.gz
     reads2_root=${outfile_name}
     ls -l ${reads2_root}.fq.gz
-    bam_root="${reads1_root}_${reads2_root}_tophat"
+    bam_root="${reads1_root}_${reads2_root}"
     if [ -f /usr/bin/parse_property.py ]; then
         new_root=`parse_property.py -f "'${reads1[0]}'" --project "${DX_PROJECT_CONTEXT_ID}" --root_name --quiet`
         if [ "$new_root" != "" ]; then
-            bam_root="${new_root}_tophat"
+            bam_root="${new_root}"
         fi
     fi
-    echo "* Alignments file will be: '${bam_root}.bam'"
-
-    echo "* Downloading and extracting TopHat index archive..."
+    echo "* Downloading TopHat index archive..."
     dx download "$tophat_index" -o tophat_index.tgz
-    tar zxvf tophat_index.tgz
 
-    # unzips into "out/"
-    gff=`ls out/*.gff`
-    anno_prefix=${gff%.gff}
-    bamComments=`ls out/*_bamCommentLines.txt`
-    geno_prefix=${bamComments%_bamCommentLines.txt}
-    echo "* Value of geno_prefix: '$geno_prefix'"
-    echo "* Value of anno_prefix: '$anno_prefix'"
-
-    # Fill in your application code here.
-
-    echo "* Map reads..."
+    # DX/ENCODE independent script is found in resources/usr/bin
+    echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    tophat -p ${nthreads} -z0 -a 8 -m 0 --min-intron-length 20 --max-intron-length 1000000 \
-        --read-edit-dist 4 --read-mismatches 4 -g 20  --no-discordant --no-mixed \
-        --library-type fr-firststrand --transcriptome-index ${anno_prefix} \
-        ${geno_prefix} ${reads1_root}.fq.gz ${reads2_root}.fq.gz
+    lrna_align_tophat_pe.sh tophat_index.tgz ${reads1_root}.fq.gz ${reads2_root}.fq.gz "$library_id" $nthreads $bam_root
     set +x
-    ls -l tophat_out/accepted_hits.bam
-    ls -l tophat_out/unmapped.bam
+    echo "* ===== Returned from dnanexus and encodeD independent script ====="
+    bam_root="${bam_root}_tophat"
 
-    echo "* Set up headers..."
-    set -x
-    HD="@HD\tVN:1.4\tSO:coordinate" 
-    stCommand="perl tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | samtools view -bS - | samtools sort - mapped_fixed; samtools merge -h newHeader.sam merged.bam mapped_fixed.bam out/unmapped.bam"
-    newPG="@PG\tID:Samtools\tPN:Samtools\tCL:"$stCommand"\tPP:Tophat\tVN:VN:0.1.17 (r973:277)"
-    libraryComment="@CO\tLIBID:${library_id}"
-
-    samtools view -H tophat_out/accepted_hits.bam | \
-    gawk -v HD="$HD" -v newPG="$newPG" -v library="$libraryComment" \
-        '{     if ($0 ~ /^@PG/) {PG=$0} 
-          else if ($0 ~ /^@HD/) {print HD; }
-          else if($0 ~ /^@SQ/) {print $0};
-         }; END{print newPG"\n"PG"\n"library;}' > newHeader.sam
-
-    # Add reference genome and transcriptome used
-    cat ${geno_prefix}_bamCommentLines.txt >> newHeader.sam
-    set +x
-
-    echo "* Fix unmapped bam and sort before merge..."
-    set -x
-    perl /usr/bin/tophat_bam_xsA_tag_fix.pl tophat_out/accepted_hits.bam | \
-                samtools view -bS - | samtools sort - mapped_fixed
-    set +x
-    ls -l mapped_fixed.bam
-
-    echo "* Merge aligned and unaligned into single bam, using the patched up header..."
-    set -x
-    samtools merge -h newHeader.sam merged.bam mapped_fixed.bam tophat_out/unmapped.bam
-    mv merged.bam ${bam_root}.bam
-    set +x
-    ls -l ${bam_root}.bam
+    echo "* Prepare metadata..."
+    qc_stats=''
+    reads=0
+    if [ -f /usr/bin/qc_metrics.py ]; then
+        qc_stats=`qc_metrics.py -n samtools_flagstats -f ${bam_root}_flagstat.txt`
+        reads=`qc_metrics.py -n samtools_flagstats -f ${bam_root}_flagstat.txt -k total`
+    fi
 
     echo "* Upload results..."
-    tophat_bam=$(dx upload ${bam_root}.bam --property SW="$versions" --brief)
+    tophat_bam=$(dx upload ${bam_root}.bam --details="{ $qc_stats }" --property reads="$reads" \
+                                                                     --property SW="$versions" --brief)
+    tophat_flagstat=$(dx upload ${bam_root}_flagstat.txt --details="{ $qc_stats }" --property reads="$reads" \
+                                                                                   --property SW="$versions" --brief)
+
     dx-jobutil-add-output tophat_bam "$tophat_bam" --class=file
+    dx-jobutil-add-output tophat_flagstat "$tophat_flagstat" --class=file
+
+    dx-jobutil-add-output reads "$reads" --class=string
+    dx-jobutil-add-output metadata "{ $qc_stats }" --class=string
     echo "* Finished."
 }
 

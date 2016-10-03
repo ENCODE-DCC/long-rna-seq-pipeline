@@ -47,62 +47,52 @@ main() {
     echo "* Fastq${concat} file: '${outfile_name}.fq.gz'"
     reads_root=${outfile_name}
     ls -l ${reads_root}.fq.gz
-    bam_root="${reads_root}_srna_star"
+    bam_root="${reads_root}"
     if [ -f /usr/bin/parse_property.py ]; then
-        new_root=`parse_property.py -f "'${reads[0]}'" --project "${DX_PROJECT_CONTEXT_ID}" --root_name --quiet`
+        new_root=`parse_property.py --job "${DX_JOB_ID}" --root_name --quiet`
         if [ "$new_root" != "" ]; then
-            bam_root="${new_root}_srna_star"
+            bam_root="${new_root}"
         fi
     fi
-    echo "* Alignments file will be: '${bam_root}.bam'"
 
-    echo "* Downloading and extracting star index archive..."
+    echo "* Downloading star index archive..."
     dx download "$star_index" -o star_index.tgz
-    tar zxvf star_index.tgz
-    # unzips into "out/"
 
-    # Fill in your application code here.
-
-    echo "* Set up headers..."
+    # DX/ENCODE independent script is found in resources/usr/bin
+    echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    libraryComment="@CO\tLIBID:${library_id}"
-    echo -e ${libraryComment} > COfile.txt
-    cat out/*_bamCommentLines.txt >> COfile.txt
-    echo `cat COfile.txt`
+    srna_align.sh star_index.tgz ${reads_root}.fq.gz "$library_id" $nthreads $bam_root
     set +x
-
-    echo "* Map reads..."
-    set -x
-    STAR --genomeDir out --readFilesIn ${reads_root}.fq.gz --readFilesCommand zcat              \
-        --runThreadN ${nthreads} --outFilterMultimapNmax 20 --alignIntronMax 1                  \
-        --clip3pAdapterSeq TGGAATTCTC --clip3pAdapterMMp 0.1 --outFilterMismatchNoverLmax 0.03  \
-        --outFilterScoreMinOverLread 0 --outFilterMatchNminOverLread 0 --outFilterMatchNmin 16  \
-        --outSAMheaderCommentFile COfile.txt --outSAMheaderHD @HD VN:1.4 SO:coordinate          \
-        --genomeLoad NoSharedMemory --outSAMunmapped Within --outSAMtype BAM SortedByCoordinate \
-        --quantMode GeneCounts --alignSJDBoverhangMin 1000 --limitBAMsortRAM 60000000000
-        
-    mv Aligned.sortedByCoord.out.bam ${bam_root}.bam
-    mv ReadsPerGene.out.tab ${bam_root}_quant.tsv
-    mv Log.final.out ${bam_root}_Log.final.out
-    set +x
-    ls -l ${bam_root}.bam
-    ls -l ${bam_root}_quant.tsv
+    echo "* ===== Returned from dnanexus and encodeD independent script ====="
+    bam_root="${bam_root}_srna_star"
 
     echo "* Prepare metadata..."
+    qc_stats=''
+    reads=0
     meta=''
     if [ -f /usr/bin/qc_metrics.py ]; then
-        meta=`qc_metrics.py -n STAR_log_final -f ${bam_root}_Log.final.out`
+        qc_stats=`qc_metrics.py -n STAR_log_final -f ${bam_root}_Log.final.out`
+        meta=`qc_metrics.py -n samtools_flagstats -f ${bam_root}_flagstat.txt`
+        reads=`qc_metrics.py -n samtools_flagstats -f ${bam_root}_flagstat.txt -k total`
+        qc_stats=`echo $qc_stats, $meta`
     fi
 
     echo "* Upload results..."
-    srna_bam=$(dx upload ${bam_root}.bam --details "{ $meta }" --property SW="$versions" --brief)
-    srna_quant=$(dx upload ${bam_root}_quant.tsv --details "{ $meta }" --property SW="$versions" --brief)
-    star_log=$(dx upload ${bam_root}_Log.final.out --brief)
+    srna_bam=$(dx upload ${bam_root}.bam --details "{ $qc_stats }" --property reads="$reads" \
+                                                                   --property SW="$versions" --brief)
+    srna_quant=$(dx upload ${bam_root}_quant.tsv --details "{ $qc_stats }" --property reads="$reads" \
+                                                                           --property SW="$versions" --brief)
+    star_log=$(dx upload ${bam_root}_Log.final.out --details "{ $qc_stats }" --property SW="$versions" --brief)
+    srna_flagstat=$(dx upload ${bam_root}_flagstat.txt --details="{ $qc_stats }" --property reads="$reads" \
+                                                                                 --property SW="$versions" --brief)
 
     dx-jobutil-add-output srna_bam "$srna_bam" --class=file
     dx-jobutil-add-output srna_quant "$srna_quant" --class=file
     dx-jobutil-add-output star_log "$star_log" --class=file
-    dx-jobutil-add-output metadata "{ $meta }" --class=string
+    dx-jobutil-add-output srna_flagstat "$srna_flagstat" --class=file
+
+    dx-jobutil-add-output reads "$reads" --class=string
+    dx-jobutil-add-output metadata "{ $qc_stats }" --class=string
 
     echo "* Finished."
 }

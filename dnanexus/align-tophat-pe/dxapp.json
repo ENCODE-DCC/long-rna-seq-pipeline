@@ -1,9 +1,9 @@
 {
   "name": "align-tophat-pe",
-  "title": "TopHat align - pe (v1.0.6)",
+  "title": "TopHat align - pe (v1.0.7)",
   "summary": "Align paired-end (stranded) reads to genome and transcriptome using tophat for the ENCODE long-rna-peq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.0.5",
+  "version": "1.0.7",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -25,7 +25,7 @@
       "label": "Genome and transcriptome indexed for tophat",
       "class": "file",
       "optional": false,
-      "patterns": ["*.tgz"]
+      "patterns": ["*_tophatIndex.tgz"]
     },
     {
       "name": "library_id",
@@ -48,6 +48,24 @@
       "label": "BAM file of alignment to whole genome",
       "class": "file",
       "patterns": ["*_tophat.bam"]
+    },
+    {
+      "name": "tophat_flagstat",
+      "label": "Samtools flagstats report for tophat_bam",
+      "class": "file",
+      "optional": true,
+      "patterns": ["*_tophat_flagstat.txt"]
+    },
+    {
+      "name": "reads",
+      "label": "Count of reads in the tophat_bam",
+      "optional": true,
+      "class": "string"
+    },
+    {
+      "name": "metadata",
+      "label": "JSON formatted string of metadata",
+      "class": "string"
     }
   ],
   "runSpec": {

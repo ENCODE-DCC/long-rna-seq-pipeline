@@ -1,38 +1,59 @@
 {
   "name": "prep-tophat",
-  "title": "TopHat genome indexing (v1.0.2)",
+  "title": "TopHat genome indexing (v1.0.4)",
   "summary": "Prepare reference genome and transcriptome indexes for tophat used in the ENCODE long-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "authorizedUsers": [],
   "inputSpec": [
     {
+      "name": "ref_genome",
       "class": "file",
       "optional": false,
-      "name": "annotations",
-      "label": "transcript and other annotations (GTF)",
-      "patterns": ["*.gtf.gz"]
-    },
-    {
-      "class": "file",
-      "optional": false,
-      "name": "genome",
       "label": "Reference genome (.fa.gz)",
       "patterns": ["*.fasta.gz", "*.fa.gz"]
     },
     {
+      "name": "annotations",
       "class": "file",
-      "optional": true,
+      "optional": false,
+      "label": "transcript and other annotations (GTF)",
+      "patterns": ["*.gtf.gz"]
+    },
+    {
       "name": "spike_in",
+      "class": "file",
+      "optional": false,
       "label": "Spike-in RNA sequences (fasta)",
       "patterns": ["*.fasta.gz", "*.fa.gz"]
     },
     {
+      "name": "tiny_fq",
       "class": "file",
       "optional": false,
-      "name": "tiny_fq",
       "label": "Tiny fastq use to fake an alignment, required for complete build.",
       "patterns": ["*.fastq.gz", "*.fq.gz"]
+    },
+    {
+      "name": "genome",
+      "label": "Genome assembly (e.g. GRCh38, hg19, mm10)",
+      "class": "string",
+      "optional": true,
+      "default": ""
+    },
+    {
+      "name": "gender",
+      "label": "Gender (e.g. XX, XY)",
+      "class": "string",
+      "optional": true,
+      "default": ""
+    },
+    {
+      "name": "anno",
+      "label": "Annotation version (e.g. v24, v19, M4)",
+      "class": "string",
+      "optional": true,
+      "default": ""
     }
   ],
   "outputSpec": [

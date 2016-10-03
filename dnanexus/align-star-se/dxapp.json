@@ -1,9 +1,9 @@
 {
   "name": "align-star-se",
-  "title": "STAR align - se (v2.0.4)",
+  "title": "STAR align - se (v2.0.6)",
   "summary": "Align single-end (unstranded) reads to genome and transcriptome using STAR for the ENCODE long-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "2.0.4",
+  "version": "2.0.6",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -18,7 +18,7 @@
       "label": "Genome indexed for STAR",
       "class": "file",
       "optional": false,
-      "patterns": ["*.tgz"]
+      "patterns": ["*_starIndex.tgz"]
     },
     {
       "name": "library_id",
@@ -53,6 +53,26 @@
       "label": "BAM file fo alignment to the annotation (transcriptome)",
       "class": "file",
       "patterns": ["*_star_anno.bam"]
+    },
+    {
+      "name": "genome_flagstat",
+      "label": "Samtools flagstats report for star_genome_bam",
+      "class": "file",
+      "optional": true,
+      "patterns": ["*_star_genome_flagstat.txt"]
+    },
+    {
+      "name": "anno_flagstat",
+      "label": "Samtools flagstats report for star_anno_bam",
+      "class": "file",
+      "optional": true,
+      "patterns": ["*_star_anno_flagstat.txt"]
+    },
+    {
+      "name": "reads",
+      "label": "Count of reads in the star_genome_bam",
+      "optional": true,
+      "class": "string"
     },
     {
       "name": "metadata",

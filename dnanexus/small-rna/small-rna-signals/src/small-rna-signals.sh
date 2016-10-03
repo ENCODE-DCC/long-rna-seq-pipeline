@@ -19,34 +19,25 @@ main() {
     echo "Value of chrom_sizes: '$chrom_sizes'"
 
     echo "* Download files..."
-    bam_fn=`dx describe "$srna_bam" --name`
-    bam_fn=${bam_fn%.bam}
-    echo "* Bam file: '"$bam_fn".bam'"
-    dx download "$srna_bam" -o "$bam_fn".bam
+    bam_root=`dx describe "$srna_bam" --name`
+    bam_root=${bam_root%.bam}
+    echo "* Bam file: '"$bam_root".bam'"
+    dx download "$srna_bam" -o "$bam_root".bam
 
-    dx download "$chrom_sizes" -o chromSizes.txt
+    dx download "$chrom_sizes" -o chrom.sizes
 
-    echo "* Make signals..."
+    # DX/ENCODE independent script is found in resources/usr/bin
+    echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    mkdir -p Signal
-    STAR --runMode inputAlignmentsFromBAM --inputBAMfile ${bam_fn}.bam --outWigType bedGraph \
-         --outWigStrand Stranded --outWigReferencesPrefix chr
+    srna_signals.sh ${bam_root}.bam chrom.sizes
     set +x
-
-    echo "* Convert bedGraph to bigWigs..."
-    set -x
-    bedGraphToBigWig Signal.UniqueMultiple.str2.out.bg chromSizes.txt ${bam_fn}_small_minusAll.bw
-    bedGraphToBigWig Signal.Unique.str2.out.bg         chromSizes.txt ${bam_fn}_small_minusUniq.bw
-    bedGraphToBigWig Signal.UniqueMultiple.str1.out.bg chromSizes.txt ${bam_fn}_small_plusAll.bw
-    bedGraphToBigWig Signal.Unique.str1.out.bg         chromSizes.txt ${bam_fn}_small_plusUniq.bw
-    echo `ls`
-    set +x
+    echo "* ===== Returned from dnanexus and encodeD independent script ====="
 
     echo "* Upload results..."
-    all_minus_bw=$(dx upload ${bam_fn}_small_minusAll.bw     --property SW="$versions" --brief)
-    all_plus_bw=$(dx upload ${bam_fn}_small_plusAll.bw       --property SW="$versions" --brief)
-    unique_minus_bw=$(dx upload ${bam_fn}_small_minusUniq.bw --property SW="$versions" --brief)
-    unique_plus_bw=$(dx upload ${bam_fn}_small_plusUniq.bw   --property SW="$versions" --brief)
+    all_minus_bw=$(dx upload ${bam_root}_minusAll.bw     --property SW="$versions" --brief)
+    all_plus_bw=$(dx upload ${bam_root}_plusAll.bw       --property SW="$versions" --brief)
+    unique_minus_bw=$(dx upload ${bam_root}_minusUniq.bw --property SW="$versions" --brief)
+    unique_plus_bw=$(dx upload ${bam_root}_plusUniq.bw   --property SW="$versions" --brief)
 
     dx-jobutil-add-output all_minus_bw "$all_minus_bw" --class=file
     dx-jobutil-add-output all_plus_bw "$all_plus_bw" --class=file

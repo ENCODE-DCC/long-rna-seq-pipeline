@@ -14,82 +14,104 @@ main() {
         versions=`tool_versions.py --dxjson dnanexus-executable.json`
     fi
 
+    echo "* Value of ref_genome:  '$ref_genome'"
+    echo "* Value of spike_in:    '$spike_in'"
+    echo "* Value of annotations: '$annotations'"
+    echo "* Value of tiny_fq:     '$tiny_fq'"
+
     echo "* Value of annotations: '$annotations'"
     echo "* Value of genome:   '$genome'"
-    echo "* Value of spike_in: '$spike_in'"
-    echo "* Value of tiny_fq:  '$tiny_fq'"
 
     echo "* Download files..."
-    annotation_fn=`dx describe "$annotations" --name`
-    annotation_fn=${annotation_fn%.gtf.gz}
-    dx download "$annotations" -o "$annotation_fn".gtf.gz
-    gunzip "$annotation_fn".gtf.gz
-    anno_prefix=${annotation_fn}
+    echo "* Download files..."
+    ref_root=`dx describe "$ref_genome" --name`
+    ref_root=${ref_root%.fasta.gz}
+    ref_root=${ref_root%.fa.gz}
+    dx download "$ref_genome" -o ${ref_root}.fa.gz
 
-    genome_fn=`dx describe "$genome" --name`
-    genome_fn=${genome_fn%.fasta.gz}
-    genome_fn=${genome_fn%.fa.gz}
-    dx download "$genome" -o "$genome_fn".fa.gz
-    gunzip "$genome_fn".fa.gz
-    ref="$genome_fn".fa
-    geno_prefix=${genome_fn}
+    spike_root=`dx describe "$spike_in" --name`
+    spike_root=${spike_root%.fasta.gz}
+    spike_root=${spike_root%.fa.gz}
+    dx download "$spike_in" -o ${spike_root}.fa.gz
+
+    anno_root=`dx describe "$annotations" --name`
+    anno_root=${anno_root%.gtf.gz}
+    dx download "$annotations" -o ${anno_root}.gtf.gz
+
 
     dx download "$tiny_fq" -o tiny.fq.gz
-    gunzip tiny.fq.gz
 
-    if [ -n "$spike_in" ]; then
-        spike_in_fn=`dx describe "$spike_in" --name`
-        spike_in_fn=${spike_in_fn%.fasta.gz}
-        spike_in_fn=${spike_in_fn%.fa.gz}
-        dx download "$spike_in" -o "$spike_in_fn".fa.gz
-        gunzip "$spike_in_fn".fa.gz
-        ref="${ref},${spike_in_fn}.fa"
-        geno_prefix="${genome_fn}-${spike_in_fn}"
-    fi
     echo "* Reference file(s): '$ref'"
     echo "* Value of geno_prefix: '$geno_prefix'"
     echo "* Value of anno_prefix: '$anno_prefix'"
 
-    # Fill in your application code here.
-
-    set -x
-    mkdir out
-    #bowtie2-build --offrate 3 -f ${ref} out/$geno_prefix  ### Definitely has an effect on results
-    bowtie2-build -f ${ref} out/$geno_prefix
-    # make sure the combined fa file is preserved in the archive, so that it isn't rebuilt each time
-    bowtie2-inspect out/$geno_prefix > out/$geno_prefix.fa
-    set +x
-
-    # Attempt to make bamCommentLines.txt. NOTE tabs handled by assignment.
-    echo "* Create bam header..."
-    set -x
-    refComment="@CO\tREFID:${genome_fn}"
-    annotationComment="@CO\tANNID:${annotation_fn}"
-    echo -e ${refComment} > out/${geno_prefix}_bamCommentLines.txt
-    echo -e ${annotationComment} >> out/${geno_prefix}_bamCommentLines.txt
-    if [ -n "$spike_in" ]; then
-        spikeInComment="@CO\tSPIKEID:${spike_in_fn}"
-        echo -e ${spikeInComment} >> out/${geno_prefix}_bamCommentLines.txt
+    # hg19/mm10 and male/female?
+    if [ -f /usr/bin/parse_property.py ]; then
+        genome=`parse_property.py -f "$ref_genome" -p genome`
+        gender=`parse_property.py -f "$ref_genome" -p gender`
+        anno=`parse_property.py -f "$annotations" -p annotation`
+    fi
+    if [ "$genome" == "" ]; then
+        if [[ $ref_root == *"hg19"* ]]; then
+            genome="hg19"
+        elif [[ $ref_root == *"GRCh38"* ]]; then
+            genome="GRCh38"
+        elif [[ $ref_root == *"mm10"* ]]; then
+            genome="mm10"
+        fi
+    fi
+    if [ "$genome" == "" ]; then
+        genome="unknown"
+        echo "* WARNING genome: '$genome'" 
+    else
+        echo "* genome: '$genome'" 
+    fi
+    if [ "$gender" == "" ]; then
+        if [[ $ref_root == *"female"* ]] || [[ $ref_root == *"XX"* ]]; then
+            gender="XX"
+        elif [[ $ref_root == *"male"* ]] || [[ $ref_root == *"XY"* ]]; then
+            gender="XY"
+        fi
+    fi
+    if [ "$gender" != "" ]; then
+        echo "* gender: '$gender'" 
+    fi
+    if [ "$anno" == "" ]; then
+        if [[ $anno_root == *"v19"* ]] || [[ $anno_root == *"V19"* ]]; then
+            anno="v19"
+            echo "* WARNING annotation version: '$anno'" 
+        elif [[ $anno_root == *"v24"* ]] || [[ $anno_root == *"V24"* ]]; then
+            anno="v24"
+        elif [[ $anno_root == *"M4"* ]]; then
+            anno="M4"
+        elif [[ $anno_root == *"M3"* ]]; then
+            anno="M3"
+        elif [[ $anno_root == *"M2"* ]]; then
+            anno="M2"
+        fi
+    fi
+    if [ "$anno" == "" ]; then
+        anno="unknown"
+        echo "* WARNING annotation version: '$anno'"
+    else 
+        echo "* annotation version: '$anno'" 
     fi
 
-    echo `cat "out/${geno_prefix}_bamCommentLines.txt"`
-    set +x
-
-    echo "* Run a 'quicky' tophat to generate index..."
+    # DX/ENCODE independent script is found in resources/usr/bin
+    echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    tophat --no-discordant --no-mixed -p 8 -z0 --min-intron-length 20 --max-intron-length 1000000 \
-           --read-mismatches 4 --read-edit-dist 4 --max-multihits 20 --library-type fr-firststrand \
-           --GTF "$annotation_fn".gtf --no-coverage-search \
-           --transcriptome-index=out/${anno_prefix} out/${geno_prefix} tiny.fq
+    lrna_index_tophat.sh ${ref_root}.fa.gz ${spike_root}.fa.gz ${anno_root}.gtf.gz tiny.fq.gz $anno $genome $gender
     set +x
+    echo "* ===== Returned from dnanexus and encodeD independent script ====="
+    archive_file="${genome}_${anno}_${spike_root}_tophatIndex.tgz"
+    if [ "$gender" == "famale" ] || [ "$gender" == "male" ] || [ "$gender" == "XX" ] || [ "$gender" == "XY" ]; then
+        archive_file="${genome}_${gender}_${anno}_${spike_root}_tophatIndex.tgz"
+    fi
 
-    echo "* Tar and upload results..."
-    echo `ls out/`
-    set -x
-    tar -czf ${genome_fn}_${annotation_fn}_tophatIndex.tgz out/${geno_prefix}* out/${anno_prefix}*
-    set +x
-
-    tophat_index=$(dx upload ${genome_fn}_${annotation_fn}_tophatIndex.tgz --property SW="$versions" --brief)
+    echo "* Upload results..."
+    tophat_index=$(dx upload $archive_file --property genome="$genome"   --property gender="$gender" \
+                                           --property annotation="$anno"  --property spike_in="$spike_root" \
+                                           --property SW="$versions" --brief)
 
     dx-jobutil-add-output tophat_index $tophat_index --class=file
     echo "* Finished."

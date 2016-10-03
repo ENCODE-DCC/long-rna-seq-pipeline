@@ -4,8 +4,8 @@
 main() {
     echo "* Installing python-dev cython python-scipy python-networkx..."
     sudo apt-get install -y gcc python-dev cython python-scipy python-networkx >> install.log 2>&1
-    echo "* Installing pysam..."
-    sudo easy_install pysam >> install.log 2>&1
+    #echo "* Installing pysam..."
+    #sudo easy_install pysam >> install.log 2>&1
     echo "* Installing grit..."
     wget https://github.com/nboley/grit/archive/2.0.5beta4.tar.gz -O grit.tgz
     mkdir grit_local
@@ -27,54 +27,36 @@ main() {
     echo "* Value of nthreads:    '$nthreads'"
 
     echo "* Download files..."
-    bam_fn=`dx describe "$rampage_marked_bam" --name`
-    bam_fn=${bam_fn%_rampage_star_marked.bam}
-    bam_fn=${bam_fn%.bam}
-    dx download "$rampage_marked_bam" -o "$bam_fn".bam
-    echo "* Bam file: '${bam_fn}.bam'"
+    bam_root=`dx describe "$rampage_marked_bam" --name`
+    bam_root=${bam_root%.bam}
+    bam_root=${bam_root%_rampage_star_marked}
+    dx download "$rampage_marked_bam" -o ${bam_root}.bam
+    echo "* Bam file: '${bam_root}.bam'"
 
-    control_fn=`dx describe "$control_bam" --name`
-    control_fn=${control_fn%.bam}
-    dx download "$control_bam" -o "$control_fn".bam
-    echo "* Control bam file: '${control_fn}.bam'"
+    control_root=`dx describe "$control_bam" --name`
+    control_root=${control_root%.bam}
+    dx download "$control_bam" -o "$control_root".bam
+    echo "* Control bam file: '${control_root}.bam'"
 
-    annotation_fn=`dx describe "$gene_annotation" --name`
-    annotation_fn=${annotation_fn%.gtf.gz}
-    dx download "$gene_annotation" -o "$annotation_fn".gtf.gz
-    gunzip "$annotation_fn".gtf.gz
-    echo "* Annotation file: '${annotation_fn}.gtf'"
+    annotation_root=`dx describe "$gene_annotation" --name`
+    annotation_root=${annotation_root%.gtf.gz}
+    dx download "$gene_annotation" -o "$annotation_root".gtf.gz
+    echo "* Annotation file: '${annotation_root}.gtf.gz'"
     
-    dx download "$chrom_sizes" -o chromSizes.txt
+    dx download "$chrom_sizes" -o chrom.sizes
 
-    peaks_root=${bam_fn}_rampage_peaks
-    echo "* Rampage peaks root: '${peaks_root}'"
+    # DX/ENCODE independent script is found in resources/usr/bin
+    echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
+    set -x
+    rampage_peaks.sh ${bam_root}.bam ${control_root}.bam ${annotation_root}.gtf.gz chrom.sizes $nthreads 
+    set +x
+    echo "* ===== Returned from dnanexus and encodeD independent script ====="
+    peaks_root=${bam_root}_rampage_peaks
     
-    echo "* Indexing bams..."
-    set -x
-    samtools index ${bam_fn}.bam 
-    samtools index ${control_fn}.bam 
-    set +x
-
-    echo "* Calling peaks..."
-    set -x
-    call_peaks --rampage-reads ${bam_fn}.bam --rnaseq-reads ${control_fn}.bam --threads $nthreads \
-               --reference ${annotation_fn}.gtf --exp-filter-fraction 0.05 --trim-fraction 0.01 \
-                --ucsc --outfname ${peaks_root}.gff --outfname-type gff \
-               --bed-peaks-ofname ${peaks_root}.bed \
-               --annotation-quantifications-ofname ${peaks_root}_quant.tsv
-    set +x
-    echo `ls`
- 
-    echo "* Converting bed to bigBed..."
-    set -x
-    grep "^chr" ${peaks_root}.bed | sort -k1,1 -k2,2n > peaks_polished.bed
-    bedToBigBed peaks_polished.bed -type=bed6+ -as=/usr/bin/tss_peak.as chromSizes.txt ${peaks_root}.bb
-    set +x
-
     echo "* Upload results..."
-    rampage_peaks_bed=$(dx upload ${peaks_root}.bed --property SW="$versions" --brief)
-    rampage_peaks_bb=$(dx upload ${peaks_root}.bb   --property SW="$versions" --brief)
-    rampage_peaks_gff=$(dx upload ${peaks_root}.gff --property SW="$versions" --brief)
+    rampage_peaks_bed=$(dx upload ${peaks_root}.bed.gz --property SW="$versions" --brief)
+    rampage_peaks_bb=$(dx upload ${peaks_root}.bb      --property SW="$versions" --brief)
+    rampage_peaks_gff=$(dx upload ${peaks_root}.gff.gz --property SW="$versions" --brief)
     rampage_peak_quants=$(dx upload ${peaks_root}_quant.tsv --property SW="$versions" --brief)
 
     dx-jobutil-add-output rampage_peaks_bed "$rampage_peaks_bed" --class=file

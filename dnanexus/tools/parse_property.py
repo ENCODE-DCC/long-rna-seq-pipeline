@@ -133,26 +133,64 @@ def file_describe(filePath,key=None,project=None,verbose=False):
     
     return value
 
+def file_details(filePath,key=None,project=None,verbose=False):
+    '''Returns dx file's description property matching 'key'.'''
+
+    dxfile = get_dxfile(filePath,project=project)    
+    
+    details = dxfile.describe(incl_details=True).get('details')
+    if not details:
+        sys.stderr.write('ERROR: unable to find details of file "' + filePath + '": \n') 
+        sys.exit(0)  # Do not error on tool run in dx script 
+    
+    if key == None:
+        if verbose:
+            sys.stderr.write(json.dumps(details) + '\n')
+        return details
+    
+    if key not in details:
+        sys.stderr.write('ERROR: unable to find "'+key+'" in details of file "' + filePath + '": \n') 
+        sys.exit(0)  # Do not error on tool run in dx script
+    value = details[key]
+         
+    if verbose:
+        sys.stderr.write(value + '\n')
+    
+    return value
+
+def folder_create_root(folder,verbose=False):
+    '''Returns a standard file name root when in folder {exp_acc}/repN_N.'''
+
+    if verbose:
+        sys.stderr.write("Trying to create root_name from: "+ folder + '\n')
+    
+    folders = folder.split('/')
+    exp = ''
+    rep = ''
+    for one_folder in reversed(folders):
+        if rep == '' and one_folder.startswith('rep'):
+            rep = one_folder
+        elif exp == '' and one_folder.startswith('ENCSR'):
+            exp = one_folder
+            break
+    
+    root = ''
+    if len(exp) > 0:
+        root = exp
+        if len(rep) > 0:
+            root += '_' + rep
+
+    if verbose:
+        sys.stderr.write(root + '\n')
+    
+    return root
+
 def file_create_root(filePath,project=None,verbose=False,quiet=False):
     '''Returns a standard file name root when in folder {exp_acc}/repN_N.'''
 
-    folder = file_describe(filePath,'folder',project=project,verbose=False)
-    folders = folder.split('/')
-    exp = ''
-    rep = folders[-1]
-    if not rep.startswith('rep'):
-        exp = rep
-        rep = ''
-    if len(folders) > 1 and exp == '':
-        exp = folders[-2]
-    if exp != '' and not exp.startswith('ENCSR'):
-        exp = ''
-    root = exp
-    if root != '' and rep != '':
-        root += '_' + rep
-         
-    if verbose:
-        sys.stderr.write(root + '\n')
+    folder = file_describe(filePath,'folder',project=project,verbose=verbose)
+    root = folder_create_root(folder,verbose=verbose)
+
     if root == '' and not quiet:  # Note, this is not an error when file is from a different dx context!
         sys.stderr.write("Found nothing for root: folder["+folder+"] path ["+filePath+"] \n")
         desc = file_describe(filePath,project=project,verbose=False)
@@ -216,12 +254,62 @@ def file_find_exp_id(filePath,project=None,verbose=False,quiet=False):
     
     return exp
 
+def job_describe(job_id,key=None,verbose=False):
+    '''Returns dx job's description property matching 'key'.'''
+
+    dxjob = None
+    try:
+        dxjob = dxpy.get_handler(job_id)
+    except:
+        sys.stderr.write('ERROR: unable to find job: "' + job_id + '": \n')
+        sys.exit(0)  # Do not error on tool run in dx script 
+    
+    desciption = dxjob.describe()
+        
+    if not desciption:
+        sys.stderr.write('ERROR: unable to find description of job "' + job_id + '": \n') 
+        sys.exit(0)  # Do not error on tool run in dx script 
+    
+    if key == None:
+        if verbose:
+            sys.stderr.write(json.dumps(desciption) + '\n')
+        return desciption
+    
+    if key not in desciption:
+        sys.stderr.write('ERROR: unable to find "'+key+'" in description of job "' + job_id + '": \n') 
+        sys.exit(0)  # Do not error on tool run in dx script
+    value = desciption[key]
+         
+    if verbose:
+        sys.stderr.write(value + '\n')
+    
+    return value
+
+def job_create_root(job_id,verbose=False,quiet=False):
+    '''Returns a standard file name root when in folder {exp_acc}/repN_N.'''
+
+    if verbose:
+        sys.stderr.write("Trying to create root_name from: "+ job_id + '\n')
+    
+    folder = job_describe(job_id,'folder',verbose=verbose)
+    root = folder_create_root(folder,verbose=verbose)
+
+    if root == '' and not quiet:  # Note, this is not an error when file is from a different dx context!
+        sys.stderr.write("Found nothing for root: folder["+folder+"] job ["+job_id+"] \n")
+        desc = job_describe(job_id,verbose=False)
+        sys.stderr.write(json.dumps(desc,indent=4) + '\n')
+    
+    return root
+
 def main():
     parser = argparse.ArgumentParser(description =  "Creates a json string of qc_metrics for a given applet. " + \
                                                     "Returns string to stdout and formatted json to stderr.")
     parser.add_argument('-f', '--file',
                         help='DX id, link or path to file.',
-                        required=True)
+                        required=False)
+    parser.add_argument('--job',
+                        help='DX id of job.',
+                        required=False)
     parser.add_argument('-p','--property',
                         help="Property name.",
                         default='QC',
@@ -242,6 +330,9 @@ def main():
                         help="Project (especially helpfule when calling from DX app).",
                         default=None,
                         required=False)
+    parser.add_argument('--details',
+                        help="Return details json.",
+                        default=None, action="store_true", required=False)
     parser.add_argument('--root_name', action="store_true", required=False, default=False, 
                         help="Return a standardized file name root based on file location.")
     parser.add_argument('--rep_tech', action="store_true", required=False, default=False, 
@@ -250,7 +341,7 @@ def main():
                         help="Return the exp_id based on file location.")
     parser.add_argument('-d', '--describe', action="store_true", required=False, default=False, 
                         help="Look for key in file description.")
-    parser.add_argument('-j', '--json', action="store_true", required=False, default=False, 
+    parser.add_argument('--json', action="store_true", required=False, default=False, 
                         help="Return json.")
     parser.add_argument('-q', '--quiet', action="store_true", required=False, default=False, 
                         help="Suppress non-error stderr messages.")
@@ -261,9 +352,20 @@ def main():
     if len(sys.argv) < 2:
         parser.print_usage()
         return
+    if args.file == None:
+        if args.job == None:
+            sys.stderr.write("Requires either '--file' or '--job' argument! \n")
+            sys.exit(0)
+        elif args.root_name == None:
+            sys.stderr.write("Requires '--file' argument! \n")
+            sys.exit(0)
+    
     
     if args.root_name:
-        root = file_create_root(args.file,project=args.project,verbose=args.verbose,quiet=args.quiet)
+        if args.job:
+            root = job_create_root(args.job,verbose=args.verbose,quiet=args.quiet)
+        else:
+            root = file_create_root(args.file,project=args.project,verbose=args.verbose,quiet=args.quiet)
         print root
         if not args.quiet:
             sys.stderr.write("root_name: '"+root+"'\n")
@@ -281,6 +383,16 @@ def main():
         print rep
         if not args.quiet:
             sys.stderr.write("rep: '"+rep+"'\n")
+        sys.exit(0)
+        
+    elif args.details:
+        details = file_details(args.file,args.key,project=args.project,verbose=args.verbose)
+        print json.dumps(details)
+        if args.key != None:
+            if not args.quiet:
+                sys.stderr.write(args.key + ": '"+json.dumps(details,indent=4,sort_keys=True)+"'\n")
+        elif not args.quiet:
+            sys.stderr.write(json.dumps(details,indent=4,sort_keys=True)+"\n")
         sys.exit(0)
         
     elif args.describe:
