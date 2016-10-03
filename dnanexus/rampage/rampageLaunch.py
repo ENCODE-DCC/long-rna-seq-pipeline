@@ -211,7 +211,7 @@ class RampageLaunch(Launch):
             psv['control'] = args.control
         
         if psv['paired_end'] and psv['assay_type'] == "cage":
-            print "CAGE is always expected to be single-end but mapping says otherwise."
+            print "ERROR: CAGE is always expected to be single-end but mapping says otherwise."
             sys.exit(1)
         elif not psv['paired_end'] and psv['assay_type'] == "rampage":
             print "Rampage is always expected to be paired-end but mapping says otherwise."

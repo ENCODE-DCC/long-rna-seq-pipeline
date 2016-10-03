@@ -2,8 +2,8 @@
 # rampage-peaks.sh
 
 main() {
-    echo "* Installing python-dev cython python-scipy python-networkx..."
-    sudo apt-get install -y gcc python-dev cython python-scipy python-networkx >> install.log 2>&1
+    #echo "* Installing python-dev cython python-scipy python-networkx..."
+    #sudo apt-get install -y gcc python-dev cython python-scipy python-networkx | tee -a install.log 2>&1
     #echo "* Installing pysam..."
     #sudo easy_install pysam >> install.log 2>&1
     echo "* Installing grit..."
@@ -11,7 +11,7 @@ main() {
     mkdir grit_local
     tar -xzf grit.tgz -C grit_local --strip-components=1
     cd grit_local
-    sudo python setup.py install >> ../install.log 2>&1
+    sudo python setup.py install | tee -a ../install.log 2>&1
     cd ..
 
     # If available, will print tool versions to stderr and json string to stdout
