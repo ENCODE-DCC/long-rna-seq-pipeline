@@ -14,10 +14,10 @@ ncpus=$6             # Number of cpus available.
 peaks_root=$7        # Root name of peaks result file (e.g. 'peaks' will result in peaks.bed.gz, peaks.bb, peaks.gtf.gz and peaks.tsv) 
 
 if [ "$assay_type" == "rampage" ] || [ "$assay_type" == "cage" ] ; then
-    echo '-- Running for $assay_type reads'
     reads_flag="--${assay_type}-reads"
+    echo "-- Running with '${reads_flag}'"
 else
-    echo '-- Unknown assay type: $assay_type' 
+    echo "-- Unknown assay type: '${assay_type}'" 
     exit -1; 
 fi
 
