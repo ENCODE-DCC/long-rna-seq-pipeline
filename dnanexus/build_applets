@@ -120,7 +120,7 @@ if [ "$virtual_applets" != "" ]; then
                 #echo "'$applet' is virtual of '$original'"
                 cd $applet
                 for link in $virtual_links; do
-                    ln -sf ../../${original}/$link $link
+                    cp -rf ../../${original}/$link $link
                 done
                 cd ..
                 break
@@ -134,7 +134,7 @@ if [ "$virtual_applets" != "" ]; then
             rm -f ${applet}/resources/usr/bin/$tool 
         done
         for link in $virtual_links; do
-            rm -f ${applet}/$link
+            rm -rf ${applet}/$link
         done
         cd ..
     done
