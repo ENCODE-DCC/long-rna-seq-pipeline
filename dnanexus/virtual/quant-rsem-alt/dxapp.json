@@ -30,8 +30,9 @@
     {
       "name": "paired_end",
       "label": "Library was paired ended",
-      "class": "boolean",
-      "default": false,
+      "class": "string",
+      "choices": [ "true", "TruSeq", "ScriptSeq", "false" ],
+      "default": "true",
       "optional": false
     },
     {

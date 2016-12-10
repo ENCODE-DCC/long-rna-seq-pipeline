@@ -31,7 +31,7 @@
       "name": "paired_end",
       "label": "Library was paired ended",
       "class": "string",
-      "choices": [ "true", "Tru-Seq", "Script-Seq", "false" ],
+      "choices": [ "true", "TruSeq", "ScriptSeq", "false" ],
       "default": "true",
       "optional": false
     },
