@@ -23,9 +23,12 @@ index_prefix=${grp%.grp}
 echo "-- Found index_prefix: '$index_prefix'"
 
 extraFlags=""
-if [ "$paired_end" == "true" ]; then
-    echo '-- Running for paired-end, stranded'
+if [ "$paired_end" == "true" ] || [ "$paired_end" == "Tru-Seq" ]; then
+    echo "-- Running for paired-end, stranded as 'Tru-Seq'"
     extraFlags="--paired-end --forward-prob 0"
+elif [ "$paired_end" == "Script-Seq" ]; then
+    echo "-- Running for paired-end, stranded as 'Script-Seq'"
+    extraFlags="--paired-end --forward-prob 1"
 else
     echo '-- Running for unpaired, unstranded'
 fi
