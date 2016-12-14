@@ -15,7 +15,7 @@ class LrnaLaunch(Launch):
 
     PIPELINE_HELP = "Launches '"+PIPELINE_NAME+"' pipeline analysis for one replicate. "
     ''' This pipline does not support combined replicates.'''
-                    
+
     GENOMES_SUPPORTED = ['hg19', 'GRCh38', 'mm10']
     ANNO_DEFAULTS = {'hg19': 'v19', 'GRCh38': 'v24', 'mm10': 'M4' }
     ANNO_ALLOWED = { 'hg19':   [ ANNO_DEFAULTS['hg19'] ],
@@ -73,7 +73,7 @@ class LrnaLaunch(Launch):
                                                      "star_index":      "star_index" },
                                         "results": { "star_genome_bam": "star_genome_bam",
                                                      "star_anno_bam":   "star_anno_bam",
-                                                     "star_log":        "star_log" }
+                                                   }  #"star_log":        "star_log" }
                             },
                             "align-star-pe":   {
                                         "app":     "align-star-pe",
@@ -83,7 +83,7 @@ class LrnaLaunch(Launch):
                                                      "star_index":      "star_index" },
                                         "results": { "star_genome_bam": "star_genome_bam",
                                                      "star_anno_bam":   "star_anno_bam",
-                                                     "star_log":        "star_log" }
+                                                   }  #"star_log":        "star_log" }
                             },
                             "starBwSe": {
                                         "app":     "bam-to-bigwig-unstranded",
@@ -103,7 +103,7 @@ class LrnaLaunch(Launch):
                             },
                             "quant-rsem":     {
                                         "app":     "quant-rsem",
-                                        "params":  { "paired_end":        "paired_end" },  #, "nthreads", "rnd_seed"
+                                        "params":  { "paired_type":       "paired_end" },  #, "nthreads", "rnd_seed"
                                         "inputs":  { "star_anno_bam":     "star_anno_bam",
                                                      "rsem_index":        "rsem_index" },
                                         "results": { "rsem_iso_results":  "rsem_iso_results",
@@ -111,7 +111,7 @@ class LrnaLaunch(Launch):
                             },
                             "quant-rsem-alt":     {
                                         "app":     "quant-rsem-alt",
-                                        "params":  { "paired_end":        "paired_end" },  #, "nthreads", "rnd_seed"
+                                        "params":  { "paired_type":       "paired_end" },  #, "nthreads", "rnd_seed"
                                         "inputs":  { "star_anno_bam":     "star_anno_bam",
                                                      "rsem_index":        "rsem_index" },
                                         "results": { "rsem_iso_results":  "rsem_iso_results",
@@ -273,6 +273,17 @@ class LrnaLaunch(Launch):
         # Some specific settings
         psv['nthreads']   = 8
         psv['rnd_seed']   = 12345
+
+        # Override paired-end with TruSeq or ScriptSeq, but only for quant-rsem
+        psv["paired_type"] = "true"
+        if not psv["paired_end"]:
+            psv["paired_type"] = "false"
+        else:
+            if psv.get('ScriptSeq',False): # file.replicate.library.document contains "/documents/F17c31e10-1542-42c6-8b4c-3afff95564cf%2F" 
+                psv["paired_type"] = "ScriptSeq"
+                print "Detected ScriptSeq"
+            else:
+                psv["paired_type"] = "TruSeq"
 
         # If annotation is not default, then add it to title
         if psv['annotation'] != self.ANNO_DEFAULTS[psv['genome']]:
