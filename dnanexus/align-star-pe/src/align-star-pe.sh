@@ -22,6 +22,13 @@ main() {
     echo "* Number of threads (default 8): '$nthreads'"
 
     #echo "* Download files..."
+    exp_rep_root=""
+    if [ -f /usr/bin/parse_property.py ]; then
+        new_root=`parse_property.py -f "'${reads1[0]}'" --project "${DX_PROJECT_CONTEXT_ID}" --root_name --quiet`
+        if [ "$new_root" != "" ]; then
+            exp_rep_root="${new_root}"
+        fi
+    fi
     outfile_name=""
     concat=""
     rm -f concat.fq
@@ -42,6 +49,13 @@ main() {
         echo "* Downloading concatenating ${file_root}.fq.gz file..."
         dx download "${reads1[$ix]}" -o - | gunzip >> concat.fq
     done
+    if [ "${concat}" != "" ]; then
+        if [ "${exp_rep_root}" != "" ]; then
+            outfile_name="${exp_rep_root}_reads1"
+        elif [ ${#outfile_name} -gt 200 ]; then
+            outfile_name="concatenated_reads1"
+        fi
+    fi
     mv concat.fq ${outfile_name}.fq
     echo "* Gzipping file..."
     gzip ${outfile_name}.fq
@@ -69,6 +83,13 @@ main() {
         echo "* Downloading and concatenating ${file_root}.fq.gz file..."
         dx download "${reads2[$ix]}" -o - | gunzip >> concat.fq
     done
+    if [ "${concat}" != "" ]; then
+        if [ "${exp_rep_root}" != "" ]; then
+            outfile_name="${exp_rep_root}_reads2"
+        elif [ ${#outfile_name} -gt 200 ]; then
+            outfile_name="concatenated_reads2"
+        fi
+    fi
     mv concat.fq ${outfile_name}.fq
     echo "* Gzipping file..."
     gzip ${outfile_name}.fq
@@ -77,11 +98,8 @@ main() {
     reads2_root=${outfile_name}
     ls -l ${reads2_root}.fq.gz
     bam_root="${reads1_root}_${reads2_root}"
-    if [ -f /usr/bin/parse_property.py ]; then
-        new_root=`parse_property.py --job "${DX_JOB_ID}" --root_name --quiet`
-        if [ "$new_root" != "" ]; then
-            bam_root="${new_root}"
-        fi
+    if [ "${exp_rep_root}" != "" ]; then
+        bam_root="${exp_rep_root}"
     fi
 
     echo "* Downloading star index archive..."

@@ -34,13 +34,14 @@ class SrnaLaunch(Launch):
                 "STEPS": {
                             "small-rna-align": {
                                 "app":      "small-rna-align", 
-                                "params": { "library_id":   "library_id", 
-                                            "nthreads":     "nthreads"      }, 
-                                "inputs": { "reads":        "reads", 
-                                            "star_index":   "star_index"    }, 
-                                "results": {"srna_bam":     "srna_bam",
-                                            "srna_quant":   "srna_quant", 
-                                            "star_log":     "star_log"      },
+                                "params": { "library_id":     "library_id",
+                                            "clipping_model": "clipping_model", 
+                                            "nthreads":       "nthreads"      }, 
+                                "inputs": { "reads":          "reads", 
+                                            "star_index":     "star_index"    }, 
+                                "results": {"srna_bam":       "srna_bam",
+                                            "srna_quant":     "srna_quant", 
+                                            "star_log":       "star_log"      },
                             }, 
                             "small-rna-signals": {
                                 "app":      "small-rna-signals", 
@@ -143,6 +144,16 @@ class SrnaLaunch(Launch):
 
         # Some specific settings
         psv['nthreads']   = 8
+
+        # By replicate:
+        for ltr in psv['reps'].keys():
+            if len(ltr) != 1: # only simple reps
+                continue
+            rep = psv['reps'][ltr]
+            rep["clipping_model"] = "ENCODE3" # Default
+            if "a_tailing" in rep:
+                rep["clipping_model"] = "A_Tailing_" + rep["a_tailing"]
+                print "%s detected for %s" % (rep["clipping_model"],rep["rep_tech"])
 
         # If annotation is not default, then add it to title
         if psv['annotation'] != self.ANNO_DEFAULTS[psv['genome']]:

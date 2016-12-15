@@ -1,9 +1,9 @@
 {
   "name": "align-tophat-se",
-  "title": "TopHat align - se (v1.0.7)",
+  "title": "TopHat align - se (v1.0.8)",
   "summary": "Align single-end (unstranded) reads to genome and transcriptome using tophat for the ENCODE long-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "authorizedUsers": [],
   "inputSpec": [
     {

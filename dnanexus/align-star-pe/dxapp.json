@@ -1,9 +1,9 @@
 {
   "name": "align-star-pe",
-  "title": "STAR align - pe (v2.1.0)",
+  "title": "STAR align - pe (v2.1.1)",
   "summary": "Align paired-end (stranded) reads to genome and transcriptome using STAR for the ENCODE long-rna-peq pipeline",
   "dxapi": "1.0.0",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "authorizedUsers": [],
   "inputSpec": [
     {
