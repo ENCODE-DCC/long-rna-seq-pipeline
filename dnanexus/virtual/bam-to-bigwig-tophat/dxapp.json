@@ -1,0 +1,91 @@
+{
+  "name": "bam-to-bigwig-tophat",
+  "title": "bam to signals - tophat (virtual-2.2.0)",
+  "summary": "Converts BAMs from alignments from stranded or unstranded libraries to bigwig format",
+  "dxapi": "1.0.0",
+  "version": "2.2.0",
+  "authorizedUsers": [],
+  "inputSpec": [
+    {
+      "name": "bam_file",
+      "label": "Input BAM file for all mapped reads",
+      "class": "file",
+      "optional": false,
+      "patterns": ["*_tophat.bam"]
+    },
+    {
+      "name": "chrom_sizes",
+      "label": "chomosome/name length file",
+      "class": "file",
+      "optional": false,
+      "patterns": ["*chrom.sizes","*.txt"]
+    },
+    {
+      "name": "stranded",
+      "label": "Strand specific library",
+      "class": "boolean",
+      "optional": false
+   }
+  ],
+  "outputSpec": [
+    {
+      "name": "minus_all_bw",
+      "label": "BigWig file for all minus-stranded reads",
+      "class": "file",
+      "patterns": ["*_minusAll.bw"],
+      "optional": true
+    },
+    {
+      "name": "minus_uniq_bw",
+      "label": "BigWig file of uniquely mapped minus-stranded reads",
+      "class": "file",
+      "patterns": ["*_minusUniq.bw"],
+      "optional": true
+    },
+    {
+      "name": "plus_all_bw",
+      "label": "BigWig file for all plus-stranded reads",
+      "class": "file",
+      "patterns": ["*_plusAll.bw"],
+      "optional": true
+    },
+    {
+      "name": "plus_uniq_bw",
+      "label": "BigWig file of uniquely mapped plus-stranded reads",
+      "class": "file",
+      "patterns": ["*_plusUniq.bw"],
+      "optional": true
+    },
+    {
+      "name": "all_bw",
+      "label": "BigWig file for all unstranded reads",
+      "class": "file",
+      "patterns": ["*_all.bw"],
+      "optional": true
+    },
+    {
+      "name": "uniq_bw",
+      "label": "BigWig file of uniquely mapped unstranded reads",
+      "class": "file",
+      "patterns": ["*_uniq.bw"],
+      "optional": true
+    }
+  ],
+  "runSpec": {
+    "interpreter": "bash",
+    "file": "src/bam-to-bigwig.sh",
+    "systemRequirements": {
+      "main": {
+        "instanceType": "mem3_hdd2_x2"
+      }
+    }
+  },
+  "access": {
+    "network": [
+      "*"
+    ]
+  },
+  "categories": [
+    "ENCODE"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+    "bam_file": {
+        "$dnanexus_link": "file-BP7Fkk805bqVVjK45j2QY05y"
+    }, 
+    "bai_file": {
+        "$dnanexus_link": "file-BP7Fkkj05bqVVjK45j2QY07G"
+    }, 
+    "chr_index": {
+        "$dnanexus_link": {
+            "project": "project-BKbfvF00Qy5PZF5V7Gv003v7", 
+            "id": "file-BP4pJ580Qy57pYPx35BQ02fy"
+        }
+    }
+}
+

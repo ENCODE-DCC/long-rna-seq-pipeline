@@ -6,11 +6,11 @@
 
 applet_dest=`cat ~/.dnanexus_config/DX_PROJECT_CONTEXT_NAME`
 applets="merge-annotation prep-star prep-rsem prep-tophat"
-applets="$applets align-tophat-pe align-star-pe bam-to-bigwig-stranded quant-rsem mad-qc"
-applets="$applets align-tophat-se align-star-se bam-to-bigwig-unstranded"
+applets="$applets align-tophat-pe align-star-pe bam-to-bigwig quant-rsem mad-qc"
+applets="$applets align-tophat-se align-star-se"
 
 tools="tool_versions.py qc_metrics.py parse_property.py"
-virtual_pairs="bam-to-bigwig-stranded:bam-to-bigwig-stranded-tophat bam-to-bigwig-unstranded:bam-to-bigwig-unstranded-tophat"
+virtual_pairs="bam-to-bigwig:bam-to-bigwig-se bam-to-bigwig:bam-to-bigwig-tophat bam-to-bigwig:bam-to-bigwig-se-tophat"
 virtual_pairs="$virtual_pairs quant-rsem:quant-rsem-alt mad-qc:mad-qc-alt"
 virtual_links="src resources Readme.developer.md Readme.md"
 

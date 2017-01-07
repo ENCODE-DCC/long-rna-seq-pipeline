@@ -1,9 +1,9 @@
 {
   "name": "quant-rsem",
-  "title": " RSEM quantify genes - pe (v1.3.0)",
+  "title": " RSEM quantify genes - pe (v1.4.0)",
   "summary": "Do genome and transcription quantitations with RSEM from STAR alignments",
   "dxapi": "1.0.0",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -30,10 +30,16 @@
     {
       "name": "paired_end",
       "label": "Library was paired ended",
-      "class": "string",
-      "choices": [ "true", "TruSeq", "ScriptSeq", "false" ],
-      "default": "true",
+      "class": "boolean",
       "optional": false
+    },
+    {
+      "name": "read_strand",
+      "label": "Read1 orientation (default: unstranded)",
+      "class": "string",
+      "choices": [ "reverse", "-", "TruSeq", "forward", "+", "ScriptSeq", "unstranded" ],
+      "default": "unstranded",
+      "optional": true
     },
     {
       "name": "nthreads",
