@@ -1,9 +1,9 @@
 {
   "name": "rampage-signals",
-  "title": "bam to signals - Rampage/Cage (v1.1.1)",
+  "title": "bam to signals - Rampage/Cage (v1.2.0)",
   "summary": "Converts 'Marked' BAMs 5' reads to bigwig format for rampage-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -19,6 +19,12 @@
       "class": "file",
       "optional": false,
       "patterns": ["*chrom.sizes","*.txt"]
+    },
+    {
+      "name": "stranded",
+      "label": "Strand specific library",
+      "class": "boolean",
+      "optional": false
     }
   ],
   "outputSpec": [
@@ -26,25 +32,43 @@
       "name": "all_plus_bw",
       "label": "BigWig file for all 5' plus-stranded reads",
       "class": "file",
-      "patterns": ["*_5p_plusAll.bw"]
+      "patterns": ["*_5p_plusAll.bw"],
+      "optional": true
     },
     {
       "name": "unique_plus_bw",
       "label": "BigWig file of uniquely mapped 5' plus-stranded reads",
       "class": "file",
-      "patterns": ["*_5p_plusUniq.bw"]
+      "patterns": ["*_5p_plusUniq.bw"],
+      "optional": true
     },
     {
       "name": "all_minus_bw",
       "label": "BigWig file for all 5' minus-stranded reads",
       "class": "file",
-      "patterns": ["*_5p_minusAll.bw"]
+      "patterns": ["*_5p_minusAll.bw"],
+      "optional": true
     },
     {
       "name": "unique_minus_bw",
       "label": "BigWig file of uniquely mapped 5' minus-stranded reads",
       "class": "file",
-      "patterns": ["*_5p_minusUniq.bw"]
+      "patterns": ["*_5p_minusUniq.bw"],
+      "optional": true
+    },
+    {
+      "name": "all_bw",
+      "label": "BigWig file for all unstranded reads",
+      "class": "file",
+      "patterns": ["*_5p_all.bw"],
+      "optional": true
+    },
+    {
+      "name": "uniq_bw",
+      "label": "BigWig file of uniquely mapped unstranded reads",
+      "class": "file",
+      "patterns": ["*_5p_uniq.bw"],
+      "optional": true
     }
   ],
   "runSpec": {

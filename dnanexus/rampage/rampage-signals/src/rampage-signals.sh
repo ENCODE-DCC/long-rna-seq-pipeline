@@ -17,6 +17,7 @@ main() {
 
     echo "Value of bam_file:    '$rampage_marked_bam'"
     echo "Value of chrom_sizes: '$chrom_sizes'"
+    echo "Value of stranded:    '$stranded'"
 
     echo "* Download files..."
     bam_root=`dx describe "$rampage_marked_bam" --name`
@@ -34,20 +35,28 @@ main() {
     signal_root=${bam_root}_${assay_type}_5p
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    rampage_signal.sh ${bam_root}.bam chrom.sizes $signal_root 
+    rampage_signal.sh ${bam_root}.bam chrom.sizes $signal_root $stranded 
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
 
     echo "* Upload results..."
-    all_minus_bw=$(dx upload ${signal_root}_minusAll.bw     --property SW="$versions" --brief)
-    all_plus_bw=$(dx upload ${signal_root}_plusAll.bw       --property SW="$versions" --brief)
-    unique_minus_bw=$(dx upload ${signal_root}_minusUniq.bw --property SW="$versions" --brief)
-    unique_plus_bw=$(dx upload ${signal_root}_plusUniq.bw   --property SW="$versions" --brief)
+    if [ "$stranded" == "true" ]; then
+        all_minus_bw=$(dx upload ${signal_root}_minusAll.bw     --property SW="$versions" --brief)
+        all_plus_bw=$(dx upload ${signal_root}_plusAll.bw       --property SW="$versions" --brief)
+        unique_minus_bw=$(dx upload ${signal_root}_minusUniq.bw --property SW="$versions" --brief)
+        unique_plus_bw=$(dx upload ${signal_root}_plusUniq.bw   --property SW="$versions" --brief)
 
-    dx-jobutil-add-output all_minus_bw "$all_minus_bw" --class=file
-    dx-jobutil-add-output all_plus_bw "$all_plus_bw" --class=file
-    dx-jobutil-add-output unique_minus_bw "$unique_minus_bw" --class=file
-    dx-jobutil-add-output unique_plus_bw "$unique_plus_bw" --class=file
+        dx-jobutil-add-output all_minus_bw "$all_minus_bw" --class=file
+        dx-jobutil-add-output all_plus_bw "$all_plus_bw" --class=file
+        dx-jobutil-add-output unique_minus_bw "$unique_minus_bw" --class=file
+        dx-jobutil-add-output unique_plus_bw "$unique_plus_bw" --class=file
+    else
+        all_bw=$(dx upload ${signal_root}_all.bw   --property SW="$versions" --brief)
+        uniq_bw=$(dx upload ${signal_root}_uniq.bw --property SW="$versions" --brief)
+
+        dx-jobutil-add-output all_bw "$all_bw" --class=file
+        dx-jobutil-add-output uniq_bw "$uniq_bw" --class=file
+    fi
 
     echo "* Finished."
 }
