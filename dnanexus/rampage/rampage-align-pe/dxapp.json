@@ -1,9 +1,9 @@
 {
   "name": "rampage-align-pe",
-  "title": "STAR align - Rampage/Cage (v1.1.2)",
+  "title": "STAR align - Rampage/Cage (v1.1.3)",
   "summary": "Align paired or single-end reads to genome and transcriptome using STAR for the ENCODE rampage-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -43,7 +43,7 @@
     },
     {
       "name": "nthreads",
-      "label": "Number of threads to use",
+      "label": "Number of GB of memory",
       "class": "int",
       "optional": true,
       "default": 8
@@ -86,9 +86,6 @@
     "file": "src/rampage-align-pe.sh",
     "systemRequirements": {
       "main": {
-        "instanceType": "mem3_hdd2_x8"
-      },
-      "myEntryPoint": {
         "instanceType": "mem3_hdd2_x8"
       }
     }

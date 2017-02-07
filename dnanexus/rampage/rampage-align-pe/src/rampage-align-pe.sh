@@ -11,7 +11,7 @@ main() {
 
     # If available, will print tool versions to stderr and json string to stdout
     versions=''
-    if [ -f /usr/bin/tool_versions.py ]; then 
+    if [ -f /usr/bin/tool_versions.py ]; then
         versions=`tool_versions.py --dxjson dnanexus-executable.json`
     fi
 
@@ -22,7 +22,24 @@ main() {
     echo "* Value of star_index: '$star_index'"
     echo "* Value of library_id: '$library_id'"
     echo "* Value of assay_type: '$assay_type'"
-    echo "* Number of threads (default 8): '$nthreads'"
+
+    # Determine memory available
+    memory_GB=60
+    if [ -f /usr/bin/parse_property.py ]; then
+        instance_type=`parse_property.py --job ${DX_JOB_ID} --describe --key instanceType --quiet`
+        if [ "$instance_type" == "mem3_hdd2_x8" ]; then
+            memory_GB=60
+        elif [ "$instance_type" == "mem3_ssd1_x16" ]; then
+            memory_GB=100
+        elif [ "$instance_type" == "mem3_ssd1_x32" ]; then
+            memory_GB=220
+        elif [ "$instance_type" == "mem1_hdd2_x32" ] || [ "$instance_type" == "mem3_ssd1_x8" ]; then
+            memory_GB=50
+        else
+            echo "* WARNING: unexpected instance type: '$instance_type''"
+        fi
+        echo "* Memory to use: '${memory_GB}GB'"
+    fi
 
     #echo "* Download files..."
     exp_rep_root=""
@@ -45,7 +62,7 @@ main() {
         else
             outfile_name="${file_root}_${outfile_name}"
             if [ "${concat}" == "" ]; then
-                outfile_name="${outfile_name}_concat" 
+                outfile_name="${outfile_name}_concat"
                 concat="s concatenated as"
             fi
         fi
@@ -64,13 +81,13 @@ main() {
     gzip ${outfile_name}.fq
     echo "* Reads1 fastq${concat} file: '${outfile_name}.fq.gz'"
     reads1_root=${outfile_name}
-    reads1_fq_gz=${reads1_root}.fq.gz 
+    reads1_fq_gz=${reads1_root}.fq.gz
     ls -l $reads1_fq_gz
 
     outfile_name=""
     concat=""
     rm -f concat.fq
-    reads2_fq_gz="" 
+    reads2_fq_gz=""
     if [ ${#reads2[@]}  -gt 0 ]; then
         for ix in ${!reads2[@]}
         do
@@ -82,7 +99,7 @@ main() {
             else
                 outfile_name="${file_root}_${outfile_name}"
                 if [ "${concat}" == "" ]; then
-                    outfile_name="${outfile_name}_concat" 
+                    outfile_name="${outfile_name}_concat"
                     concat="s concatenated as"
                 fi
             fi
@@ -102,10 +119,10 @@ main() {
         echo "* Reads2 fastq${concat} file: '${outfile_name}.fq.gz'"
         ls -l ${outfile_name}.fq.gz
         reads2_root=${outfile_name}
-        reads2_fq_gz=${reads2_root}.fq.gz 
+        reads2_fq_gz=${reads2_root}.fq.gz
         ls -l $reads2_fq_gz
     fi
-        
+
     if [ ${#reads2[@]} -gt 0 ]; then
         bam_root="${reads1_root}_${reads2_root}"
     else
@@ -117,12 +134,12 @@ main() {
 
     echo "* Downloading star index archive..."
     dx download "$star_index" -o star_index.tgz
-    
+
     # DX/ENCODE independent script is found in resources/usr/bin
     bam_root="${bam_root}_${assay_type}_star"
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    rampage_align_star.sh star_index.tgz $reads1_fq_gz $reads2_fq_gz "$library_id" $nthreads $bam_root
+    rampage_align_star.sh star_index.tgz $reads1_fq_gz $reads2_fq_gz "$library_id" $nthreads ${memory_GB} $bam_root
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
 
