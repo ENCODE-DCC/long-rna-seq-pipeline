@@ -15,7 +15,7 @@ class RampageLaunch(Launch):
     PIPELINE_HELP = "Launches '"+PIPELINE_NAME+"' pipeline " + \
                     "analysis for one replicate or combined replicates. "
     ''' This help title should name pipline and whether combined replicates are supported.'''
-                    
+
     GENOMES_SUPPORTED = ['hg19', 'GRCh38', 'mm10']
     ANNO_DEFAULTS = {'hg19': 'v19', 'GRCh38': 'v24', 'mm10': 'M4' }
     ANNO_ALLOWED = { 'hg19': [ ANNO_DEFAULTS['hg19'] ],
@@ -47,24 +47,24 @@ class RampageLaunch(Launch):
                                 "inputs":  { "reads1":     "reads1",
                                              "reads2":     "reads2",
                                              "star_index": "star_index" },
-                                "results": { "rampage_marked_bam": "rampage_marked_bam", 
+                                "results": { "rampage_marked_bam": "rampage_marked_bam",
                                              "rampage_star_log": "rampage_star_log" }
                             },
                             "rampage-signals": {
                                 "app":    "rampage-signals",
-                                "params":  {},
-                                "inputs":  { "chrom_sizes": "chrom_sizes", 
+                                "params":  {"stranded":       "stranded"},
+                                "inputs":  { "chrom_sizes": "chrom_sizes",
                                              "rampage_marked_bam": "rampage_marked_bam" },
-                                "results": { "all_plus_bw":    "all_plus_bw",    
+                                "results": { "all_plus_bw":    "all_plus_bw",
                                              "all_minus_bw":    "all_minus_bw",
-                                             "unique_plus_bw": "unique_plus_bw", 
+                                             "unique_plus_bw": "unique_plus_bw",
                                              "unique_minus_bw": "unique_minus_bw" }
                             },
                             "rampage-peaks": {
                                 "app":     "rampage-peaks",
                                 "params":  { "assay_type": "assay_type", "nthreads": "nthreads" },
-                                "inputs":  { "control_bam": "control_bam", 
-                                             "gene_annotation": "gene_annotation", 
+                                "inputs":  { "control_bam": "control_bam",
+                                             "gene_annotation": "gene_annotation",
                                              "chrom_sizes": "chrom_sizes",
                                              "rampage_marked_bam": "rampage_marked_bam" },
                                 "results": { "rampage_peaks_bed":  "rampage_peaks_bed",
@@ -80,8 +80,8 @@ class RampageLaunch(Launch):
                             "rampage-idr": {
                                 "app":     "rampage-idr",
                                 "params":  {},
-                                "inputs":  { "peaks_a": "peaks_a", 
-                                             "peaks_b": "peaks_b", 
+                                "inputs":  { "peaks_a": "peaks_a",
+                                             "peaks_b": "peaks_b",
                                              "chrom_sizes": "chrom_sizes" },
                                 "results": { "rampage_idr_png": "rampage_idr_png",
                                              "rampage_idr_bb":  "rampage_idr_bb",
@@ -90,7 +90,7 @@ class RampageLaunch(Launch):
                             "rampage-mad-qc": {
                                         "app":     "rampage-mad-qc",
                                         "params":  {},
-                                        "inputs":  { "quants_a": "quants_a", 
+                                        "inputs":  { "quants_a": "quants_a",
                                                      "quants_b": "quants_b" },
                                         "results": { "mad_plot": "mad_plot" }
                             },
@@ -171,11 +171,11 @@ class RampageLaunch(Launch):
 
     def __init__(self):
         Launch.__init__(self)
-        
+
     def get_args(self):
         '''Parse the input arguments.'''
         ap = Launch.get_args(self,parse=False)
-        
+
         # NOTE: Could override get_args() to have this non-generic control message
         #ap.add_argument('-c', '--control',
         #                help='The control bam for peak calling.',
@@ -193,7 +193,7 @@ class RampageLaunch(Launch):
         '''Adds pipeline specific variables to a dict, for use building the workflow.'''
         #args.pe = True # This is necessary to ensure templating does what it must.
         psv = Launch.pipeline_specific_vars(self,args)
-        
+
         # Could be multiple annotations supported per genome
         psv['annotation'] = args.annotation
         if psv['genome'] != self.GENOME_DEFAULT and psv['annotation'] == self.ANNO_DEFAULT:
@@ -209,20 +209,22 @@ class RampageLaunch(Launch):
         psv['nthreads']   = 8
         if not self.template:
             psv['control'] = args.control
-        
+
         if psv['paired_end'] and psv['assay_type'] == "cage":
             print "ERROR: CAGE is always expected to be single-end but mapping says otherwise."
             sys.exit(1)
         elif not psv['paired_end'] and psv['assay_type'] == "rampage":
             print "Rampage is always expected to be paired-end but mapping says otherwise."
             sys.exit(1)
+        if not psv["stranded"]:
+            print "Detected unstranded library"
 
         # run will either be for combined or single rep.
         if not self.combined_reps:
             run = psv['reps']['a']  # If not combined then run will be for the first (only) replicate
         else:
             run = psv
-            
+
         # If annotation is not default, then add it to title
         if psv['annotation'] != self.ANNO_DEFAULTS[psv['genome']]:
             psv['title'] += ', ' + psv['annotation']
