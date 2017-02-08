@@ -47,8 +47,7 @@ class RampageLaunch(Launch):
                                 "inputs":  { "reads1":     "reads1",
                                              "reads2":     "reads2",
                                              "star_index": "star_index" },
-                                "results": { "rampage_marked_bam": "rampage_marked_bam",
-                                             "rampage_star_log": "rampage_star_log" }
+                                "results": { "rampage_marked_bam": "rampage_marked_bam" }
                             },
                             "rampage-signals": {
                                 "app":    "rampage-signals",
