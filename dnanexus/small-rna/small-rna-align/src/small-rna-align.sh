@@ -11,13 +11,14 @@ main() {
 
     # If available, will print tool versions to stderr and json string to stdout
     versions=''
-    if [ -f /usr/bin/tool_versions.py ]; then 
+    if [ -f /usr/bin/tool_versions.py ]; then
         versions=`tool_versions.py --dxjson dnanexus-executable.json`
     fi
 
     echo "* Value of reads: '$reads'"
     echo "* Value of star_index: '$star_index'"
     echo "* Value of library_id: '$library_id'"
+    echo "* Value of clipping_model: '$clipping_model'"
     echo "* Value of nthreads: '$nthreads'"
 
     #echo "* Download files..."
@@ -34,7 +35,7 @@ main() {
         else
             outfile_name="${file_root}_${outfile_name}"
             if [ "${concat}" == "" ]; then
-                outfile_name="${outfile_name}_concat" 
+                outfile_name="${outfile_name}_concat"
                 concat="s concatenated as"
             fi
         fi
@@ -61,7 +62,7 @@ main() {
     # DX/ENCODE independent script is found in resources/usr/bin
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    srna_align.sh star_index.tgz ${reads_root}.fq.gz "$library_id" $nthreads $bam_root
+    srna_align.sh star_index.tgz ${reads_root}.fq.gz "$library_id" $nthreads $bam_root $clipping_model
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
     bam_root="${bam_root}_srna_star"
