@@ -43,7 +43,7 @@
     },
     {
       "name": "nthreads",
-      "label": "Number of GB of memory",
+      "label": "Number of threads to use",
       "class": "int",
       "optional": true,
       "default": 8
