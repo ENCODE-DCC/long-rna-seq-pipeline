@@ -15,7 +15,7 @@ class SrnaLaunch(Launch):
 
     PIPELINE_HELP = "Launches '"+PIPELINE_NAME+"' pipeline analysis for one replicate. "
     ''' This pipline does not support combined replicates.'''
-                    
+
     GENOMES_SUPPORTED = ['hg19', 'GRCh38', 'mm10']
     ANNO_DEFAULTS = {'hg19': 'v19', 'GRCh38': 'v24', 'mm10': 'M4' }
     ANNO_ALLOWED = { 'hg19': [ ANNO_DEFAULTS['hg19'] ],
@@ -26,61 +26,62 @@ class SrnaLaunch(Launch):
 
     PIPELINE_BRANCH_ORDER = [ "REP", "COMBINED_REPS" ]
     '''Currently there are no combined replicate processing steps.'''
-    
+
     PIPELINE_BRANCHES = {
     #'''Each branch must define the 'steps' and their (artificially) linear order.'''
         "REP": {
                 "ORDER": [  "small-rna-align", "small-rna-signals"  ],
                 "STEPS": {
                             "small-rna-align": {
-                                "app":      "small-rna-align", 
-                                "params": { "library_id":   "library_id", 
-                                            "nthreads":     "nthreads"      }, 
-                                "inputs": { "reads":        "reads", 
-                                            "star_index":   "star_index"    }, 
+                                "app":      "small-rna-align",
+                                "params": { "library_id":   "library_id",
+                                            "clipping_model": "clipping_model",
+                                            "nthreads":     "nthreads"      },
+                                "inputs": { "reads":        "reads",
+                                            "star_index":   "star_index"    },
                                 "results": {"srna_bam":     "srna_bam",
-                                            "srna_quant":   "srna_quant", 
+                                            "srna_quant":   "srna_quant",
                                             "star_log":     "star_log"      },
-                            }, 
+                            },
                             "small-rna-signals": {
-                                "app":      "small-rna-signals", 
-                                "inputs": { "srna_bam":         "srna_bam", 
-                                            "chrom_sizes":      "chrom_sizes"       }, 
-                                "results": {"all_minus_bw":     "all_minus_bw", 
-                                            "unique_plus_bw":   "unique_plus_bw", 
-                                            "all_plus_bw":      "all_plus_bw", 
+                                "app":      "small-rna-signals",
+                                "inputs": { "srna_bam":         "srna_bam",
+                                            "chrom_sizes":      "chrom_sizes"       },
+                                "results": {"all_minus_bw":     "all_minus_bw",
+                                            "unique_plus_bw":   "unique_plus_bw",
+                                            "all_plus_bw":      "all_plus_bw",
                                             "unique_minus_bw":  "unique_minus_bw"   },
-                            }, 
+                            },
                 },
         },
         "COMBINED_REPS": {
                 "ORDER": [  "small-rna-mad-qc" ],
                 "STEPS": {
                             "small-rna-mad-qc": {
-                                "app":      "small-rna-mad-qc", 
-                                "inputs": { "quants_a":         "quants_a", 
+                                "app":      "small-rna-mad-qc",
+                                "inputs": { "quants_a":         "quants_a",
                                             "quants_b":         "quants_b",
-                                            "annotations":      "annotations"   }, 
+                                            "annotations":      "annotations"   },
                                 "results": {"mad_plot":         "mad_plot"      },
                             },
-                
+
                 },
         },
     }
-    
+
     FILE_GLOBS = {
-        #"reads":            "/*_concat.fq.gz", 
-        "srna_bam":         "/*_srna_star.bam", 
-        "star_log":         "/*_srna_star_Log.final.out", 
-        "srna_quant":       "/*_srna_star_quant.tsv", 
-        "all_minus_bw":     "/*_small_minusAll.bw", 
-        "all_plus_bw":      "/*_small_plusAll.bw", 
+        #"reads":            "/*_concat.fq.gz",
+        "srna_bam":         "/*_srna_star.bam",
+        "star_log":         "/*_srna_star_Log.final.out",
+        "srna_quant":       "/*_srna_star_quant.tsv",
+        "all_minus_bw":     "/*_small_minusAll.bw",
+        "all_plus_bw":      "/*_small_plusAll.bw",
         "unique_minus_bw":  "/*_small_minusUniq.bw",
-        "unique_plus_bw":   "/*_small_plusUniq.bw", 
+        "unique_plus_bw":   "/*_small_plusUniq.bw",
         "quants_a":         "/*_srna_star_quant.tsv",
         "quants_b":         "/*_srna_star_quant.tsv",
-        "mad_plot":         "/*_mad_plot.png", 
-    }    
+        "mad_plot":         "/*_mad_plot.png",
+    }
 
     REFERENCE_FILES = {
         # For looking up reference file names.
@@ -109,11 +110,11 @@ class SrnaLaunch(Launch):
 
     def __init__(self):
         Launch.__init__(self)
-        
+
     def get_args(self):
         '''Parse the input arguments.'''
         ap = Launch.get_args(self,parse=False)
-        
+
         ap.add_argument('-a', '--annotation',
                         help="Label of annotation (default: '" + self.ANNO_DEFAULT + "')",
                         choices=[self.ANNO_DEFAULT, 'M2','M3','M4'],
@@ -126,7 +127,7 @@ class SrnaLaunch(Launch):
         psv = Launch.pipeline_specific_vars(self,args)
 
         # Now add pipline specific variables and tests
-        
+
         # Could be multiple annotations supported per genome
         psv['annotation'] = args.annotation
         if psv['genome'] != self.GENOME_DEFAULT and psv['annotation'] == self.ANNO_DEFAULT:
@@ -134,7 +135,7 @@ class SrnaLaunch(Launch):
         if psv['annotation'] not in self.ANNO_ALLOWED[psv['genome']]:
             print psv['genome']+" has no "+psv['annotation']+" annotation."
             sys.exit(1)
-        
+
         # Paired ends?
         if psv['paired_end']:
             print "Small-RNA is always expected to be single-end but mapping says otherwise."
@@ -143,6 +144,16 @@ class SrnaLaunch(Launch):
 
         # Some specific settings
         psv['nthreads']   = 8
+
+        # By replicate:
+        for ltr in psv['reps'].keys():
+            if len(ltr) != 1: # only simple reps
+                continue
+            rep = psv['reps'][ltr]
+            rep["clipping_model"] = "ENCODE3" # Default
+            if "a_tailing" in rep:
+                rep["clipping_model"] = "A_Tailing_" + rep["a_tailing"]
+                print "%s detected for %s" % (rep["clipping_model"],rep["rep_tech"])
 
         # If annotation is not default, then add it to title
         if psv['annotation'] != self.ANNO_DEFAULTS[psv['genome']]:
