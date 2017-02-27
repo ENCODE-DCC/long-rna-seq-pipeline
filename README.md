@@ -1,5 +1,5 @@
 # long rna-seq-pipeline
-STAR based ENCODE Long RNA-Seq processing pipeline, for >200bp: **Pipeline Restrictions**
+**Pipeline Restrictions** for STAR based ENCODE Long RNA-Seq processing pipeline, >200bp
 
 * The read length should be a minimum of 50 base pairs.
 * Sequencing may be paired- or single-end, as long as sequencing type is specified and read pairs are indicated.
@@ -11,7 +11,7 @@ STAR based ENCODE Long RNA-Seq processing pipeline, for >200bp: **Pipeline Restr
 * Gene and transcript quantification files are annotated to either GENCODE V24 or M4 (https://www.encodeproject.org/references/ENCSR884DHJ/)
 
 # small rna-seq pipeline
-STAR based ENCODE Long RNA-Seq processing pipeline, for <200bp: **Pipeline Restrictions**
+ **Pipeline Restrictions** for STAR based ENCODE Long RNA-Seq processing pipeline, <200bp
 
 * The read length should be a minimum of 50 base pairs.
 * Sequencing should be single-ended.
