@@ -34,4 +34,14 @@ OUTPUTS: star-index.tgz(a)         small-rna.bam(b)      unique-plus.bw         
                                                          all-plus.bw
                                                          all-minus.bw
 ```
+---------
+## Pipeline Restrictions for STAR based ENCODE small RNA-seq processing pipeline, <200bp
+
+* The read length should be a minimum of 50 base pairs.
+* Sequencing should be single-ended.
+* All Illumina platforms are supported for use in the uniform pipeline; colorspace (SOLiD) are not supported.
+* Barcodes and spike-in sequences, if present in the fastq, must be indicated.
+* Library insert size range must be indicated. 
+* Alignment files are mapped to either the GRCh38 or mm10 (https://www.encodeproject.org/references/ENCSR425FOI/) sequences.
+* Gene and transcript quantification files are annotated to either GENCODE V24 or M4 (https://www.encodeproject.org/references/ENCSR884DHJ/)
                                                          
