@@ -43,4 +43,14 @@ OUTPUTS: rampage.bam(a)         unique-plus.bw    peaks.gtf          peaks-idr.b
                                 all-plus.bw       peaks.bb           idr-plot.png
                                 all-minus.bw      quants.tsv(c)
 ```
+---------
+## Uniform Processing Pipeline Restrictions
 
+* Sequencing must be paired-ended
+* The read length must be a minimum of 50 base pairs. 
+* All Illumina platforms are supported for use in the uniform pipeline; colorspace (SOLiD) are not supported.
+* Barcodes and spike-ins, if present in the fastq, must be indicated. 
+* Each RAMPAGE experiment must have a corresponding RNA-seq experiment as a control. 
+* Library insert size range must be indicated. 
+* Alignment files are mapped to either the GRCh38 or mm10 sequences.
+* Gene and transcript quantification files are annotated to either GENCODE V24 or M4.
