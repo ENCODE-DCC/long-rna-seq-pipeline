@@ -11,7 +11,7 @@ main() {
 
     # If available, will print tool versions to stderr and json string to stdout
     versions=''
-    if [ -f /usr/bin/tool_versions.py ]; then 
+    if [ -f /usr/bin/tool_versions.py ]; then
         versions=`tool_versions.py --dxjson dnanexus-executable.json`
     fi
 
@@ -20,6 +20,24 @@ main() {
     echo "* Value of star_index: '$star_index'"
     echo "* Value of library_id: '$library_id'"
     echo "* Number of threads (default 8): '$nthreads'"
+
+    # Determine memory available
+    memory_GB=60
+    if [ -f /usr/bin/parse_property.py ]; then
+        instance_type=`parse_property.py --job ${DX_JOB_ID} --describe --key instanceType --quiet`
+        if [ "$instance_type" == "mem3_hdd2_x8" ]; then
+            memory_GB=60
+        elif [ "$instance_type" == "mem3_ssd1_x16" ]; then
+            memory_GB=100
+        elif [ "$instance_type" == "mem3_ssd1_x32" ]; then
+            memory_GB=220
+        elif [ "$instance_type" == "mem1_hdd2_x32" ] || [ "$instance_type" == "mem3_ssd1_x8" ]; then
+            memory_GB=50
+        else
+            echo "* WARNING: unexpected instance type: '$instance_type''"
+        fi
+        echo "* Memory to use: '${memory_GB}GB'"
+    fi
 
     #echo "* Download files..."
     exp_rep_root=""
@@ -42,7 +60,7 @@ main() {
         else
             outfile_name="${file_root}_${outfile_name}"
             if [ "${concat}" == "" ]; then
-                outfile_name="${outfile_name}_concat" 
+                outfile_name="${outfile_name}_concat"
                 concat="s concatenated as"
             fi
         fi
@@ -76,7 +94,7 @@ main() {
         else
             outfile_name="${file_root}_${outfile_name}"
             if [ "${concat}" == "" ]; then
-                outfile_name="${outfile_name}_concat" 
+                outfile_name="${outfile_name}_concat"
                 concat="s concatenated as"
             fi
         fi
@@ -108,7 +126,7 @@ main() {
     # DX/ENCODE independent script is found in resources/usr/bin
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    lrna_align_star_pe.sh star_index.tgz ${reads1_root}.fq.gz ${reads2_root}.fq.gz "$library_id" $nthreads $bam_root
+    lrna_align_star_pe.sh star_index.tgz ${reads1_root}.fq.gz ${reads2_root}.fq.gz "$library_id" $nthreads ${memory_GB} $bam_root
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
     bam_root="${bam_root}_star"
