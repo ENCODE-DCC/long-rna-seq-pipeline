@@ -104,7 +104,7 @@ main() {
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
     archive_file="${genome}_${anno}_${spike_root}_tophatIndex.tgz"
-    if [ "$gender" == "famale" ] || [ "$gender" == "male" ] || [ "$gender" == "XX" ] || [ "$gender" == "XY" ]; then
+    if [ "$gender" == "female" ] || [ "$gender" == "male" ] || [ "$gender" == "XX" ] || [ "$gender" == "XY" ]; then
         archive_file="${genome}_${gender}_${anno}_${spike_root}_tophatIndex.tgz"
     fi
 

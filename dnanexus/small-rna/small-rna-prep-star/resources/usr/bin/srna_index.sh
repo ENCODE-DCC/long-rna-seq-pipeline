@@ -14,7 +14,7 @@ if [ $# -eq 5 ]; then
 fi
 
 archive_file="${genome}_${anno}_sRNA_starIndex.tgz"
-if [ "$gender" == "famale" ] || [ "$gender" == "male" ] || [ "$gender" == "XX" ] || [ "$gender" == "XY" ]; then
+if [ "$gender" == "female" ] || [ "$gender" == "male" ] || [ "$gender" == "XX" ] || [ "$gender" == "XY" ]; then
     archive_file="${genome}_${gender}_${anno}_sRNA_starIndex.tgz"
 fi
 echo "-- Results will be: '${archive_file}'."

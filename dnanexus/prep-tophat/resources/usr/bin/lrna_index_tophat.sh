@@ -31,7 +31,7 @@ tiny_fq=${tiny_fq_gz%.gz}
 gunzip $tiny_fq_gz
 
 archive_file="${genome}_${anno}_${spike_root}_tophatIndex.tgz"
-if [ "$gender" == "famale" ] || [ "$gender" == "male" ] || [ "$gender" == "XX" ] || [ "$gender" == "XY" ]; then
+if [ "$gender" == "female" ] || [ "$gender" == "male" ] || [ "$gender" == "XX" ] || [ "$gender" == "XY" ]; then
     archive_file="${genome}_${gender}_${anno}_${spike_root}_tophatIndex.tgz"
 fi
 echo "-- Results will be: '${archive_file}'."

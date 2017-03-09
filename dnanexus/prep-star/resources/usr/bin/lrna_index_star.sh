@@ -28,7 +28,7 @@ anno_root=${anno_gtf%.gtf}
 gunzip $anno_gtf_gz
 
 archive_file="${genome}_${anno}_${spike_root}_starIndex.tgz"
-if [ "$gender" == "famale" ] || [ "$gender" == "male" ] || [ "$gender" == "XX" ] || [ "$gender" == "XY" ]; then
+if [ "$gender" == "female" ] || [ "$gender" == "male" ] || [ "$gender" == "XX" ] || [ "$gender" == "XY" ]; then
     archive_file="${genome}_${gender}_${anno}_${spike_root}_starIndex.tgz"
 fi
 echo "-- Results will be: '${archive_file}'."
