@@ -1,9 +1,9 @@
 {
   "name": "small-rna-mad-qc",
-  "title": "Mean Absolute Deviation - small-RNA-seq (v1.1.0)",
+  "title": "Mean Absolute Deviation - small-RNA-seq (v1.1.1)",
   "summary": "mad-qc",
   "dxapi": "1.0.0",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "categories": [
     "ENCODE"
   ],
@@ -44,6 +44,8 @@
     }
   ],
   "runSpec": {
+    "distribution": "Ubuntu",
+    "release": "12.04",
     "interpreter": "python2.7",
     "file": "src/small-rna-mad-qc.py",
     "execDepends": [

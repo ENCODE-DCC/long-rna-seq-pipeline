@@ -1,9 +1,9 @@
 {
   "name": "merge-annotation",
-  "title": "Merge annotation, t-RNAs and spike-ins (v1.0.2)",
+  "title": "Merge annotation, t-RNAs and spike-ins (v1.0.3)",
   "summary": "Takes GENCODE and spike-ins and creates a single GTF file for quantitation (prep step)",
   "dxapi": "1.0.0",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -36,6 +36,8 @@
     }
   ],
   "runSpec": {
+    "distribution": "Ubuntu",
+    "release": "12.04",
     "interpreter": "bash",
     "file": "src/merge-annotation.sh",
     "execDepends": [

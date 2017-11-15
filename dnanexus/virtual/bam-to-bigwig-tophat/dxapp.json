@@ -1,9 +1,9 @@
 {
   "name": "bam-to-bigwig-tophat",
-  "title": "bam to signals - tophat (virtual-2.2.0)",
+  "title": "bam to signals - tophat (virtual-2.2.1)",
   "summary": "Converts BAMs from alignments from stranded or unstranded libraries to bigwig format",
   "dxapi": "1.0.0",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -72,6 +72,8 @@
     }
   ],
   "runSpec": {
+    "distribution": "Ubuntu",
+    "release": "12.04",
     "interpreter": "bash",
     "file": "src/bam-to-bigwig.sh",
     "systemRequirements": {

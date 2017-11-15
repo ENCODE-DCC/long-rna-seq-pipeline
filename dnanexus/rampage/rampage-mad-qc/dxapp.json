@@ -1,9 +1,9 @@
 {
   "name": "rampage-mad-qc",
-  "title": "Mean Absolute Deviation QC metrics (v1.1.1)",
+  "title": "Mean Absolute Deviation QC metrics (v1.1.2)",
   "summary": "Compares two quantifications and calculates Mean Absolute Deviation",
   "dxapi": "1.0.0",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "categories": [
     "ENCODE"
   ],
@@ -37,6 +37,8 @@
     }
   ],
   "runSpec": {
+    "distribution": "Ubuntu",
+    "release": "12.04",
     "interpreter": "python2.7",
     "file": "src/rampage-mad-qc.py",
     "execDepends": [

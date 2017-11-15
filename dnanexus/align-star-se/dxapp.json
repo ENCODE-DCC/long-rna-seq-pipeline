@@ -1,9 +1,9 @@
 {
   "name": "align-star-se",
-  "title": "STAR align - se (v2.1.1)",
+  "title": "STAR align - se (v2.1.2)",
   "summary": "Align single-end (unstranded) reads to genome and transcriptome using STAR for the ENCODE long-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -81,6 +81,8 @@
     }
   ],
   "runSpec": {
+    "distribution": "Ubuntu",
+    "release": "12.04",
     "interpreter": "bash",
     "file": "src/align-star-se.sh",
     "systemRequirements": {

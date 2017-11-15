@@ -1,9 +1,9 @@
 {
   "name": "prep-tophat",
-  "title": "TopHat genome indexing (v1.0.4)",
+  "title": "TopHat genome indexing (v1.0.5)",
   "summary": "Prepare reference genome and transcriptome indexes for tophat used in the ENCODE long-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -64,6 +64,8 @@
     }
   ],
   "runSpec": {
+    "distribution": "Ubuntu",
+    "release": "12.04",
     "interpreter": "bash",
     "file": "src/prep-tophat.sh",
     "systemRequirements": {

@@ -1,9 +1,9 @@
 {
   "name": "rampage-idr",
-  "title": "IDR on  Rampage/Cage peaks (v1.2.1)",
+  "title": "IDR on  Rampage/Cage peaks (v1.2.2)",
   "summary": "Compares two sets of peaks and generates an Irreproducible Discovery Rate report",
   "dxapi": "1.0.0",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -54,6 +54,8 @@
     }
   ],
   "runSpec": {
+    "distribution": "Ubuntu",
+    "release": "12.04",
     "interpreter": "bash",
     "file": "src/rampage-idr.sh",
     "execDepends": [{"name": "pigz"}],

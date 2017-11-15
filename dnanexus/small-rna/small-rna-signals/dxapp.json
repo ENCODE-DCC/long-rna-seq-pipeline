@@ -1,9 +1,9 @@
 {
   "name": "small-rna-signals",
-  "title": "bam to signals - small-RNA-seq (v1.2.0)",
+  "title": "bam to signals - small-RNA-seq (v1.2.1)",
   "summary": "Converts BAMs of alignments from stranded libraries to bigwig format",
   "dxapi": "1.0.0",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -48,6 +48,8 @@
     }
   ],
   "runSpec": {
+    "distribution": "Ubuntu",
+    "release": "12.04",
     "interpreter": "bash",
     "file": "src/small-rna-signals.sh",
     "systemRequirements": {

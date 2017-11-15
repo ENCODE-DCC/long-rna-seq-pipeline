@@ -1,9 +1,9 @@
 {
   "name": "quant-rsem-alt",
-  "title": " RSEM quantify genes - se (virtual-1.4.0)",
+  "title": " RSEM quantify genes - se (virtual-1.4.1)",
   "summary": "Do genome and transcription quantitations with RSEM from STAR alignments",
   "dxapi": "1.0.0",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -64,6 +64,8 @@
     }
   ],
   "runSpec": {
+    "distribution": "Ubuntu",
+    "release": "12.04",
     "interpreter": "bash",
     "file": "src/quant-rsem.sh",
     "systemRequirements": {
