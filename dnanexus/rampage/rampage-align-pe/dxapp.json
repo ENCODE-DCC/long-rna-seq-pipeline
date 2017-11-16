@@ -1,9 +1,9 @@
 {
   "name": "rampage-align-pe",
-  "title": "STAR align - Rampage (v1.0.6)",
+  "title": "STAR align - Rampage (v1.0.7)",
   "summary": "Align paired-end reads to genome and transcriptome using STAR for the ENCODE rampage-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -74,6 +74,8 @@
     }
   ],
   "runSpec": {
+    "distribution": "Ubuntu",
+    "release": "12.04",
     "interpreter": "bash",
     "file": "src/rampage-align-pe.sh",
     "systemRequirements": {

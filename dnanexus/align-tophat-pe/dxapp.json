@@ -1,9 +1,9 @@
 {
   "name": "align-tophat-pe",
-  "title": "TopHat align - pe (v1.0.7)",
+  "title": "TopHat align - pe (v1.0.8)",
   "summary": "Align paired-end (stranded) reads to genome and transcriptome using tophat for the ENCODE long-rna-peq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -69,6 +69,8 @@
     }
   ],
   "runSpec": {
+    "distribution": "Ubuntu",
+    "release": "12.04",
     "interpreter": "bash",
     "file": "src/align-tophat-pe.sh",
     "systemRequirements": {

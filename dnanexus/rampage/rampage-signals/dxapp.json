@@ -1,9 +1,9 @@
 {
   "name": "rampage-signals",
-  "title": "bam to signals - Rampage (v1.0.4)",
+  "title": "bam to signals - Rampage (v1.0.5)",
   "summary": "Converts 'Marked' BAMs 5' reads to bigwig format for rampage-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -48,6 +48,8 @@
     }
   ],
   "runSpec": {
+    "distribution": "Ubuntu",
+    "release": "12.04",
     "interpreter": "bash",
     "file": "src/rampage-signals.sh",
     "systemRequirements": {

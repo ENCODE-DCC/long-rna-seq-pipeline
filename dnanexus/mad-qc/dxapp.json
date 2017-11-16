@@ -1,9 +1,9 @@
 {
   "name": "mad-qc",
-  "title": "Mean Absolute Deviation QC metrics (v1.0.2)",
+  "title": "Mean Absolute Deviation QC metrics (v1.0.3)",
   "summary": "mad-qc",
   "dxapi": "1.0.0",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "categories": [
     "ENCODE"
   ],
@@ -37,6 +37,8 @@
     }
   ],
   "runSpec": {
+    "distribution": "Ubuntu",
+    "release": "12.04",
     "interpreter": "python2.7",
     "file": "src/mad-qc.py",
     "execDepends": [

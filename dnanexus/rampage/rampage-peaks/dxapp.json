@@ -1,9 +1,9 @@
 {
   "name": "rampage-peaks",
-  "title": "Call Rampage peaks (v2.0.2)",
+  "title": "Call Rampage peaks (v2.0.3)",
   "summary": "Uses genome BAM marked for Rampage to calls peaks and produce 5' signals",
   "dxapi": "1.0.0",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -69,6 +69,8 @@
     }
   ],
   "runSpec": {
+    "distribution": "Ubuntu",
+    "release": "12.04",
     "interpreter": "bash",
     "file": "src/rampage-peaks.sh",
     "execDepends": [{"name": "pigz"},{ "name": "pysam", "package_manager": "pip", "version": "0.8.4" }],

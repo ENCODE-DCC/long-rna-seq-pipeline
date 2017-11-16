@@ -1,9 +1,9 @@
 {
   "name": "prep-star",
-  "title": "STAR genome indexing (v2.1.0)",
+  "title": "STAR genome indexing (v2.1.1)",
   "summary": "Prepare reference genome and transcriptome indexes for STAR used in the ENCODE long-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -57,6 +57,8 @@
     }
   ],
   "runSpec": {
+    "distribution": "Ubuntu",
+    "release": "12.04",
     "interpreter": "bash",
     "file": "src/prep-star.sh",
     "systemRequirements": {

@@ -1,9 +1,9 @@
 {
   "name": "small-rna-align",
-  "title": "STAR align - small-RNA-seq (v2.0.4)",
+  "title": "STAR align - small-RNA-seq (v2.0.5)",
   "summary": "Align single-end (stranded) reads to genome using STAR for the ENCODE small-rna-seq pipeline",
   "dxapi": "1.0.0",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "authorizedUsers": [],
   "inputSpec": [
     {
@@ -81,6 +81,8 @@
     }
   ],
   "runSpec": {
+    "distribution": "Ubuntu",
+    "release": "12.04",
     "interpreter": "bash",
     "file": "src/small-rna-align.sh",
     "systemRequirements": {
