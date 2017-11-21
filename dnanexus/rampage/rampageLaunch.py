@@ -202,21 +202,21 @@ class RampageLaunch(Launch):
             sys.exit(1)
 
         # Some specific settings
-        psv['assay_type'] = "rampage"
-        if self.exp["assay_term_name"] == "CAGE":
-            psv['assay_type'] = "cage"
         psv['nthreads']   = 8
         if not self.template:
+            psv['assay_type'] = "rampage"
+            if self.exp["assay_term_name"] == "CAGE":
+                psv['assay_type'] = "cage"
             psv['control'] = args.control
 
-        if psv['paired_end'] and psv['assay_type'] == "cage":
-            print "ERROR: CAGE is always expected to be single-end but mapping says otherwise."
-            sys.exit(1)
-        elif not psv['paired_end'] and psv['assay_type'] == "rampage":
-            print "Rampage is always expected to be paired-end but mapping says otherwise."
-            sys.exit(1)
-        if not psv["stranded"]:
-            print "Detected unstranded library"
+            if psv['paired_end'] and psv['assay_type'] == "cage":
+                print "ERROR: CAGE is always expected to be single-end but mapping says otherwise."
+                sys.exit(1)
+            elif not psv['paired_end'] and psv['assay_type'] == "rampage":
+                print "Rampage is always expected to be paired-end but mapping says otherwise."
+                sys.exit(1)
+            if not psv["stranded"]:
+                print "Detected unstranded library"
 
         # run will either be for combined or single rep.
         if not self.combined_reps:
@@ -229,9 +229,10 @@ class RampageLaunch(Launch):
             psv['title'] += ', ' + psv['annotation']
             psv['name']  += '_' + psv['annotation']
 
-        if self.exp["assay_term_name"] == "CAGE":
-            psv['name'] = psv['assay_type'] + psv['name'][4:]
-            psv['title'] = "CAGE" + psv['title'][7:]
+        if not self.template:
+            if self.exp["assay_term_name"] == "CAGE":
+                psv['name'] = psv['assay_type'] + psv['name'][4:]
+                psv['title'] = "CAGE" + psv['title'][7:]
 
         # Must override results location because of annotation
         psv['resultsLoc'] = self.umbrella_folder(args.folder,self.FOLDER_DEFAULT,self.proj_name,psv['exp_type'], \
