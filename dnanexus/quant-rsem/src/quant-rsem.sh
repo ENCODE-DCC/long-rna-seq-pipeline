@@ -1,10 +1,10 @@
 #!/bin/bash
-# quant-rsem.sh 
+# quant-rsem.sh
 
 main() {
     # Now in resources/usr/bin
     # echo "* Dowload and install RSEM..."
-    # git clone https://github.com/bli25wisc/RSEM.git    
+    # git clone https://github.com/bli25wisc/RSEM.git
     #wget https://github.com/deweylab/RSEM/archive/v1.2.23.tar.gz -O rsem.tgz >> install.log 2>&1
     #mkdir rsem
     #tar -xzf rsem.tgz -C rsem --strip-components=1
@@ -18,17 +18,18 @@ main() {
     #mv rsem-run-em /usr/bin/ >> install.log 2>&1
     #mv rsem-run-gibbs /usr/bin/ >> install.log 2>&1
     #mv rsem_perl_utils.pm /usr/bin/ >> install.log 2>&1
-    #cd .. 
+    #cd ..
 
     # If available, will print tool versions to stderr and json string to stdout
     versions=''
-    if [ -f /usr/bin/tool_versions.py ]; then 
+    if [ -f /usr/bin/tool_versions.py ]; then
         versions=`tool_versions.py --dxjson dnanexus-executable.json`
     fi
 
     echo "* Value of annotation_bam: '$star_anno_bam'"
     echo "* Value of rsem_index:     '$rsem_index'"
     echo "* Value of paired:         '$paired_end'"
+    echo "* vaule of read_strand:    '$read_strand'"
     echo "* Random number seed:      '$rnd_seed'"
     echo "* Value of nthreads:       '$nthreads'"
 
@@ -42,7 +43,7 @@ main() {
     # DX/ENCODE independent script is found in resources/usr/bin
     echo "* ===== Calling DNAnexus and ENCODE independent script... ====="
     set -x
-    lrna_rsem_quantification.sh rsem_index.tgz ${bam_root}.bam $paired_end $rnd_seed $nthreads
+    lrna_rsem_quantification.sh rsem_index.tgz ${bam_root}.bam $paired_end $read_strand $rnd_seed $nthreads
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
 
