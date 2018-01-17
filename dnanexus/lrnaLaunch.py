@@ -296,6 +296,11 @@ class LrnaLaunch(Launch):
             elif psv.get('ScriptSeq', False):  # file.replicate.library.document contains "/documents/F17c31e10-1542-42c6-8b4c-3afff95564cf%2F"
                 psv["read_strand"] = "ScriptSeq"  # "ScriptSeq" experiments are rd1+/rd2- (AKA forward)
                 print "Detected ScriptSeq"
+        else:  # SE
+            if psv["stranded"]:
+                psv["read_strand"] = psv.get("strand_direction", "unstranded")
+            else:
+                psv["read_strand"] = "unstranded"
         # print "Detected special cases"
 
         # If annotation is not default, then add it to title
