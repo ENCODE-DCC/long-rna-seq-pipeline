@@ -93,18 +93,24 @@ class LrnaLaunch(Launch):
                                         "params":  {"stranded":       "stranded"},
                                         "inputs":  {"star_genome_bam": "bam_file",
                                                     "chrom_sizes":     "chrom_sizes"},
-                                        "results": {"star_all_bw":     "all_bw",
-                                                    "star_uniq_bw":    "uniq_bw"}
+                                        "results": {"OPT_star_all_bw":     "all_bw",
+                                                    "OPT_star_uniq_bw":    "uniq_bw",
+                                                    "OPT_star_minus_all_bw":  "minus_all_bw",
+                                                    "OPT_star_minus_uniq_bw": "minus_uniq_bw",
+                                                    "OPT_star_plus_all_bw":   "plus_all_bw",
+                                                    "OPT_star_plus_uniq_bw":  "plus_uniq_bw"}
                             },
                             "b2bw-pe-star": {
                                         "app":     "bam-to-bigwig",
                                         "params":  {"stranded":           "stranded"},
                                         "inputs":  {"star_genome_bam":    "bam_file",
                                                     "chrom_sizes":        "chrom_sizes"},
-                                        "results": {"star_minus_all_bw":  "minus_all_bw",
-                                                    "star_minus_uniq_bw": "minus_uniq_bw",
-                                                    "star_plus_all_bw":   "plus_all_bw",
-                                                    "star_plus_uniq_bw":  "plus_uniq_bw"}
+                                        "results": {"OPT_star_all_bw":     "all_bw",
+                                                    "OPT_star_uniq_bw":    "uniq_bw",
+                                                    "OPT_star_minus_all_bw":  "minus_all_bw",
+                                                    "OPT_star_minus_uniq_bw": "minus_uniq_bw",
+                                                    "OPT_star_plus_all_bw":   "plus_all_bw",
+                                                    "OPT_star_plus_uniq_bw":  "plus_uniq_bw"}
                             },
                             "quant-rsem":     {
                                         "app":     "quant-rsem",
@@ -165,12 +171,12 @@ class LrnaLaunch(Launch):
         "star_genome_bam":      "/*_star_genome.bam",
         "star_anno_bam":        "/*_star_anno.bam",
         "star_log":             "/*_Log.final.out",
-        "star_minus_all_bw":    "/*_star_genome_minusAll.bw",
-        "star_minus_uniq_bw":   "/*_star_genome_minusUniq.bw",
-        "star_plus_all_bw":     "/*_star_genome_plusAll.bw",
-        "star_plus_uniq_bw":    "/*_star_genome_plusUniq.bw",
-        "star_all_bw":          "/*_star_genome_all.bw",
-        "star_uniq_bw":         "/*_star_genome_uniq.bw",
+        "OPT_star_minus_all_bw":    "/*_star_genome_minusAll.bw",
+        "OPT_star_minus_uniq_bw":   "/*_star_genome_minusUniq.bw",
+        "OPT_star_plus_all_bw":     "/*_star_genome_plusAll.bw",
+        "OPT_star_plus_uniq_bw":    "/*_star_genome_plusUniq.bw",
+        "OPT_star_all_bw":          "/*_star_genome_all.bw",
+        "OPT_star_uniq_bw":         "/*_star_genome_uniq.bw",
         "rsem_iso_results":     "/*_rsem.isoforms.results",
         "rsem_gene_results":    "/*_rsem.genes.results",
         "quants_a":             "/*_rsem.genes.results",
@@ -301,6 +307,8 @@ class LrnaLaunch(Launch):
                 psv["read_strand"] = psv.get("strand_direction", "unstranded")
             else:
                 psv["read_strand"] = "unstranded"
+        if psv["stranded"]:
+            print "Strand orientation is '%s'" % (psv["read_strand"])
         # print "Detected special cases"
 
         # If annotation is not default, then add it to title
