@@ -5,8 +5,8 @@ if [ $# -ne 4 ]; then
     echo "Compares two sets of peaks and generates an Irreproducible Discovery Rate report. Is independent of DX and encodeD."
     exit -1; 
 fi
-peaks_a_bed=$1  # Rampage dumplicates marked bam file.
-peaks_b_bed=$2  # long-RNA-seq control bam file.
+peaks_a_bed=$1  # First peaks .bed file to compare from rampage-peaks step.
+peaks_b_bed=$2  # Second peaks .bed file to compare from rampage-peaks step.
 chrom_sizes=$3  # chrom_sizes file that matches the genome used to create bam_root.
 idr_root="$4"   # root name for output bb and png files (e.g. "out" will create "out.bb" and "out.png") 
 
