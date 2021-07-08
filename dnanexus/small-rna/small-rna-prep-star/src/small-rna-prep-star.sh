@@ -91,7 +91,7 @@ main() {
     set +x
     echo "* ===== Returned from dnanexus and encodeD independent script ====="
     archive_file="${genome}_${anno}_sRNA_starIndex.tgz"
-    if [ "$gender" == "famale" ] || [ "$gender" == "male" ] || [ "$gender" == "XX" ] || [ "$gender" == "XY" ]; then
+    if [ "$gender" == "female" ] || [ "$gender" == "male" ] || [ "$gender" == "XX" ] || [ "$gender" == "XY" ]; then
         archive_file="${genome}_${gender}_${anno}_sRNA_starIndex.tgz"
     fi
     gene_id_root="${genome}_${anno}_gene_ids"
